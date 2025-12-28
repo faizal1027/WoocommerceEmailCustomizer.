@@ -1,0 +1,64 @@
+import React from 'react'
+import BillingAddressWidget from './Widgets/billingAddressWidget'
+import ShippingAddressWidget from './Widgets/shippingAddressWidget'
+import OrderItemWidget from './Widgets/orderItemWidgets'
+import TaxBillingWidget from './Widgets/taxBillingWidget'
+import EmailHeaderWidget from './Widgets/emailHeaderWidget'
+import EmailFooterWidget from './Widgets/emailFooterWidget'
+import CtaButtonWidget from './Widgets/ctaButtonWidget'
+import RelatedProductsWidget from './Widgets/relatedProductsWidget'
+import OrderSubtotalWidget from './Widgets/orderSubtotalWidget'
+import OrderTotalWidget from './Widgets/orderTotalWidget'
+import ShippingMethodWidget from './Widgets/shippingMethodWidget'
+import PaymentMethodWidget from './Widgets/paymentMethodWidget'
+import CustomerNoteWidget from './Widgets/customerNoteWidget'
+import { Box } from '@mui/material';
+
+export const wooCommerceWidgets = [
+  { Component: EmailHeaderWidget, name: 'Email Header' },
+  { Component: BillingAddressWidget, name: 'Billing Address' },
+  { Component: ShippingAddressWidget, name: 'Shipping Address' },
+  { Component: OrderItemWidget, name: 'Order Items' },
+  { Component: TaxBillingWidget, name: 'Tax & Billing' },
+  { Component: OrderSubtotalWidget, name: 'Order Subtotal' },
+  { Component: OrderTotalWidget, name: 'Order Total' },
+  { Component: ShippingMethodWidget, name: 'Shipping Method' },
+  { Component: PaymentMethodWidget, name: 'Payment Method' },
+  { Component: CustomerNoteWidget, name: 'Customer Note' },
+  { Component: CtaButtonWidget, name: 'CTA Button' },
+  { Component: RelatedProductsWidget, name: 'Related Products' },
+  { Component: EmailFooterWidget, name: 'Email Footer' },
+];
+
+const WooCommerceLayout = ({ searchTerm = '' }: { searchTerm?: string }) => {
+  const filteredWidgets = wooCommerceWidgets.filter(widget =>
+    !searchTerm || widget.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        width: "100%",
+        p: 2,
+        overflowY: 'auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 1,
+        placeItems: "left",
+      }}
+    >
+      {filteredWidgets.map(({ Component, name }) => (
+        <Component key={name} />
+      ))}
+      {filteredWidgets.length === 0 && (
+        <Box sx={{ gridColumn: '1 / -1', p: 1, textAlign: 'center', color: 'text.secondary', fontSize: '14px' }}>
+          No WooCommerce blocks found
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+
+export default WooCommerceLayout

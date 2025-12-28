@@ -1,0 +1,790 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface ColumnStyle {
+  bgColor: string;
+  borderTopColor: string;
+  borderBottomColor: string;
+  borderLeftColor: string;
+  borderRightColor: string;
+  borderStyle: 'solid' | 'dashed' | 'dotted';
+  borderTopSize: number;
+  borderBottomSize: number;
+  borderLeftSize: number;
+  borderRightSize: number;
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  height: number | 'auto';
+}
+
+export type WidgetContentType = 'text' | 'heading' | 'button' | 'socialIcons' | 'divider' | 'image' | null;
+
+interface Column {
+  id: string;
+  style: ColumnStyle;
+  contentType: WidgetContentType;
+  contentData: string | null;
+  textEditorOptions: TextEditorOptions;
+  headingEditorOptions: HeadingEditorOptions;
+  socialIconsEditorOptions: SocialIconsEditorOptions;
+  dividerEditorOptions: DividerEditorOptions;
+  imageEditorOptions: ImageEditorOptions;
+  buttonEditorOptions: ButtonEditorOptions;
+}
+
+interface BlockStyle {
+  bgColor: string;
+  borderTopColor: string;
+  borderBottomColor: string;
+  borderLeftColor: string;
+  borderRightColor: string;
+  borderStyle: 'solid' | 'dashed' | 'dotted';
+  borderTopSize: number;
+  borderBottomSize: number;
+  borderLeftSize: number;
+  borderRightSize: number;
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  height: number | 'auto';
+}
+
+interface DroppedBlock {
+  id: string;
+  columns: Column[];
+  style: BlockStyle;
+}
+
+export interface TextEditorOptions {
+  fontFamily: string;
+  fontSize: number;
+  color: string;
+  backgroundColor: string;
+  textAlign: 'left' | 'center' | 'right' | 'justify';
+  lineHeight: number;
+  letterSpace: number;
+  padding: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
+  content: string; 
+}
+
+export interface ButtonEditorOptions {
+  urlDisabled: boolean;
+  text: string;
+  url: string;
+  fontSize: number;
+  fontWeight: string;
+  textAlign: 'left' | 'center' | 'right';
+  bgColor: string;
+  textColor: string;
+  widthAuto?: boolean;
+  width?: number;
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  borderRadius: {
+    topLeft: number;
+    topRight: number;
+    bottomRight: number;
+    bottomLeft: number;
+  };
+}
+
+export interface HeadingEditorOptions {
+  headingType: 'h1' | 'h2' | 'h3' | 'h4';
+  fontFamily: string;
+  fontWeight: string;
+  fontSize: number;
+  color: string;
+  textAlign: 'left' | 'center' | 'right' | 'justify';
+  lineHeight: number;
+  letterSpace: number;
+  padding: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
+}
+
+export type SocialIconKey = 'facebook' | 'twitter' | 'linkedin' | 'instagram' | 'pinterest' | 'youtube' | 'whatsapp' | 'reddit' | 'github' | 'telegram' | 'envelope';
+
+export interface SocialIconsEditorOptions {
+  iconSize: number;
+  iconColor: string;
+  iconAlign: 'left' | 'center' | 'right';
+  iconSpace: number;
+  padding: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
+  addedIcons: {
+    icons: SocialIconKey[];
+    url: string[];
+  };
+}
+
+export interface DividerEditorOptions {
+  width: string;
+  style: 'solid' | 'dashed' | 'dotted';
+  thickness: number;
+  color: string;
+  alignment: 'left' | 'center' | 'right';
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+}
+
+interface ImageEditorOptions {
+  src: string;
+  altText: string;
+  width: string;
+  align: 'left' | 'center' | 'right';
+  autoWidth: boolean;
+  padding: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
+}
+
+interface WorkspaceState {
+  blocks: DroppedBlock[];
+  selectedBlockId: string | null;
+  editorOpen: boolean;
+  selectedColumnIndex: number | null;
+  selectedBlockForEditor: string | null;
+  selectedContentType: WidgetContentType | null;
+  textEditorOptions: TextEditorOptions;
+  dividerEditorOptions: DividerEditorOptions;
+  imageEditorOptions: ImageEditorOptions;
+}
+
+export const defaultColumnStyle: ColumnStyle = {
+  bgColor: '#ffffffff',
+  borderTopColor: '#a0c4ff',
+  borderBottomColor: '#a0c4ff',
+  borderLeftColor: '#a0c4ff',
+  borderRightColor: '#a0c4ff',
+  borderStyle: 'solid',
+  borderTopSize: 0,
+  borderBottomSize: 0,
+  borderLeftSize: 0,
+  borderRightSize: 0,
+  padding: { top: 10, right: 10, bottom: 10, left: 10 },
+  height: 'auto',
+};
+
+export const defaultBlockStyle: BlockStyle = {
+  bgColor: '#e6f0fa',
+  borderTopColor: '#a0c4ff',
+  borderBottomColor: '#a0c4ff',
+  borderLeftColor: '#a0c4ff',
+  borderRightColor: '#a0c4ff',
+  borderStyle: 'solid',
+  borderTopSize: 21,
+  borderBottomSize: 0,
+  borderLeftSize: 0,
+  borderRightSize: 0,
+  padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  height: 'auto',
+};
+
+export const neutralBlockStyle: BlockStyle = {
+  bgColor: 'transparent',
+  borderTopColor: 'transparent',
+  borderBottomColor: 'transparent',
+  borderLeftColor: 'transparent',
+  borderRightColor: 'transparent',
+  borderStyle: 'solid',
+  borderTopSize: 0,
+  borderBottomSize: 0,
+  borderLeftSize: 0,
+  borderRightSize: 0,
+  padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  height: 'auto',
+};
+
+export const defaultTextEditorOptions: TextEditorOptions = {
+  fontFamily: 'global',
+    fontSize: 14,
+  color: '#d32f2f',
+  backgroundColor: 'transparent',
+  textAlign: 'left',
+  lineHeight: 140,
+  letterSpace: 1,
+  padding: { top: 0, left: 0, right: 0, bottom: 0 },
+  content: '<p>Click to edit text</p>',
+};
+
+export const defaultButtonEditorOptions: ButtonEditorOptions = {
+  text: 'Button',
+  url: '#',
+  fontSize: 16,
+  fontWeight: 'normal',
+  textAlign: 'center',
+  bgColor: '#007bff',
+  textColor: '#ffffff',
+  widthAuto: true,
+  width: undefined,
+  padding: { top: 10, right: 10, bottom: 10, left: 10 },
+  borderRadius: { topLeft: 5, topRight: 5, bottomRight: 5, bottomLeft: 5 },
+  urlDisabled: false,
+};
+
+export const defaultHeadingEditorOptions: HeadingEditorOptions = {
+  fontFamily: 'global',
+  fontWeight: 'bold',
+  fontSize: 14,
+  color: '#000000ff',
+  textAlign: 'left',
+  lineHeight: 110,
+  letterSpace: 1,
+  padding: { top: 0, left: 0, right: 0, bottom: 0 },
+  headingType: 'h1'
+};
+
+export const defaultSocialIconsEditorOptions: SocialIconsEditorOptions = {
+  padding: { top: 5, left: 5, right: 5, bottom: 5 },
+  iconSize: 32,
+  iconColor: "color",
+  iconAlign: 'center',
+  iconSpace: 0,
+  addedIcons: {
+    icons: [],
+    url: []
+  }
+};
+
+export const defaultDividerEditorOptions: DividerEditorOptions = {
+  width: '75',
+  style: 'solid',
+  thickness: 2,
+  color: '#000000',
+  alignment: 'center',
+  padding: {
+    top: 10,
+    right: 0,
+    bottom: 10,
+    left: 0,
+  },
+};
+
+const defaultImageEditorOptions: ImageEditorOptions = {
+  src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
+  altText: '',
+  width: '100%',
+  align: 'center',
+  autoWidth: true,
+  padding: {
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  }
+};
+
+const initialState: WorkspaceState = {
+  blocks: [],
+  selectedBlockId: null,
+  editorOpen: false,
+  selectedColumnIndex: null,
+  selectedBlockForEditor: null,
+  selectedContentType: null,
+  textEditorOptions: defaultTextEditorOptions,
+  dividerEditorOptions: defaultDividerEditorOptions,
+  imageEditorOptions: defaultImageEditorOptions,
+};
+
+const workspaceSlice = createSlice({
+  name: 'workspace',
+  initialState,
+  reducers: {
+    addBlock: (state, action: PayloadAction<{ columns: number; type?: string; content?: string }>) => {
+      const blockId = `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`;
+      const columns = Array.from({ length: action.payload.columns }, () => (
+        {
+        id: `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`,
+        style: { ...defaultColumnStyle },
+        contentType: null,
+        contentData: null,
+        textEditorOptions: { ...defaultTextEditorOptions },
+        headingEditorOptions: { ...defaultHeadingEditorOptions },
+        socialIconsEditorOptions: { ...defaultSocialIconsEditorOptions },
+        dividerEditorOptions: { ...defaultDividerEditorOptions },
+        imageEditorOptions: { ...defaultImageEditorOptions },
+        buttonEditorOptions: { ...defaultButtonEditorOptions },
+      }));
+      const newBlock: DroppedBlock = {
+        id: blockId,
+        columns,
+        style: { ...defaultBlockStyle },
+      };
+      state.blocks.push(newBlock);
+      console.log('added block:', state.blocks);
+    },
+    copyBlock: (state, action: PayloadAction<string | null>) => {
+      const blockToCopy = state.blocks.find((block) => block.id === action.payload);
+      if (blockToCopy && action.payload) {
+        const newBlockId = `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`;
+        const newColumns = blockToCopy.columns.map((col) => ({
+          id: `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`,
+          style: { ...col.style },
+          contentType: col.contentType,
+          contentData: col.contentData,
+          textEditorOptions: { ...col.textEditorOptions },
+          headingEditorOptions: { ...col.headingEditorOptions },
+          socialIconsEditorOptions: { ...col.socialIconsEditorOptions },
+          dividerEditorOptions: { ...col.dividerEditorOptions },
+          imageEditorOptions: { ...col.imageEditorOptions },
+          buttonEditorOptions: { ...col.buttonEditorOptions }
+        }));
+        state.blocks.push({
+          id: newBlockId,
+          columns: newColumns,
+          style: { ...blockToCopy.style },
+        });
+      }
+    },
+    deleteBlock: (state, action: PayloadAction<string | null>) => {
+      if (action.payload) {
+        state.blocks = state.blocks.filter((block) => block.id !== action.payload);
+        if (state.selectedBlockId === action.payload) {
+          state.selectedBlockId = null;
+        }
+        if (state.selectedBlockForEditor === action.payload) {
+          state.editorOpen = false;
+          state.selectedColumnIndex = null;
+          state.selectedBlockForEditor = null;
+        }
+      }
+    },
+    deleteColumnContent: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number }>) => {
+      const { blockId, columnIndex } = action.payload;
+      if (blockId) {
+        const block = state.blocks.find((b) => b.id === blockId);
+        if (block && block.columns[columnIndex]) {
+          block.columns[columnIndex].contentType = null;
+          block.columns[columnIndex].contentData = null;
+          block.columns[columnIndex].textEditorOptions = { ...defaultTextEditorOptions };
+          block.columns[columnIndex].headingEditorOptions = { ...defaultHeadingEditorOptions };
+          block.columns[columnIndex].socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions };
+          block.columns[columnIndex].dividerEditorOptions = { ...defaultDividerEditorOptions };
+          block.columns[columnIndex].imageEditorOptions = { ...defaultImageEditorOptions };
+          block.columns[columnIndex].style.height = 'auto';
+
+          const allColumnsEmpty = block.columns.every((col) => col.contentType === null);
+          if (allColumnsEmpty) {
+            block.style = { ...defaultColumnStyle };
+          }
+
+          if (state.selectedBlockForEditor === blockId && state.selectedColumnIndex === columnIndex) {
+            state.editorOpen = false;
+            state.selectedBlockForEditor = null;
+            state.selectedColumnIndex = null;
+            state.selectedContentType = null;
+          }
+        }
+      }
+    },
+    reorderBlocks: (state, action: PayloadAction<{ sourceId: string; targetId: string }>) => {
+      const { sourceId, targetId } = action.payload;
+      const sourceIndex = state.blocks.findIndex((block) => block.id === sourceId);
+      const targetIndex = state.blocks.findIndex((block) => block.id === targetId);
+      if (sourceIndex !== -1 && targetIndex !== -1) {
+        const [movedBlock] = state.blocks.splice(sourceIndex, 1);
+        state.blocks.splice(targetIndex, 0, movedBlock);
+      }
+    },
+    setSelectedBlockId: (state, action: PayloadAction<string | null>) => {
+      state.selectedBlockId = action.payload;
+    },
+    openEditor: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number | null; contentType?: WidgetContentType | null }>) => {
+      state.editorOpen = true;
+      state.selectedBlockForEditor = action.payload.blockId;
+      state.selectedColumnIndex = action.payload.columnIndex;
+      state.selectedContentType = action.payload.contentType !== undefined
+        ? action.payload.contentType
+        : (
+            action.payload.columnIndex !== null && action.payload.blockId
+              ? state.blocks.find((b) => b.id === action.payload.blockId)?.columns[action.payload.columnIndex]?.contentType || null
+              : null
+          );
+    },
+    closeEditor: (state) => {
+      state.editorOpen = false;
+      state.selectedColumnIndex = null;
+      state.selectedBlockForEditor = null;
+      state.selectedContentType = null;
+    },
+    clearBlocks: (state) => {
+      state.blocks = [];
+      state.selectedBlockId = null;
+      state.editorOpen = false;
+      state.selectedColumnIndex = null;
+      state.selectedBlockForEditor = null;
+    },
+    updateBlockHeight: (state, action: PayloadAction<{ blockId: string | null; height: number | 'auto' }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block) {
+          block.style.height = action.payload.height;
+        }
+      }
+    },
+    updateSelectedColumnIndex: (state, action: PayloadAction<number | null>) => {
+      state.selectedColumnIndex = action.payload;
+    },
+    updateColumnBgColor: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.bgColor = action.payload.color;
+        }
+      }
+    },
+    updateColumnBorderColor: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderTopColor = action.payload.color;
+          block.columns[action.payload.columnIndex].style.borderBottomColor = action.payload.color;
+          block.columns[action.payload.columnIndex].style.borderLeftColor = action.payload.color;
+          block.columns[action.payload.columnIndex].style.borderRightColor = action.payload.color;
+        }
+      }
+    },
+    updateColumnPadding: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        side: 'top' | 'right' | 'bottom' | 'left';
+        value: number;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.padding[action.payload.side] = action.payload.value;
+        }
+      }
+    },
+    updateColumnBorderStyle: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; style: 'solid' | 'dashed' | 'dotted' }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderStyle = action.payload.style;
+        }
+      }
+    },
+    updateColumnBorderTopSize: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; size: number }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderTopSize = action.payload.size;
+        }
+      }
+    },
+    updateColumnBorderBottomSize: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; size: number }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderBottomSize = action.payload.size;
+        }
+      }
+    },
+    updateColumnBorderLeftSize: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; size: number }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderLeftSize = action.payload.size;
+        }
+      }
+    },
+    updateColumnBorderRightSize: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; size: number }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderRightSize = action.payload.size;
+        }
+      }
+    },
+    updateColumnHeight: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; height: number | 'auto' }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.height = action.payload.height;
+        }
+      }
+    },
+    updateTextEditorOptions: (state, action: PayloadAction<Partial<TextEditorOptions>>) => {
+    },
+    resetTextEditorOptions: (state) => {
+    },
+    addColumnContent: (state, action: PayloadAction<{
+      blockId: string | null;
+      columnIndex: number;
+      contentType: WidgetContentType;
+      contentData: string | null;
+    }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          const column = block.columns[action.payload.columnIndex];
+          column.contentType = action.payload.contentType;
+          column.contentData = action.payload.contentData;
+          column.style.height = 'auto';
+          block.style = { ...neutralBlockStyle };
+
+          // column.textEditorOptions = action.payload.contentType ==  { ...defaultTextEditorOptions };
+          // column.headingEditorOptions = action.payload.contentType === 'heading' ? { ...defaultHeadingEditorOptions } : undefined as any;
+          // column.buttonEditorOptions = action.payload.contentType === 'button' ? { ...defaultButtonEditorOptions } : undefined as any;
+          // column.imageEditorOptions = action.payload.contentType === 'image' ? { ...defaultImageEditorOptions } : undefined as any;
+          // column.dividerEditorOptions = action.payload.contentType === 'divider' ? { ...defaultDividerEditorOptions } : undefined as any;
+          // column.socialIconsEditorOptions = action.payload.contentType === 'socialIcons' ? { ...defaultSocialIconsEditorOptions } : undefined as any;
+          if (action.payload.contentType === 'heading') {
+            column.headingEditorOptions = {
+              ...defaultHeadingEditorOptions,
+              headingType: 'h1',
+              fontSize: 22,
+            };
+          } 
+          // else if (action.payload.contentType === 'image') {
+          //   column.imageEditorOptions = { ...defaultImageEditorOptions };
+          // }
+
+          state.editorOpen = true;
+          state.selectedBlockForEditor = action.payload.blockId;
+          state.selectedColumnIndex = action.payload.columnIndex;
+          state.selectedContentType = action.payload.contentType;
+        }
+      }
+    },
+    updateColumnContentData: (state, action: PayloadAction<{
+      blockId: string | null;
+      columnIndex: number;
+      data: string;
+    }>) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].contentData = action.payload.data;
+        }
+      }
+    },
+    updateColumnTextEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<TextEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].textEditorOptions = {
+            ...block.columns[action.payload.columnIndex].textEditorOptions,
+            ...action.payload.options,
+          };
+          console.log('Updated textAlign:', block.columns[action.payload.columnIndex].textEditorOptions.textAlign);
+        }
+      }
+    },
+    updateHeadingEditorOptions: (state, action: PayloadAction<Partial<HeadingEditorOptions>>) => {
+    },
+    updateColumnHeadingEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<HeadingEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].headingEditorOptions = {
+            ...(block.columns[action.payload.columnIndex].headingEditorOptions || defaultHeadingEditorOptions),
+            ...action.payload.options,
+          };
+        }
+      }
+    },
+    updateSocialIconsEditorOptions: (state, action: PayloadAction<Partial<SocialIconsEditorOptions>>) => {
+    },
+    updateColumnSocialIconsEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<SocialIconsEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].socialIconsEditorOptions = {
+            ...block.columns[action.payload.columnIndex].socialIconsEditorOptions,
+            ...action.payload.options,
+          };
+        }
+      }
+    },
+    updateButtonEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<ButtonEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex] && block.columns[action.payload.columnIndex].contentType === 'button') {
+          const currentData = block.columns[action.payload.columnIndex].contentData
+            ? JSON.parse(block.columns[action.payload.columnIndex].contentData as string)
+            : { ...defaultButtonEditorOptions };
+          const newData = { ...currentData, ...action.payload.options };
+          block.columns[action.payload.columnIndex].contentData = JSON.stringify(newData);
+        }
+      }
+    },
+    updateDividerEditorOptions: (state, action: PayloadAction<Partial<DividerEditorOptions>>) => {
+    },
+    updateColumnDividerEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<DividerEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].dividerEditorOptions = {
+            ...block.columns[action.payload.columnIndex].dividerEditorOptions,
+            ...action.payload.options,
+          };
+          console.log("divider editor option");
+        }
+      }
+    },
+    updateImageEditorOptions: (state, action: PayloadAction<Partial<ImageEditorOptions>>) => {
+    },
+    updateColumnImageEditorOptions: (
+      state,
+      action: PayloadAction<{
+        blockId: string | null;
+        columnIndex: number;
+        options: Partial<ImageEditorOptions>;
+      }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].imageEditorOptions = {
+            ...block.columns[action.payload.columnIndex].imageEditorOptions || defaultImageEditorOptions,
+            ...action.payload.options,
+          };
+        }
+      }
+    },
+    updateColumnBorderTopColor: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderTopColor = action.payload.color;
+        }
+      }
+    },
+    updateColumnBorderBottomColor: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderBottomColor = action.payload.color;
+        }
+      }
+    },
+    updateColumnBorderLeftColor: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderLeftColor = action.payload.color;
+        }
+      }
+    },
+    updateColumnBorderRightColor: (
+      state,
+      action: PayloadAction<{ blockId: string | null; columnIndex: number; color: string }>
+    ) => {
+      if (action.payload.blockId) {
+        const block = state.blocks.find((b) => b.id === action.payload.blockId);
+        if (block && block.columns[action.payload.columnIndex]) {
+          block.columns[action.payload.columnIndex].style.borderRightColor = action.payload.color;
+        }
+      }
+    },
+  },
+});
+
+export const {
+  addBlock, copyBlock, deleteBlock, setSelectedBlockId, openEditor,
+  closeEditor, clearBlocks, updateBlockHeight,
+  updateSelectedColumnIndex, updateColumnBgColor,
+  updateColumnBorderColor, updateColumnPadding,
+  updateColumnBorderStyle, updateColumnBorderTopSize,
+  updateColumnBorderBottomSize, updateColumnBorderLeftSize,
+  updateColumnBorderRightSize, updateColumnHeight,
+  updateTextEditorOptions, resetTextEditorOptions,
+  addColumnContent, updateColumnContentData,reorderBlocks,
+  updateColumnTextEditorOptions, deleteColumnContent,
+  updateColumnBorderTopColor, updateColumnBorderBottomColor,
+  updateColumnBorderLeftColor, updateColumnBorderRightColor,
+  updateButtonEditorOptions, updateColumnHeadingEditorOptions, updateSocialIconsEditorOptions,
+  updateHeadingEditorOptions, updateColumnSocialIconsEditorOptions,
+  updateColumnDividerEditorOptions, updateDividerEditorOptions,
+  updateColumnImageEditorOptions, updateImageEditorOptions
+} = workspaceSlice.actions;
+
+export type { Column, DroppedBlock };
+export default workspaceSlice.reducer;

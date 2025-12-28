@@ -1,0 +1,43 @@
+import React from 'react'
+import { Box } from '@mui/material';
+import RowWidget from './Widgets/rowWidget';
+import ContainerWidget from './Widgets/containerWidget';
+import GroupWidget from './Widgets/groupWidget';
+
+export const blockLayoutWidgets = [
+  { Component: RowWidget, name: 'Row' },
+  { Component: ContainerWidget, name: 'Container' },
+  { Component: GroupWidget, name: 'Group' },
+];
+
+const LayoutBlockLayout = ({ searchTerm = '' }: { searchTerm?: string }) => {
+  const filteredWidgets = blockLayoutWidgets.filter(widget =>
+    !searchTerm || widget.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        width: "100%",
+        p: 2,
+        overflowY: 'auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 1,
+        placeItems: "left"
+      }}
+    >
+      {filteredWidgets.map(({ Component, name }) => (
+        <Component key={name} />
+      ))}
+      {filteredWidgets.length === 0 && (
+        <Box sx={{ gridColumn: '1 / -1', p: 1, textAlign: 'center', color: 'text.secondary', fontSize: '14px' }}>
+          No layout blocks found
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default LayoutBlockLayout;

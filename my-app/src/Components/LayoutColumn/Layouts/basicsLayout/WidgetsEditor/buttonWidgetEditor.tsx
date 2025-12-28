@@ -1,0 +1,497 @@
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
+  Switch,
+  Slider,
+  FormControlLabel,
+  IconButton,
+  Tooltip,
+  Stack,
+  Divider,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+} from "@mui/material";
+import { ChromePicker } from "react-color";
+import {
+  FormatAlignLeft,
+  FormatAlignCenter,
+  FormatAlignRight,
+  Close as CloseIcon,
+} from "@mui/icons-material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../../Store/store";
+import {
+  updateWidgetContentData,
+  closeEditor,
+  deleteColumnContent,
+} from "../../../../../Store/Slice/workspaceSlice";
+import { ButtonEditorOptions, defaultButtonEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
+import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
+
+const ButtonWidgetEditor = () => {
+  const dispatch = useDispatch();
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, blocks } = useSelector(
+    (state: RootState) => state.workspace
+  );
+  const column =
+    selectedBlockForEditor && selectedColumnIndex !== null
+      ? blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
+      : null;
+  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
+  const buttonData: ButtonEditorOptions = widgetContent?.contentData
+    ? JSON.parse(widgetContent.contentData)
+    : { ...defaultButtonEditorOptions };
+
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
+
+  const optionsRef = useRef(buttonData);
+  useEffect(() => {
+    optionsRef.current = buttonData;
+  }, [buttonData]);
+
+  const updateData = useCallback((newData: any) => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+      const updatedData = { ...optionsRef.current, ...newData };
+      dispatch(
+        updateWidgetContentData({
+          blockId: selectedBlockForEditor,
+          columnIndex: selectedColumnIndex,
+          widgetIndex: selectedWidgetIndex,
+          data: JSON.stringify(updatedData),
+        })
+      );
+    }
+  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+
+  const debouncedUpdate = useMemo(() => {
+    let timeoutId: any;
+    return (newData: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => updateData(newData), 50);
+    };
+  }, [updateData]);
+
+  const handleChange = (field: keyof ButtonEditorOptions, value: any) => {
+    debouncedUpdate({ [field]: value });
+  };
+
+  const handlePaddingChange = (side: keyof ButtonEditorOptions["padding"], value: number) => {
+    debouncedUpdate({ padding: { ...buttonData.padding, [side]: value } });
+  };
+
+  const handleBorderRadiusChange = (side: keyof ButtonEditorOptions["borderRadius"], value: number) => {
+    debouncedUpdate({ borderRadius: { ...buttonData.borderRadius, [side]: value } });
+  };
+
+  const handleWidthToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isAuto = event.target.checked;
+    debouncedUpdate({
+      widthAuto: isAuto,
+      width: isAuto ? undefined : buttonData.width ?? 100,
+    });
+  };
+
+  const handleWidthChange = (event: Event, newValue: number | number[]) => {
+    debouncedUpdate({ width: newValue as number });
+  };
+
+  const handleCloseEditor = useCallback(() => {
+    dispatch(closeEditor());
+  }, [dispatch]);
+
+  const handleDeleteContent = useCallback(() => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+      dispatch(
+        deleteColumnContent({
+          blockId: selectedBlockForEditor,
+          columnIndex: selectedColumnIndex,
+          widgetIndex: selectedWidgetIndex,
+        })
+      );
+    }
+  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+
+  const colorSwatchStyle = (bgColor: string) => ({
+    width: 24,
+    height: 24,
+    backgroundColor: bgColor || 'transparent',
+    borderRadius: 0.5,
+    cursor: "pointer",
+    border: "1px solid #ccc"
+  });
+
+  return (
+    <Box p={2} position="relative">
+      <Stack spacing={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Box>
+            <Typography variant="h6">
+              Button
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Customize button style.
+            </Typography>
+          </Box>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ bgcolor: '#eee' }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ bgcolor: '#eee' }}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Content */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Content
+          </Typography>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Variables
+              </Typography>
+              <Box mb={1}>
+                <PlaceholderSelect
+                  onSelect={(ph) => handleChange("text", (buttonData.text || "") + ph)}
+                />
+              </Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Button Text
+              </Typography>
+              <TextField
+                fullWidth
+                value={buttonData.text}
+                onChange={(e) => handleChange("text", e.target.value)}
+                size="small"
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                URL Link (HTTPS)
+              </Typography>
+              <Box mb={1}>
+                <PlaceholderSelect
+                  onSelect={(ph) => handleChange("url", (buttonData.url || "") + ph)}
+                />
+              </Box>
+              <TextField
+                fullWidth
+                value={buttonData.url}
+                onChange={(e) => handleChange("url", e.target.value)}
+                size="small"
+                placeholder="example.com"
+                InputProps={{
+                  startAdornment: (
+                    <Typography variant="body2" color="textSecondary" mr={1}>
+                      https://
+                    </Typography>
+                  ),
+                }}
+              />
+            </Box>
+          </Stack>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Appearance */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Appearance
+          </Typography>
+          <Stack spacing={2}>
+
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Background
+                </Typography>
+                <Box position="relative">
+                  <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}>
+                    <Box sx={colorSwatchStyle(buttonData.bgColor)} onClick={() => setShowBgColorPicker(!showBgColorPicker)} />
+                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{buttonData.bgColor}</Typography>
+                  </Box>
+                  {showBgColorPicker && (
+                    <Box sx={{
+                      position: "absolute",
+                      zIndex: 1000,
+                      mt: 1,
+                      right: 0,
+                      backgroundColor: "#fff",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                      borderRadius: 1,
+                      overflow: 'hidden'
+                    }}>
+                      <Box display="flex" justifyContent="flex-end" mb={0.5}>
+                        <IconButton
+                          size="small"
+                          onClick={() => setShowBgColorPicker(false)}
+                          sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
+                        >
+                          <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
+                      <ChromePicker
+                        color={buttonData.bgColor}
+                        onChange={(newColor) => handleChange("bgColor", newColor.hex)}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Text Color
+                </Typography>
+                <Box position="relative">
+                  <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}>
+                    <Box sx={colorSwatchStyle(buttonData.textColor)} onClick={() => setShowTextColorPicker(!showTextColorPicker)} />
+                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{buttonData.textColor}</Typography>
+                  </Box>
+                  {showTextColorPicker && (
+                    <Box sx={{
+                      position: "absolute",
+                      zIndex: 1000,
+                      mt: 1,
+                      right: 0,
+                      backgroundColor: "#fff",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                      borderRadius: 1,
+                      overflow: 'hidden'
+                    }}>
+                      <Box display="flex" justifyContent="flex-end" mb={0.5}>
+                        <IconButton
+                          size="small"
+                          onClick={() => setShowTextColorPicker(false)}
+                          sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
+                        >
+                          <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
+                      <ChromePicker
+                        color={buttonData.textColor}
+                        onChange={(newColor) => handleChange("textColor", newColor.hex)}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Font Size
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  value={buttonData.fontSize}
+                  onChange={(e) => handleChange("fontSize", Number(e.target.value))}
+                  size="small"
+                />
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Font Weight
+                </Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    fullWidth
+                    value={buttonData.fontWeight}
+                    onChange={(e) => handleChange("fontWeight", e.target.value)}
+                    MenuProps={{
+                      disablePortal: false,
+                      sx: { zIndex: 1300001 },
+                      style: { zIndex: 1300001 }
+                    }}
+                  >
+                    <MenuItem value="normal" >Normal</MenuItem>
+                    <MenuItem value="bold">Bold</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Alignment
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={buttonData.textAlign}
+                onChange={(e, newAlign) =>
+                  newAlign && handleChange("textAlign", newAlign)
+                }
+                fullWidth
+                size="small"
+              >
+                <ToggleButton value="left" size="small">
+                  <FormatAlignLeft fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="center" size="small">
+                  <FormatAlignCenter fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="right" size="small">
+                  <FormatAlignRight fontSize="small" />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Width
+              </Typography>
+              <Box display="flex" alignItems="center" gap={2} mt={1}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={buttonData.widthAuto || false}
+                      onChange={handleWidthToggle}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={<Typography variant="body2">Auto</Typography>}
+                  labelPlacement="start"
+                  sx={{ m: 0 }}
+                />
+                {!buttonData.widthAuto && (
+                  <Box width="100%" ml={2}>
+                    <Slider
+                      value={buttonData.width ?? 100}
+                      onChange={handleWidthChange}
+                      min={0}
+                      max={100}
+                      step={1}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => `${value}%`}
+                      size="small"
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Box>
+
+          </Stack>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Spacing */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Border Radius
+          </Typography>
+          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Top Left
+              </Typography>
+              <TextField
+                type="number"
+                value={buttonData.borderRadius.topLeft}
+                onChange={(e) => handleBorderRadiusChange("topLeft", Number(e.target.value))}
+                size="small"
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Top Right
+              </Typography>
+              <TextField
+                type="number"
+                value={buttonData.borderRadius.topRight}
+                onChange={(e) => handleBorderRadiusChange("topRight", Number(e.target.value))}
+                size="small"
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Bottom Left
+              </Typography>
+              <TextField
+                type="number"
+                value={buttonData.borderRadius.bottomLeft}
+                onChange={(e) => handleBorderRadiusChange("bottomLeft", Number(e.target.value))}
+                size="small"
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Bottom Right
+              </Typography>
+              <TextField
+                type="number"
+                value={buttonData.borderRadius.bottomRight}
+                onChange={(e) => handleBorderRadiusChange("bottomRight", Number(e.target.value))}
+                size="small"
+                fullWidth
+              />
+            </Box>
+          </Box>
+        </Box>
+
+        <Box pb={2}>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Padding
+          </Typography>
+          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Top
+              </Typography>
+              <TextField type="number" value={buttonData.padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} size="small" fullWidth />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Bottom
+              </Typography>
+              <TextField type="number" value={buttonData.padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} size="small" fullWidth />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Left
+              </Typography>
+              <TextField type="number" value={buttonData.padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} size="small" fullWidth />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Right
+              </Typography>
+              <TextField type="number" value={buttonData.padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} size="small" fullWidth />
+            </Box>
+          </Box>
+        </Box>
+      </Stack>
+    </Box>
+  );
+};
+
+export default ButtonWidgetEditor;

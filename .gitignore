@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+.env
+dist/
+# Ignore creating a zip recursively if they have one
+*.zip

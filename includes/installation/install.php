@@ -1,0 +1,209 @@
+<?php
+
+namespace SmackCoders\WETC;
+
+if (!defined('ABSPATH')) {
+    die;
+}
+
+class WETC_Installer {  
+
+    private static $instance = null;
+
+    private function __construct() {
+        // add_action('init', [$this, 'register_email_post_type']);
+    }
+
+    public static function get_instance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    } 
+
+    public static function activate() {
+        // Use output buffering to prevent unexpected output
+        ob_start();
+
+        // Check if WooCommerce and WP Mail SMTP are active
+        if (
+            !is_plugin_active('woocommerce/woocommerce.php') ||
+            !is_plugin_active('wp-mail-smtp/wp_mail_smtp.php')
+        ) {
+            deactivate_plugins(plugin_basename(__FILE__));
+
+            $wga_woocommerce_plugin_path = 'woocommerce/woocommerce.php';
+            $wga_activate_wc_url = wp_nonce_url(
+                admin_url('plugins.php?action=activate&plugin=' . $wga_woocommerce_plugin_path),
+                'activate-plugin_' . $wga_woocommerce_plugin_path
+            );
+
+            $wga_smtp_plugin_path = 'wp-mail-smtp/wp_mail_smtp.php';
+            $wga_activate_smtp_url = wp_nonce_url(
+                admin_url('plugins.php?action=activate&plugin=' . $wga_smtp_plugin_path),
+                'activate-plugin_' . $wga_smtp_plugin_path
+            );
+
+            $message_parts = [];
+
+            // WooCommerce message
+            if (!is_plugin_active('woocommerce/woocommerce.php')) {
+                $message_parts[] = sprintf(
+                    'Woocommerce Email Template Customizer requires <strong>WooCommerce</strong> to be installed and activated.
+                    <br><br>If WooCommerce is not installed, <a href="%s">Click here to install WooCommerce</a>.
+                    <br>If WooCommerce is already installed, <a href="%s">Click here to activate WooCommerce</a>.',
+                    esc_url(admin_url('plugin-install.php?s=woocommerce&tab=search&type=term')),
+                    esc_url($wga_activate_wc_url)
+                );
+            }
+
+            // WP Mail SMTP message
+            if (!is_plugin_active('wp-mail-smtp/wp_mail_smtp.php')) {
+                $message_parts[] = sprintf(
+                    'Woocommerce Email Template Customizer also requires <strong>WP Mail SMTP</strong> to be installed and activated.
+                    <br><br>If WP Mail SMTP is not installed, <a href="%s">Click here to install WP Mail SMTP</a>.
+                    <br>If WP Mail SMTP is already installed, <a href="%s">Click here to activate WP Mail SMTP</a>.',
+                    esc_url(admin_url('plugin-install.php?s=wp+mail+smtp&tab=search&type=term')),
+                    esc_url($wga_activate_smtp_url)
+                );
+            }
+
+            $final_message = implode('<br><br><hr><br>', $message_parts);
+
+            wp_die(
+                wp_kses_post($final_message),
+                esc_html__('Plugin Activation Error', 'pulse-analytics'),
+                array('back_link' => true)
+            );
+        }
+
+        // Create tables and insert data
+        self::WETC_create_table();
+        self::WETC_insert_data();
+        flush_rewrite_rules();
+        ob_end_clean();
+    }  
+
+    public static function deactivate() {
+        flush_rewrite_rules();
+    }
+
+    public static function WETC_create_table() {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+// Table 1: wetc_email_templates
+$woo_email_templates = "{$wpdb->prefix}wetc_email_templates";
+$sql_woo_email_templates = "CREATE TABLE IF NOT EXISTS $woo_email_templates (
+    id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    email_template_name VARCHAR(255) NOT NULL,
+    content_type VARCHAR(100) NOT NULL,
+    recipient TEXT NOT NULL,
+    subject VARCHAR(255),
+    html_content LONGTEXT,
+    json_data LONGTEXT,
+    PRIMARY KEY (id)
+) $charset_collate;";
+
+        // Table 2: woo_email_template_meta
+        $woo_email_template_meta = "{$wpdb->prefix}woo_email_template";
+        $sql_woo_email_template_meta = "CREATE TABLE IF NOT EXISTS $woo_email_template_meta (
+            meta_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            template_id INT(11) UNSIGNED NOT NULL,
+            meta_key VARCHAR(255) NOT NULL,
+            meta_value TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (template_id) REFERENCES $woo_email_templates(id) ON DELETE CASCADE
+        ) $charset_collate;";
+
+        // Table 3: woo_email_analytics
+        $wp_woo_email_analytics = "{$wpdb->prefix}woo_email_analytics";
+        $sql_woo_email_analytics = "CREATE TABLE IF NOT EXISTS $wp_woo_email_analytics (
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            template_id INT(11) UNSIGNED NOT NULL,            
+            emails_sent INT(11) NOT NULL DEFAULT 0,           
+            emails_opened INT(11) NOT NULL DEFAULT 0,           
+            emails_clicked INT(11) NOT NULL DEFAULT 0,        
+            date_recorded DATE NOT NULL,                        
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_analytics_template_id (template_id),
+            CONSTRAINT fk_analytics_template_id FOREIGN KEY (template_id) REFERENCES {$wpdb->prefix}wetc_email_templates(id) ON DELETE CASCADE
+        ) $charset_collate;";
+
+        // Table 4: woo_email_ab_tests
+        $wp_woo_email_ab_tests = "{$wpdb->prefix}woo_email_ab_tests";
+        $sql_woo_email_ab_tests = "CREATE TABLE IF NOT EXISTS $wp_woo_email_ab_tests (
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            template_id INT(11) UNSIGNED NOT NULL,             
+            test_name VARCHAR(255) NOT NULL,                 
+            variant ENUM('A','B') NOT NULL,                    
+            variant_details TEXT,                              
+            results TEXT,                                      
+            start_date DATE NOT NULL,                           
+            end_date DATE DEFAULT NULL,                        
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_ab_template_id (template_id),
+            CONSTRAINT fk_ab_template_id FOREIGN KEY (template_id) REFERENCES {$wpdb->prefix}wetc_email_templates(id) ON DELETE CASCADE
+        ) $charset_collate;";
+
+        // Table 5: woo_plugin_licenses
+        $wp_woo_plugin_licenses = "{$wpdb->prefix}woo_plugin_licenses";
+        $sql_woo_plugin_licenses = "CREATE TABLE IF NOT EXISTS $wp_woo_plugin_licenses (
+            id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            license_key VARCHAR(255) NOT NULL UNIQUE,          
+            user_id INT(11) UNSIGNED NOT NULL,                  
+            status ENUM('active','inactive','expired') DEFAULT 'inactive', 
+            activation_date DATETIME DEFAULT NULL,         
+            expiration_date DATETIME DEFAULT NULL,            
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql_woo_email_templates);
+        dbDelta($sql_woo_email_template_meta);
+        dbDelta($sql_woo_email_analytics);
+        dbDelta($sql_woo_email_ab_tests);
+        dbDelta($sql_woo_plugin_licenses);
+
+        // Insert data after table creation
+        self::WETC_insert_data();
+    }
+
+    public static function WETC_insert_data() {
+        global $wpdb;
+
+        // Insert data into wetc_email_templates
+        $woo_email_templates = "{$wpdb->prefix}wetc_email_templates";
+        $existing_templates = $wpdb->get_var("SELECT COUNT(*) FROM $woo_email_templates");
+
+        if ($existing_templates == 0) {
+            $admin_email = get_option('admin_email');
+            $templates = [
+                [
+                    'email_template_name' => 'New Order Admin Template',
+                    'content_type' => 'JSON',
+                    'recipient' => $admin_email,
+                    'json_data' => null  // Empty template - users will build with drag-and-drop
+                ]
+            ];
+
+            foreach ($templates as $template) {
+                $wpdb->insert(
+                    $woo_email_templates,
+                    $template,
+                    ['%s', '%s', '%s', '%s']
+                );
+            }
+        }
+    }
+}
+
+WETC_Installer::get_instance();
+?>

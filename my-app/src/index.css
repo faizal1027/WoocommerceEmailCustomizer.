@@ -1,0 +1,129 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: unset;
+}
+
+strong,
+b {
+  font-weight: bold !important;
+}
+
+em,
+i {
+  font-style: italic !important;
+}
+
+.css-113d811-MuiFormLabel-root-MuiInputLabel-root {
+  top: -10px;
+}
+
+
+.wp-die-message,
+p {
+  line-height: unset;
+  font-size: unset;
+  margin: 0;
+}
+
+h2,
+h3 {
+  color: unset;
+  margin: 0;
+}
+
+h4 {
+  margin: 0;
+}
+
+/* CKEditor content styles for lists - in editor */
+.ck-content ul,
+.ck-content ol {
+  margin-left: 20px;
+  padding-left: 20px;
+}
+
+.ck-content ul {
+  list-style-type: disc;
+}
+
+.ck-content ol {
+  list-style-type: decimal;
+}
+
+.ck-content li {
+  margin-bottom: 5px;
+}
+
+/* List styles for rendered content - scoped to plugin only */
+#root ul {
+  margin-left: 20px !important;
+  padding-left: 20px !important;
+  list-style-type: disc !important;
+}
+
+#root ol {
+  margin-left: 20px !important;
+  padding-left: 20px !important;
+  list-style-type: decimal !important;
+}
+
+#root li {
+  margin-bottom: 5px !important;
+}
+
+/* Fix for MUI TextField border cutting through label in WP Admin */
+/* WordPress global styles often hide or collapse legends */
+fieldset.MuiOutlinedInput-notchedOutline legend {
+  width: auto !important;
+  height: 11px !important;
+  /* Force height so it takes space */
+  display: block !important;
+  visibility: hidden !important;
+  /* It should be invisible but take space */
+  max-width: 100% !important;
+  font-size: 0.75em !important;
+  /* Ensure font size matches label scale */
+  padding: 0 !important;
+  text-align: left !important;
+  transition: max-width 50ms cubic-bezier(0.0, 0, 0.2, 1) 0ms !important;
+  white-space: nowrap !important;
+  line-height: normal !important;
+}
+
+fieldset.MuiOutlinedInput-notchedOutline legend span {
+  display: inline-block !important;
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+  visibility: visible !important;
+  /* Sometimes needed for width calc */
+  opacity: 0 !important;
+  /* Keep it invisible visually */
+  width: auto !important;
+  white-space: nowrap !important;
+  font-size: inherit !important;
+}
+
+/* FIX: Ensure WordPress Media Modal is above everything */
+/* Stagger z-index to ensure modal is above backdrop */
+.media-modal-backdrop {
+  z-index: 2147483640 !important;
+}
+
+.media-modal {
+  z-index: 2147483645 !important;
+}
+
+/* Ensure inner parts inherit or stay high if needed */
+.media-frame,
+.media-frame-content,
+.media-frame-title,
+.media-frame-router,
+.media-frame-toolbar {
+  z-index: 2147483646 !important;
+}
+
+.media-modal-close {
+  z-index: 2147483647 !important;
+}

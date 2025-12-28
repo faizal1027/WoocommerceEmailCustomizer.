@@ -1,0 +1,437 @@
+import {
+  Box,
+  ClickAwayListener,
+  FormControl,
+  IconButton,
+  MenuItem,
+  Select,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+  Stack,
+  Divider,
+  InputLabel,
+} from "@mui/material";
+import { ChromePicker } from "react-color";
+import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
+import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../../Store/store";
+import {
+  updateColumnHeadingEditorOptions,
+  deleteColumnContent,
+  closeEditor,
+  updateWidgetContentData,
+} from "../../../../../Store/Slice/workspaceSlice";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+
+const HeadingWidgetEditor = () => {
+  const dispatch = useDispatch();
+  const { selectedBlockForEditor, selectedColumnIndex, blocks, selectedWidgetIndex } = useSelector(
+    (state: RootState) => state.workspace
+  );
+  const column = useSelector((state: RootState) => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null) {
+      const block = state.workspace.blocks.find(block => block.id === selectedBlockForEditor);
+      return block?.columns[selectedColumnIndex];
+    }
+    return null;
+  });
+  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
+  // Stable calculation of options
+  const headingEditorOptions = useMemo(() => {
+    if (widgetContent?.contentData) {
+      try {
+        return JSON.parse(widgetContent.contentData);
+      } catch (e) {
+        console.error("Failed to parse widget content data", e);
+      }
+    }
+    return {
+      headingType: "h1",
+      fontFamily: "global",
+      fontWeight: "bold",
+      fontSize: 22,
+      color: "#000000",
+      backgroundColor: "transparent",
+      textAlign: "left",
+      lineHeight: 140,
+      letterSpace: 1,
+      padding: { top: 0, left: 0, right: 0, bottom: 0 },
+    };
+  }, [widgetContent?.contentData]);
+
+  const {
+    fontFamily,
+    fontWeight,
+    fontSize,
+    headingType,
+    color,
+    backgroundColor,
+    textAlign,
+    lineHeight,
+    letterSpace,
+    padding = { top: 0, left: 0, right: 0, bottom: 0 },
+  } = headingEditorOptions;
+
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+
+  const optionsRef = useRef(headingEditorOptions);
+  useEffect(() => {
+    optionsRef.current = headingEditorOptions;
+  }, [headingEditorOptions]);
+
+  const handleCloseEditor = useCallback(() => {
+    dispatch(closeEditor());
+  }, [dispatch]);
+
+  const handleDeleteContent = useCallback(() => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+      dispatch(
+        deleteColumnContent({
+          blockId: selectedBlockForEditor,
+          columnIndex: selectedColumnIndex,
+          widgetIndex: selectedWidgetIndex,
+        })
+      );
+    }
+  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+
+  const updateData = useCallback((newData: any) => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+      const updatedData = { ...optionsRef.current, ...newData };
+      dispatch(
+        updateWidgetContentData({
+          blockId: selectedBlockForEditor,
+          columnIndex: selectedColumnIndex,
+          widgetIndex: selectedWidgetIndex,
+          data: JSON.stringify(updatedData),
+        })
+      );
+    }
+  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+
+  const debouncedUpdate = useMemo(() => {
+    let timeoutId: any;
+    return (newData: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => updateData(newData), 50);
+    };
+  }, [updateData]);
+
+  const handlePaddingChange = (side: "top" | "left" | "right" | "bottom", value: number) => {
+    debouncedUpdate({ padding: { ...padding, [side]: value } });
+  };
+
+  const colorSwatchStyle = (bgColor: string) => ({
+    width: 30,
+    height: 30,
+    backgroundColor: bgColor || 'transparent',
+    borderRadius: 1,
+    border: "1px solid #ccc",
+    cursor: "pointer",
+  });
+
+  const handleHeadingTypeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newHeadingType: "h1" | "h2" | "h3" | "h4" | null
+  ) => {
+    if (newHeadingType !== null) {
+      let newFontSize = fontSize;
+      switch (newHeadingType) {
+        case "h1": newFontSize = 22; break;
+        case "h2": newFontSize = 20; break;
+        case "h3": newFontSize = 18; break;
+        case "h4": newFontSize = 16; break;
+      }
+      debouncedUpdate({ headingType: newHeadingType, fontSize: newFontSize });
+    }
+  };
+
+
+  return (
+    <Box p={2}>
+      <Stack spacing={3}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography variant="h6">
+              Heading
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Customize heading style.
+            </Typography>
+          </Box>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ bgcolor: '#eee' }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ bgcolor: '#eee' }}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Heading Type */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Heading Type
+          </Typography>
+          <ToggleButtonGroup
+            exclusive
+            value={headingType}
+            onChange={handleHeadingTypeChange}
+            fullWidth
+            size="small"
+          >
+            <ToggleButton value="h1">
+              <Typography fontWeight="bold" sx={{ fontSize: "13px" }}>H1</Typography>
+            </ToggleButton>
+            <ToggleButton value="h2">
+              <Typography fontWeight="bold" sx={{ fontSize: "13px" }}>H2</Typography>
+            </ToggleButton>
+            <ToggleButton value="h3">
+              <Typography fontWeight="bold" sx={{ fontSize: "13px" }}>H3</Typography>
+            </ToggleButton>
+            <ToggleButton value="h4">
+              <Typography fontWeight="bold" sx={{ fontSize: "13px" }}>H4</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Typography */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Typography
+          </Typography>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Font Family
+              </Typography>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={fontFamily}
+                  onChange={(e) => debouncedUpdate({ fontFamily: e.target.value as string })}
+                  MenuProps={{
+                    disablePortal: false,
+                    sx: { zIndex: 1300001 },
+                    style: { zIndex: 1300001 }
+                  }}
+                >
+                  <MenuItem value="global">Global</MenuItem>
+                  <MenuItem value="Arial, sans-serif">Arial</MenuItem>
+                  <MenuItem value="Verdana, Geneva, sans-serif">Verdana</MenuItem>
+                  <MenuItem value="Times New Roman, serif">Times New Roman</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Font Weight
+                </Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={fontWeight}
+                    onChange={(e) => debouncedUpdate({ fontWeight: e.target.value as string })}
+                    MenuProps={{
+                      disablePortal: false,
+                      sx: { zIndex: 1300001 },
+                      style: { zIndex: 1300001 }
+                    }}
+                  >
+                    <MenuItem value="normal">Normal</MenuItem>
+                    <MenuItem value="bold">Bold</MenuItem>
+                    <MenuItem value="lighter">Lighter</MenuItem>
+                    <MenuItem value="bolder">Bolder</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Font Size
+                </Typography>
+                <TextField
+                  type="number"
+                  value={fontSize}
+                  onChange={(e) => debouncedUpdate({ fontSize: Number(e.target.value) })}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+            </Box>
+
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Line Height (%)
+                </Typography>
+                <TextField
+                  type="number"
+                  value={lineHeight}
+                  onChange={(e) => debouncedUpdate({ lineHeight: Number(e.target.value) })}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Letter Spacing
+                </Typography>
+                <TextField
+                  type="number"
+                  value={letterSpace}
+                  onChange={(e) => debouncedUpdate({ letterSpace: Number(e.target.value) })}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Text Color
+              </Typography>
+              <Box position="relative">
+                <Box sx={colorSwatchStyle(color)} onClick={() => setShowColorPicker(!showColorPicker)} />
+                {showColorPicker && (
+                  <Box sx={{
+                    position: "absolute",
+                    zIndex: 1000,
+                    mt: 1,
+                    right: 0,
+                    backgroundColor: "#fff",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                    borderRadius: 1,
+                    overflow: 'hidden'
+                  }}>
+                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setShowColorPicker(false)}
+                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
+                      >
+                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
+                    <ChromePicker
+                      color={color}
+                      onChange={(newColor) => debouncedUpdate({ color: newColor.hex })}
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Background Color
+              </Typography>
+              <Box position="relative">
+                <Box sx={colorSwatchStyle(backgroundColor)} onClick={() => setShowBgColorPicker(!showBgColorPicker)} />
+                {showBgColorPicker && (
+                  <Box sx={{
+                    position: "absolute",
+                    zIndex: 1000,
+                    mt: 1,
+                    right: 0,
+                    backgroundColor: "#fff",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                    borderRadius: 1,
+                    overflow: 'hidden'
+                  }}>
+                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setShowBgColorPicker(false)}
+                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
+                      >
+                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
+                    <ChromePicker
+                      color={backgroundColor || 'transparent'}
+                      onChange={(newColor) => debouncedUpdate({ backgroundColor: newColor.hex })}
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Alignment
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={textAlign}
+                onChange={(e, newAlign) => newAlign && debouncedUpdate({ textAlign: newAlign })}
+                fullWidth
+                size="small"
+              >
+                <ToggleButton value="left"><FormatAlignLeftIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="center"><FormatAlignCenterIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="right"><FormatAlignRightIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="justify"><FormatAlignJustifyIcon fontSize="small" /></ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+          </Stack>
+        </Box>
+
+        <Divider />
+
+        {/* Section: Spacing */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Spacing (Padding)
+          </Typography>
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Top
+              </Typography>
+              <TextField type="number" size="small" fullWidth value={padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Bottom
+              </Typography>
+              <TextField type="number" size="small" fullWidth value={padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Left
+              </Typography>
+              <TextField type="number" size="small" fullWidth value={padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Right
+              </Typography>
+              <TextField type="number" size="small" fullWidth value={padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} />
+            </Box>
+          </Box>
+        </Box>
+      </Stack>
+    </Box>
+  );
+};
+
+export default HeadingWidgetEditor;
