@@ -102,6 +102,7 @@ $sql_woo_email_templates = "CREATE TABLE IF NOT EXISTS $woo_email_templates (
     subject VARCHAR(255),
     html_content LONGTEXT,
     json_data LONGTEXT,
+    priority INT(11) DEFAULT 0,
     PRIMARY KEY (id)
 ) $charset_collate;";
 

@@ -103,9 +103,9 @@ public static function get_instance() {
         $table_name = $wpdb->prefix . 'wetc_email_templates';
         
         // --- Robust Slug Matching ---
-        // 1. Try exact match
+        // 1. Try exact match with highest priority
         $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE content_type = %s ORDER BY id DESC LIMIT 1",
+            "SELECT * FROM $table_name WHERE content_type = %s ORDER BY priority DESC, id DESC LIMIT 1",
             $content_type
         ));
 
@@ -113,7 +113,7 @@ public static function get_instance() {
 
         // 2. Try case-insensitive and normalized (spaces to underscores)
         $normalized_slug = str_replace(' ', '_', strtolower($content_type));
-        $all_templates = $wpdb->get_results("SELECT * FROM $table_name ORDER BY id DESC");
+        $all_templates = $wpdb->get_results("SELECT * FROM $table_name ORDER BY priority DESC, id DESC");
         
         foreach ($all_templates as $template) {
             $t_slug = str_replace(' ', '_', strtolower($template->content_type));

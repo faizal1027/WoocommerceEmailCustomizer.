@@ -464,7 +464,7 @@ class WETC_Connector {
         }
 
         // Try to get cached template list
-        $cache_key = 'wetc_template_names_list';
+        $cache_key = 'wetc_template_names_list_v2';
         $cached_templates = get_transient($cache_key);
 
         if (false !== $cached_templates) {
@@ -475,10 +475,15 @@ class WETC_Connector {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wetc_email_templates';
 
+        // Check if priority column exists (handles cases where migration hasn't run)
+        $column_check = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'priority'");
+        $has_priority = !empty($column_check);
+
         // Include json_data - frontend needs it for template loading
         // Performance is still optimized via caching
+        $fields = "id, email_template_name, json_data" . ($has_priority ? ", priority" : "");
         $results = $wpdb->get_results(
-            "SELECT id, email_template_name, json_data FROM {$table_name}",
+            "SELECT {$fields} FROM {$table_name}",
             ARRAY_A
         );
 
@@ -508,6 +513,13 @@ class WETC_Connector {
         $template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
         $content_type = isset($_POST['content_type']) ? sanitize_text_field($_POST['content_type']) : 'JSON';
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
+        $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 0;
+
+        // FIX: If content_type appears to be a label (e.g. "New Order (Admin)"), clear it
+        // so the logic below can correctly deduce the slug (e.g. "new_order_admin").
+        if (!empty($content_type) && strpos($content_type, ' ') !== false) {
+             $content_type = ''; 
+        }
 
         if (empty($template_name)) {
             wp_send_json_error(['message' => 'Template name is required']);
@@ -569,6 +581,18 @@ class WETC_Connector {
         }
 
 
+
+        // Check if priority column exists, if not try to add it
+        $column_check = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'priority'");
+        $has_priority = !empty($column_check);
+        
+        if (!$has_priority) {
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN priority INT(11) DEFAULT 0");
+            // Re-check
+            $column_check = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'priority'");
+            $has_priority = !empty($column_check);
+        }
+
         // Prepare data array - include html_content if it exists
         $data = [
             'email_template_name' => $template_name,
@@ -579,6 +603,11 @@ class WETC_Connector {
         ];
         
         $formats = ['%s', '%s', '%s', '%s', '%s'];
+
+        if ($has_priority) {
+            $data['priority'] = $priority;
+            $formats[] = '%d';
+        }
         
         // Add html_content if provided
         if (!empty($html_content)) {
@@ -599,7 +628,7 @@ class WETC_Connector {
 
             if ($result !== false) {
                 // Clear template list cache after update
-                delete_transient('wetc_template_names_list');
+                delete_transient('wetc_template_names_list_v2');
                 wp_send_json_success([
                     'message' => 'Template updated successfully',
                     'template_id' => $template_id
@@ -617,7 +646,7 @@ class WETC_Connector {
 
             if ($result !== false) {
                 // Clear template list cache after insert
-                delete_transient('wetc_template_names_list');
+                delete_transient('wetc_template_names_list_v2');
                 wp_send_json_success([
                     'message' => 'Template saved successfully',
                     'template_id' => $wpdb->insert_id

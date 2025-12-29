@@ -34,6 +34,7 @@ interface Template {
   id: string;
   email_template_name: string;
   json_data: string;
+  priority?: string;
 }
 
 interface TabPanelProps {
@@ -71,6 +72,7 @@ const ExportColumn = () => {
   // ==== STATES ====
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
+  const [priority, setPriority] = useState<number>(0);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportContent, setExportContent] = useState('');
   const [selectedExportFormat, setSelectedExportFormat] = useState<'html' | 'json'>('html');
@@ -127,6 +129,7 @@ const ExportColumn = () => {
             const template = response.data.data.templates.find((t: any) => t.id == templateId);
             if (template) {
               setTemplateName(template.email_template_name || '');
+              setPriority(template.priority ? parseInt(template.priority, 10) : 0);
             }
           } else {
             // Add New mode - start fresh
@@ -166,6 +169,7 @@ const ExportColumn = () => {
 
           // Also verify template description or name updates if needed
           setTemplateName(template.email_template_name);
+          setPriority(template.priority ? parseInt(template.priority, 10) : 0);
         } catch (e) {
         }
       }
@@ -199,6 +203,7 @@ const ExportColumn = () => {
           }
           setCurrentTemplateId(templateId);
           setTemplateName(selectedTemplate.email_template_name);
+          setPriority(selectedTemplate.priority ? parseInt(selectedTemplate.priority, 10) : 0);
           showSnackbar(`Loaded template: ${selectedTemplate.email_template_name}`, 'success');
         } else {
           // In Add New mode (no ID in URL), we ONLY update the title/type
@@ -473,6 +478,7 @@ const ExportColumn = () => {
         background: "#fff",
         padding: "20px",
         gap: 2,
+        overflowY: "auto",
       }}
     >
       {/* Hidden file input for import */}
@@ -659,6 +665,7 @@ const ExportColumn = () => {
               formData.append("action", "save_email_template");
               formData.append("_ajax_nonce", window.emailTemplateAjax.nonce);
               formData.append("template_name", finalTemplateName);
+              formData.append("priority", String(priority));
               formData.append("json_data", JSON.stringify(blocks));
               formData.append("html_content", htmlContent);
 
@@ -731,7 +738,7 @@ const ExportColumn = () => {
               showSnackbar(`Save error: ${error.message}`, 'error');
             }
           }}
-          disabled={!templateName.trim() || blocks.length === 0}
+          disabled={isSending}
           sx={{
             fontSize: "14px",
             borderRadius: "3px",
@@ -773,79 +780,105 @@ const ExportColumn = () => {
         </Button>
       </Box>
 
+      <Divider />
+
       {/* Email Type */}
-      <Typography sx={{ fontSize: "14px", mt: 1 }}>Email type</Typography>
-      <Select
-        size="small"
-        fullWidth
-        displayEmpty
-        value={selectedTemplateId}
-        onChange={(e) => handleTemplateSelect(e.target.value as string)}
-        onOpen={() => { }}
-        MenuProps={{
-          disablePortal: false,
-          sx: { zIndex: 1300001 }, // Higher than typical highest z-index (1300 is MUI modal)
-          style: { zIndex: 1300001 }
-        }}
-        sx={{ fontSize: "14px" }}
-      >
-        <MenuItem value="" disabled>
-          Select Email Type
-        </MenuItem>
-        {templates.map((template) => (
-          <MenuItem key={template.id} value={template.id}>
-            {template.email_template_name}
-          </MenuItem>
-        ))}
-      </Select>
+      <Box sx={{ mt: 1 }}>
+        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Email type</Typography>
+        <Select
+          size="small"
+          fullWidth
+          displayEmpty
+          value={selectedTemplateId}
+          onChange={(e) => handleTemplateSelect(e.target.value as string)}
+          MenuProps={{
+            disablePortal: true,
+            PaperProps: {
+              sx: {
+                maxWidth: '500px',
+                width: 'auto',
+                '& .MuiMenuItem-root': {
+                  whiteSpace: 'nowrap',
+                  paddingLeft: '12px',
+                  paddingRight: '12px'
+                }
+              }
+            },
+            sx: { zIndex: 1300001 },
+            style: { zIndex: 1300001 }
+          }}
+          sx={{ fontSize: "14px" }}
+        >
+          <MenuItem value="" disabled>Select Type</MenuItem>
+          {templates.map((t) => (
+            <MenuItem key={t.id} value={t.id}>{t.email_template_name}</MenuItem>
+          ))}
+        </Select>
+      </Box>
+
+      {/* Priority */}
+      <Box sx={{ mt: 1 }}>
+        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Priority</Typography>
+        <TextField
+          fullWidth
+          size="small"
+          type="number"
+          value={priority}
+          onChange={(e) => setPriority(parseInt(e.target.value) || 0)}
+          InputProps={{ inputProps: { min: 0 } }}
+          placeholder="0"
+          helperText="Higher value means higher priority."
+          sx={{ fontSize: "14px" }}
+        />
+      </Box>
 
       {/* Title */}
-      <Typography sx={{ fontSize: "14px" }}>Title</Typography>
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Template Name"
-        variant="outlined"
-        value={templateName}
-        onChange={(e) => setTemplateName(e.target.value)}
-      />
+      <Box>
+        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Title</Typography>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Template Name"
+          value={templateName}
+          onChange={(e) => setTemplateName(e.target.value)}
+        />
+      </Box>
 
-      {/* Description */}
-      <Typography sx={{ fontSize: "14px" }}>Description</Typography>
-      <TextField
-        fullWidth
-        multiline
-        minRows={4}
-        placeholder="Template Description"
-        variant="outlined"
-        value={templateDescription}
-        onChange={(e) => setTemplateDescription(e.target.value)}
-      />
+      {/* Description (Compact) */}
+      <Box>
+        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Description</Typography>
+        <TextField
+          fullWidth
+          multiline
+          minRows={2}
+          maxRows={4}
+          placeholder="Description"
+          value={templateDescription}
+          onChange={(e) => setTemplateDescription(e.target.value)}
+        />
+      </Box>
 
       {/* Email Address */}
-      <Typography sx={{ fontSize: "14px" }}>Email address for test</Typography>
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <TextField
-          size="small"
-          placeholder="Enter email"
-          fullWidth
-          variant="outlined"
-          value={testEmail}
-          onChange={(e) => setTestEmail(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSendTestEmail}
-          disabled={isSending}
-          sx={{
-            padding: "8px 14px",
-            textTransform: "none",
-            fontSize: "11px",
-          }}
-        >
-          {isSending ? "Sending..." : "Send"}
-        </Button>
+      <Box>
+        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Test Email</Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <TextField
+            size="small"
+            placeholder="email@example.com"
+            fullWidth
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleSendTestEmail}
+            disabled={isSending}
+            sx={{ minWidth: '60px' }}
+          >
+            {isSending ? "..." : "Send"}
+          </Button>
+        </Box>
       </Box>
 
       <Divider sx={{ my: 2 }} />
