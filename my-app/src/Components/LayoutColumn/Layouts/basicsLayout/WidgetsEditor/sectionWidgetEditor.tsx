@@ -357,7 +357,7 @@ const SectionWidgetEditor = () => {
                     open={openBorderPicker}
                     anchorEl={borderAnchorEl}
                     onClose={handleClose}
-                    sx={{ zIndex: 99999 }}
+                    sx={{ zIndex: 1300001 }}
                     anchorOrigin={{
                       vertical: "bottom",
                       horizontal: "left",

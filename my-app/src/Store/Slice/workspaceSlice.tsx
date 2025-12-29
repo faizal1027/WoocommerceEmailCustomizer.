@@ -2001,6 +2001,732 @@ const workspaceSlice = createSlice({
               state.priceEditorOptions = defaultPriceEditorOptions;
             }
           }
+          // Handle Link Component
+          else if (state.selectedContentType === 'link' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.linkEditorOptions = { ...defaultLinkEditorOptions, ...parsed };
+              } catch (e) {
+                state.linkEditorOptions = defaultLinkEditorOptions;
+              }
+            } else if (column.linkEditorOptions) {
+              state.linkEditorOptions = { ...defaultLinkEditorOptions, ...column.linkEditorOptions };
+            } else {
+              state.linkEditorOptions = defaultLinkEditorOptions;
+            }
+          }
+          // Handle Icon Component
+          else if (state.selectedContentType === 'icon' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.iconEditorOptions = { ...defaultIconEditorOptions, ...parsed };
+              } catch (e) {
+                state.iconEditorOptions = defaultIconEditorOptions;
+              }
+            } else if (column.iconEditorOptions) {
+              state.iconEditorOptions = { ...defaultIconEditorOptions, ...column.iconEditorOptions };
+            } else {
+              state.iconEditorOptions = defaultIconEditorOptions;
+            }
+          }
+          // Handle Button Component
+          else if (state.selectedContentType === 'button' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.buttonEditorOptions = { ...defaultButtonEditorOptions, ...parsed };
+              } catch (e) {
+                state.buttonEditorOptions = defaultButtonEditorOptions;
+              }
+            } else if (column.buttonEditorOptions) {
+              state.buttonEditorOptions = { ...defaultButtonEditorOptions, ...column.buttonEditorOptions };
+            } else {
+              state.buttonEditorOptions = defaultButtonEditorOptions;
+            }
+          }
+          // Handle Social Icons Component
+          else if (state.selectedContentType === 'socialIcons' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions, ...parsed };
+              } catch (e) {
+                state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
+              }
+            } else if (column.socialIconsEditorOptions) {
+              state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions, ...column.socialIconsEditorOptions };
+            } else {
+              state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
+            }
+          }
+          // Handle Heading Component
+          else if (state.selectedContentType === 'heading' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.headingEditorOptions = { ...defaultHeadingEditorOptions, ...parsed };
+              } catch (e) {
+                state.headingEditorOptions = defaultHeadingEditorOptions;
+              }
+            } else if (column.headingEditorOptions) {
+              state.headingEditorOptions = { ...defaultHeadingEditorOptions, ...column.headingEditorOptions };
+            } else {
+              state.headingEditorOptions = defaultHeadingEditorOptions;
+            }
+          }
+          // Handle Text Component
+          else if (state.selectedContentType === 'text' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.textEditorOptions = { ...defaultTextEditorOptions, ...parsed };
+              } catch (e) {
+                state.textEditorOptions = defaultTextEditorOptions;
+              }
+            } else if (column.textEditorOptions) {
+              state.textEditorOptions = { ...defaultTextEditorOptions, ...column.textEditorOptions };
+            } else {
+              state.textEditorOptions = defaultTextEditorOptions;
+            }
+          }
+          // Handle Image Component
+          else if (state.selectedContentType === 'image' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.imageEditorOptions = { ...defaultImageEditorOptions, ...parsed };
+              } catch (e) {
+                state.imageEditorOptions = defaultImageEditorOptions;
+              }
+            } else if (column.imageEditorOptions) {
+              state.imageEditorOptions = { ...defaultImageEditorOptions, ...column.imageEditorOptions };
+            } else {
+              state.imageEditorOptions = defaultImageEditorOptions;
+            }
+          }
+          // Handle Divider Component
+          else if (state.selectedContentType === 'divider' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.dividerEditorOptions = { ...defaultDividerEditorOptions, ...parsed };
+              } catch (e) {
+                state.dividerEditorOptions = defaultDividerEditorOptions;
+              }
+            } else if (column.dividerEditorOptions) {
+              state.dividerEditorOptions = { ...defaultDividerEditorOptions, ...column.dividerEditorOptions };
+            } else {
+              state.dividerEditorOptions = defaultDividerEditorOptions;
+            }
+          }
+          // Handle Spacer Component
+          else if (state.selectedContentType === 'spacer' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.spacerEditorOptions = { ...defaultSpacerEditorOptions, ...parsed };
+              } catch (e) {
+                state.spacerEditorOptions = defaultSpacerEditorOptions;
+              }
+            } else if (column.spacerEditorOptions) {
+              state.spacerEditorOptions = { ...defaultSpacerEditorOptions, ...column.spacerEditorOptions };
+            } else {
+              state.spacerEditorOptions = defaultSpacerEditorOptions;
+            }
+          }
+          // Handle Section Component
+          else if (state.selectedContentType === 'section' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.sectionEditorOptions = { ...defaultSectionEditorOptions, ...parsed };
+              } catch (e) {
+                state.sectionEditorOptions = defaultSectionEditorOptions;
+              }
+            } else if (column.sectionEditorOptions) {
+              state.sectionEditorOptions = { ...defaultSectionEditorOptions, ...column.sectionEditorOptions };
+            } else {
+              state.sectionEditorOptions = defaultSectionEditorOptions;
+            }
+          }
+          // Handle Map Component
+          else if (state.selectedContentType === 'map' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.mapEditorOptions = { ...defaultMapEditorOptions, ...parsed };
+              } catch (e) {
+                state.mapEditorOptions = defaultMapEditorOptions;
+              }
+            } else if (column.mapEditorOptions) {
+              state.mapEditorOptions = { ...defaultMapEditorOptions, ...column.mapEditorOptions };
+            } else {
+              state.mapEditorOptions = defaultMapEditorOptions;
+            }
+          }
+          // Handle Row Component
+          else if (state.selectedContentType === 'row' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.rowEditorOptions = { ...defaultRowEditorOptions, ...parsed };
+              } catch (e) {
+                state.rowEditorOptions = defaultRowEditorOptions;
+              }
+            } else if (column.rowEditorOptions) {
+              state.rowEditorOptions = { ...defaultRowEditorOptions, ...column.rowEditorOptions };
+            } else {
+              state.rowEditorOptions = defaultRowEditorOptions;
+            }
+          }
+          // Handle Container Component
+          else if (state.selectedContentType === 'container' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.containerEditorOptions = { ...defaultContainerEditorOptions, ...parsed };
+              } catch (e) {
+                state.containerEditorOptions = defaultContainerEditorOptions;
+              }
+            } else if (column.containerEditorOptions) {
+              state.containerEditorOptions = { ...defaultContainerEditorOptions, ...column.containerEditorOptions };
+            } else {
+              state.containerEditorOptions = defaultContainerEditorOptions;
+            }
+          }
+          // Handle Group Component
+          else if (state.selectedContentType === 'group' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.groupEditorOptions = { ...defaultGroupEditorOptions, ...parsed };
+              } catch (e) {
+                state.groupEditorOptions = defaultGroupEditorOptions;
+              }
+            } else if (column.groupEditorOptions) {
+              state.groupEditorOptions = { ...defaultGroupEditorOptions, ...column.groupEditorOptions };
+            } else {
+              state.groupEditorOptions = defaultGroupEditorOptions;
+            }
+          }
+          // Handle SocialFollow Component
+          else if (state.selectedContentType === 'socialFollow' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.socialFollowEditorOptions = { ...defaultSocialFollowEditorOptions, ...parsed };
+              } catch (e) {
+                state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
+              }
+            } else if (column.socialFollowEditorOptions) {
+              state.socialFollowEditorOptions = { ...defaultSocialFollowEditorOptions, ...column.socialFollowEditorOptions };
+            } else {
+              state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
+            }
+          }
+          // Handle Video Component
+          else if (state.selectedContentType === 'video' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.videoEditorOptions = { ...defaultVideoEditorOptions, ...parsed };
+              } catch (e) {
+                state.videoEditorOptions = defaultVideoEditorOptions;
+              }
+            } else if (column.videoEditorOptions) {
+              state.videoEditorOptions = { ...defaultVideoEditorOptions, ...column.videoEditorOptions };
+            } else {
+              state.videoEditorOptions = defaultVideoEditorOptions;
+            }
+          }
+          // Handle Countdown Component
+          else if (state.selectedContentType === 'countdown' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.countdownEditorOptions = { ...defaultCountdownEditorOptions, ...parsed };
+              } catch (e) {
+                state.countdownEditorOptions = defaultCountdownEditorOptions;
+              }
+            } else if (column.countdownEditorOptions) {
+              state.countdownEditorOptions = { ...defaultCountdownEditorOptions, ...column.countdownEditorOptions };
+            } else {
+              state.countdownEditorOptions = defaultCountdownEditorOptions;
+            }
+          }
+          // Handle ProgressBar Component
+          else if (state.selectedContentType === 'progressBar' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.progressBarEditorOptions = { ...defaultProgressBarEditorOptions, ...parsed };
+              } catch (e) {
+                state.progressBarEditorOptions = defaultProgressBarEditorOptions;
+              }
+            } else if (column.progressBarEditorOptions) {
+              state.progressBarEditorOptions = { ...defaultProgressBarEditorOptions, ...column.progressBarEditorOptions };
+            } else {
+              state.progressBarEditorOptions = defaultProgressBarEditorOptions;
+            }
+          }
+          // Handle PromoCode Component
+          else if (state.selectedContentType === 'promoCode' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.promoCodeEditorOptions = { ...defaultPromoCodeEditorOptions, ...parsed };
+              } catch (e) {
+                state.promoCodeEditorOptions = defaultPromoCodeEditorOptions;
+              }
+            } else if (column.promoCodeEditorOptions) {
+              state.promoCodeEditorOptions = { ...defaultPromoCodeEditorOptions, ...column.promoCodeEditorOptions };
+            } else {
+              state.promoCodeEditorOptions = defaultPromoCodeEditorOptions;
+            }
+          }
+          // Handle Testimonial Component
+          else if (state.selectedContentType === 'testimonial' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.testimonialEditorOptions = { ...defaultTestimonialEditorOptions, ...parsed };
+              } catch (e) {
+                state.testimonialEditorOptions = defaultTestimonialEditorOptions;
+              }
+            } else if (column.testimonialEditorOptions) {
+              state.testimonialEditorOptions = { ...defaultTestimonialEditorOptions, ...column.testimonialEditorOptions };
+            } else {
+              state.testimonialEditorOptions = defaultTestimonialEditorOptions;
+            }
+          }
+          // Handle Navbar Component
+          else if (state.selectedContentType === 'navbar' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.navbarEditorOptions = { ...defaultNavbarEditorOptions, ...parsed };
+              } catch (e) {
+                state.navbarEditorOptions = defaultNavbarEditorOptions;
+              }
+            } else if (column.navbarEditorOptions) {
+              state.navbarEditorOptions = { ...defaultNavbarEditorOptions, ...column.navbarEditorOptions };
+            } else {
+              state.navbarEditorOptions = defaultNavbarEditorOptions;
+            }
+          }
+          // Handle Card Component
+          else if (state.selectedContentType === 'card' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.cardEditorOptions = { ...defaultCardEditorOptions, ...parsed };
+              } catch (e) {
+                state.cardEditorOptions = defaultCardEditorOptions;
+              }
+            } else if (column.cardEditorOptions) {
+              state.cardEditorOptions = { ...defaultCardEditorOptions, ...column.cardEditorOptions };
+            } else {
+              state.cardEditorOptions = defaultCardEditorOptions;
+            }
+          }
+          // Handle Alert Component
+          else if (state.selectedContentType === 'alert' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.alertEditorOptions = { ...defaultAlertEditorOptions, ...parsed };
+              } catch (e) {
+                state.alertEditorOptions = defaultAlertEditorOptions;
+              }
+            } else if (column.alertEditorOptions) {
+              state.alertEditorOptions = { ...defaultAlertEditorOptions, ...column.alertEditorOptions };
+            } else {
+              state.alertEditorOptions = defaultAlertEditorOptions;
+            }
+          }
+          // Handle Progress Component
+          else if (state.selectedContentType === 'progress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.progressEditorOptions = { ...defaultProgressEditorOptions, ...parsed };
+              } catch (e) {
+                state.progressEditorOptions = defaultProgressEditorOptions;
+              }
+            } else if (column.progressEditorOptions) {
+              state.progressEditorOptions = { ...defaultProgressEditorOptions, ...column.progressEditorOptions };
+            } else {
+              state.progressEditorOptions = defaultProgressEditorOptions;
+            }
+          }
+          // Handle Form Component
+          else if (state.selectedContentType === 'form' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.formEditorOptions = { ...defaultFormEditorOptions, ...parsed };
+              } catch (e) {
+                state.formEditorOptions = defaultFormEditorOptions;
+              }
+            } else if (column.formEditorOptions) {
+              state.formEditorOptions = { ...defaultFormEditorOptions, ...column.formEditorOptions };
+            } else {
+              state.formEditorOptions = defaultFormEditorOptions;
+            }
+          }
+          // Handle Survey Component
+          else if (state.selectedContentType === 'survey' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.surveyEditorOptions = { ...defaultSurveyEditorOptions, ...parsed };
+              } catch (e) {
+                state.surveyEditorOptions = defaultSurveyEditorOptions;
+              }
+            } else if (column.surveyEditorOptions) {
+              state.surveyEditorOptions = { ...defaultSurveyEditorOptions, ...column.surveyEditorOptions };
+            } else {
+              state.surveyEditorOptions = defaultSurveyEditorOptions;
+            }
+          }
+          // Handle Input Component
+          else if (state.selectedContentType === 'input' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.inputEditorOptions = { ...defaultInputEditorOptions, ...parsed };
+              } catch (e) {
+                state.inputEditorOptions = defaultInputEditorOptions;
+              }
+            } else if (column.inputEditorOptions) {
+              state.inputEditorOptions = { ...defaultInputEditorOptions, ...column.inputEditorOptions };
+            } else {
+              state.inputEditorOptions = defaultInputEditorOptions;
+            }
+          }
+          // Handle Textarea Component
+          else if (state.selectedContentType === 'textarea' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.textareaEditorOptions = { ...defaultTextareaEditorOptions, ...parsed };
+              } catch (e) {
+                state.textareaEditorOptions = defaultTextareaEditorOptions;
+              }
+            } else if (column.textareaEditorOptions) {
+              state.textareaEditorOptions = { ...defaultTextareaEditorOptions, ...column.textareaEditorOptions };
+            } else {
+              state.textareaEditorOptions = defaultTextareaEditorOptions;
+            }
+          }
+          // Handle Checkbox Component
+          else if (state.selectedContentType === 'checkbox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.checkboxEditorOptions = { ...defaultCheckboxEditorOptions, ...parsed };
+              } catch (e) {
+                state.checkboxEditorOptions = defaultCheckboxEditorOptions;
+              }
+            } else if (column.checkboxEditorOptions) {
+              state.checkboxEditorOptions = { ...defaultCheckboxEditorOptions, ...column.checkboxEditorOptions };
+            } else {
+              state.checkboxEditorOptions = defaultCheckboxEditorOptions;
+            }
+          }
+          // Handle Radio Component
+          else if (state.selectedContentType === 'radio' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.radioEditorOptions = { ...defaultRadioEditorOptions, ...parsed };
+              } catch (e) {
+                state.radioEditorOptions = defaultRadioEditorOptions;
+              }
+            } else if (column.radioEditorOptions) {
+              state.radioEditorOptions = { ...defaultRadioEditorOptions, ...column.radioEditorOptions };
+            } else {
+              state.radioEditorOptions = defaultRadioEditorOptions;
+            }
+          }
+          // Handle Label Component
+          else if (state.selectedContentType === 'label' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.labelEditorOptions = { ...defaultLabelEditorOptions, ...parsed };
+              } catch (e) {
+                state.labelEditorOptions = defaultLabelEditorOptions;
+              }
+            } else if (column.labelEditorOptions) {
+              state.labelEditorOptions = { ...defaultLabelEditorOptions, ...column.labelEditorOptions };
+            } else {
+              state.labelEditorOptions = defaultLabelEditorOptions;
+            }
+          }
+          // Handle ShippingAddress Component
+          else if (state.selectedContentType === 'shippingAddress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.shippingAddressEditorOptions = { ...defaultShippingAddressEditorOptions, ...parsed };
+              } catch (e) {
+                state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
+              }
+            } else if (column.shippingAddressEditorOptions) {
+              state.shippingAddressEditorOptions = { ...defaultShippingAddressEditorOptions, ...column.shippingAddressEditorOptions };
+            } else {
+              state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
+            }
+          }
+          // Handle BillingAddress Component
+          else if (state.selectedContentType === 'billingAddress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.billingAddressEditorOptions = { ...defaultBillingAddressEditorOptions, ...parsed };
+              } catch (e) {
+                state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
+              }
+            } else if (column.billingAddressEditorOptions) {
+              state.billingAddressEditorOptions = { ...defaultBillingAddressEditorOptions, ...column.billingAddressEditorOptions };
+            } else {
+              state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
+            }
+          }
+          // Handle OrderSubtotal Component
+          else if (state.selectedContentType === 'orderSubtotal' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.orderSubtotalEditorOptions = { ...defaultOrderSubtotalEditorOptions, ...parsed };
+              } catch (e) {
+                state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
+              }
+            } else if (column.orderSubtotalEditorOptions) {
+              state.orderSubtotalEditorOptions = { ...defaultOrderSubtotalEditorOptions, ...column.orderSubtotalEditorOptions };
+            } else {
+              state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
+            }
+          }
+          // Handle OrderTotal Component
+          else if (state.selectedContentType === 'orderTotal' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.orderTotalEditorOptions = { ...defaultOrderTotalEditorOptions, ...parsed };
+              } catch (e) {
+                state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
+              }
+            } else if (column.orderTotalEditorOptions) {
+              state.orderTotalEditorOptions = { ...defaultOrderTotalEditorOptions, ...column.orderTotalEditorOptions };
+            } else {
+              state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
+            }
+          }
+          // Handle ShippingMethod Component
+          else if (state.selectedContentType === 'shippingMethod' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.shippingMethodEditorOptions = { ...defaultShippingMethodEditorOptions, ...parsed };
+              } catch (e) {
+                state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
+              }
+            } else if (column.shippingMethodEditorOptions) {
+              state.shippingMethodEditorOptions = { ...defaultShippingMethodEditorOptions, ...column.shippingMethodEditorOptions };
+            } else {
+              state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
+            }
+          }
+          // Handle PaymentMethod Component
+          else if (state.selectedContentType === 'paymentMethod' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.paymentMethodEditorOptions = { ...defaultPaymentMethodEditorOptions, ...parsed };
+              } catch (e) {
+                state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
+              }
+            } else if (column.paymentMethodEditorOptions) {
+              state.paymentMethodEditorOptions = { ...defaultPaymentMethodEditorOptions, ...column.paymentMethodEditorOptions };
+            } else {
+              state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
+            }
+          }
+          // Handle CustomerNote Component
+          else if (state.selectedContentType === 'customerNote' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.customerNoteEditorOptions = { ...defaultCustomerNoteEditorOptions, ...parsed };
+              } catch (e) {
+                state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
+              }
+            } else if (column.customerNoteEditorOptions) {
+              state.customerNoteEditorOptions = { ...defaultCustomerNoteEditorOptions, ...column.customerNoteEditorOptions };
+            } else {
+              state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
+            }
+          }
+          // Handle LinkBox Component
+          else if (state.selectedContentType === 'linkBox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.linkBoxEditorOptions = { ...defaultLinkBoxEditorOptions, ...parsed };
+              } catch (e) {
+                state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
+              }
+            } else if (column.linkBoxEditorOptions) {
+              state.linkBoxEditorOptions = { ...defaultLinkBoxEditorOptions, ...column.linkBoxEditorOptions };
+            } else {
+              state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
+            }
+          }
+          // Handle ImageBox Component
+          else if (state.selectedContentType === 'imageBox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.imageBoxEditorOptions = { ...defaultImageBoxEditorOptions, ...parsed };
+              } catch (e) {
+                state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
+              }
+            } else if (column.imageBoxEditorOptions) {
+              state.imageBoxEditorOptions = { ...defaultImageBoxEditorOptions, ...column.imageBoxEditorOptions };
+            } else {
+              state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
+            }
+          }
+          else {
+            if (state.selectedContentType === 'link') {
+              state.linkEditorOptions = defaultLinkEditorOptions;
+            } else if (state.selectedContentType === 'icon') {
+              state.iconEditorOptions = defaultIconEditorOptions;
+            } else if (state.selectedContentType === 'socialIcons') {
+              state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
+            } else if (state.selectedContentType === 'button') {
+              state.buttonEditorOptions = defaultButtonEditorOptions;
+            } else if (state.selectedContentType === 'heading') {
+              state.headingEditorOptions = defaultHeadingEditorOptions;
+            } else if (state.selectedContentType === 'text') {
+              state.textEditorOptions = defaultTextEditorOptions;
+            } else if (state.selectedContentType === 'image') {
+              state.imageEditorOptions = defaultImageEditorOptions;
+            } else if (state.selectedContentType === 'divider') {
+              state.dividerEditorOptions = defaultDividerEditorOptions;
+            } else if (state.selectedContentType === 'spacer') {
+              state.spacerEditorOptions = defaultSpacerEditorOptions;
+            } else if (state.selectedContentType === 'section') {
+              state.sectionEditorOptions = defaultSectionEditorOptions;
+            } else if (state.selectedContentType === 'map') {
+              state.mapEditorOptions = defaultMapEditorOptions;
+            } else if (state.selectedContentType === 'row') {
+              state.rowEditorOptions = defaultRowEditorOptions;
+            } else if (state.selectedContentType === 'container') {
+              state.containerEditorOptions = defaultContainerEditorOptions;
+            } else if (state.selectedContentType === 'group') {
+              state.groupEditorOptions = defaultGroupEditorOptions;
+            } else if (state.selectedContentType === 'socialFollow') {
+              state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
+            } else if (state.selectedContentType === 'video') {
+              state.videoEditorOptions = defaultVideoEditorOptions;
+            } else if (state.selectedContentType === 'countdown') {
+              state.countdownEditorOptions = defaultCountdownEditorOptions;
+            } else if (state.selectedContentType === 'progressBar') {
+              state.progressBarEditorOptions = defaultProgressBarEditorOptions;
+            } else if (state.selectedContentType === 'promoCode') {
+              state.promoCodeEditorOptions = defaultPromoCodeEditorOptions;
+            } else if (state.selectedContentType === 'testimonial') {
+              state.testimonialEditorOptions = defaultTestimonialEditorOptions;
+            } else if (state.selectedContentType === 'navbar') {
+              state.navbarEditorOptions = defaultNavbarEditorOptions;
+            } else if (state.selectedContentType === 'card') {
+              state.cardEditorOptions = defaultCardEditorOptions;
+            } else if (state.selectedContentType === 'alert') {
+              state.alertEditorOptions = defaultAlertEditorOptions;
+            } else if (state.selectedContentType === 'progress') {
+              state.progressEditorOptions = defaultProgressEditorOptions;
+            } else if (state.selectedContentType === 'form') {
+              state.formEditorOptions = defaultFormEditorOptions;
+            } else if (state.selectedContentType === 'survey') {
+              state.surveyEditorOptions = defaultSurveyEditorOptions;
+            } else if (state.selectedContentType === 'input') {
+              state.inputEditorOptions = defaultInputEditorOptions;
+            } else if (state.selectedContentType === 'textarea') {
+              state.textareaEditorOptions = defaultTextareaEditorOptions;
+            } else if (state.selectedContentType === 'checkbox') {
+              state.checkboxEditorOptions = defaultCheckboxEditorOptions;
+            } else if (state.selectedContentType === 'radio') {
+              state.radioEditorOptions = defaultRadioEditorOptions;
+            } else if (state.selectedContentType === 'label') {
+              state.labelEditorOptions = defaultLabelEditorOptions;
+            } else if (state.selectedContentType === 'shippingAddress') {
+              state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
+            } else if (state.selectedContentType === 'billingAddress') {
+              state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
+            } else if (state.selectedContentType === 'orderSubtotal') {
+              state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
+            } else if (state.selectedContentType === 'orderTotal') {
+              state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
+            } else if (state.selectedContentType === 'shippingMethod') {
+              state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
+            } else if (state.selectedContentType === 'paymentMethod') {
+              state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
+            } else if (state.selectedContentType === 'customerNote') {
+              state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
+            } else if (state.selectedContentType === 'linkBox') {
+              state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
+            } else if (state.selectedContentType === 'imageBox') {
+              state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
+            } else if (state.selectedContentType === 'price') {
+              state.priceEditorOptions = defaultPriceEditorOptions;
+            }
+          }
+
         }
       }
     },
@@ -2482,9 +3208,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'imageBox') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'imageBox') {
           column.imageBoxEditorOptions = { ...column.imageBoxEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.imageBoxEditorOptions);
+          widget.contentData = JSON.stringify(column.imageBoxEditorOptions);
         }
       }
     },
@@ -2494,9 +3221,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'map') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'map') {
           column.mapEditorOptions = { ...column.mapEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.mapEditorOptions);
+          widget.contentData = JSON.stringify(column.mapEditorOptions);
         }
       }
     },
@@ -2506,9 +3234,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'icon') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'icon') {
           column.iconEditorOptions = { ...column.iconEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.iconEditorOptions);
+          widget.contentData = JSON.stringify(column.iconEditorOptions);
         }
       }
     },
@@ -2569,9 +3298,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'socialIcons') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'socialIcons') {
           column.socialIconsEditorOptions = { ...column.socialIconsEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.socialIconsEditorOptions);
+          widget.contentData = JSON.stringify(column.socialIconsEditorOptions);
         }
       }
     },
@@ -2627,9 +3357,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'divider') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'divider') {
           column.dividerEditorOptions = { ...column.dividerEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.dividerEditorOptions);
+          widget.contentData = JSON.stringify(column.dividerEditorOptions);
         }
       }
     },
@@ -2660,9 +3391,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'image') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'image') {
           column.imageEditorOptions = { ...column.imageEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.imageEditorOptions);
+          widget.contentData = JSON.stringify(column.imageEditorOptions);
         }
       }
     },
@@ -2692,9 +3424,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'row') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'row') {
           column.rowEditorOptions = { ...column.rowEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.rowEditorOptions);
+          widget.contentData = JSON.stringify(column.rowEditorOptions);
         }
       }
     },
@@ -2704,9 +3437,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'container') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'container') {
           column.containerEditorOptions = { ...column.containerEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.containerEditorOptions);
+          widget.contentData = JSON.stringify(column.containerEditorOptions);
         }
       }
     },
@@ -2716,9 +3450,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'group') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'group') {
           column.groupEditorOptions = { ...column.groupEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.groupEditorOptions);
+          widget.contentData = JSON.stringify(column.groupEditorOptions);
         }
       }
     },
@@ -2729,9 +3464,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'socialFollow') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'socialFollow') {
           column.socialFollowEditorOptions = { ...column.socialFollowEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.socialFollowEditorOptions);
+          widget.contentData = JSON.stringify(column.socialFollowEditorOptions);
         }
       }
     },
@@ -2741,9 +3477,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'video') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'video') {
           column.videoEditorOptions = { ...column.videoEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.videoEditorOptions);
+          widget.contentData = JSON.stringify(column.videoEditorOptions);
         }
       }
     },
@@ -2766,9 +3503,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'countdown') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'countdown') {
           column.countdownEditorOptions = { ...column.countdownEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.countdownEditorOptions);
+          widget.contentData = JSON.stringify(column.countdownEditorOptions);
         }
       }
     },
@@ -2778,9 +3516,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'progressBar') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'progressBar') {
           column.progressBarEditorOptions = { ...column.progressBarEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.progressBarEditorOptions);
+          widget.contentData = JSON.stringify(column.progressBarEditorOptions);
         }
       }
     },
@@ -2803,9 +3542,10 @@ const workspaceSlice = createSlice({
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
-        if (column?.contentType === 'promoCode') {
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+        if (widget && widget.contentType === 'promoCode') {
           column.promoCodeEditorOptions = { ...column.promoCodeEditorOptions, ...action.payload };
-          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.promoCodeEditorOptions);
+          widget.contentData = JSON.stringify(column.promoCodeEditorOptions);
         }
       }
     },

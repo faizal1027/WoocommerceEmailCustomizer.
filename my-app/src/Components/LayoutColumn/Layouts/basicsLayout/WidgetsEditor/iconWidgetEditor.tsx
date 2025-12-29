@@ -28,7 +28,11 @@ const IconWidgetEditor = () => {
   const handleChange = (field: keyof typeof iconEditorOptions) => (
     e: any
   ) => {
-    dispatch(updateIconEditorOptions({ [field]: e.target.value }));
+    let value = e.target ? e.target.value : e;
+    if (field === 'size') {
+      value = Number(value);
+    }
+    dispatch(updateIconEditorOptions({ [field]: value }));
   };
 
   const handleColorChange = (newColor: any) => {
@@ -140,6 +144,11 @@ const IconWidgetEditor = () => {
                 <Select
                   value={iconEditorOptions.iconType || 'star'}
                   onChange={handleChange('iconType')}
+                  MenuProps={{
+                    disablePortal: true,
+                    sx: { zIndex: 1300001 },
+                    style: { zIndex: 1300001 }
+                  }}
                 >
                   {iconTypes.map((icon) => (
                     <MenuItem key={icon} value={icon}>
@@ -174,7 +183,8 @@ const IconWidgetEditor = () => {
                     open={openColorPicker}
                     anchorEl={anchorEl}
                     onClose={handleColorClose}
-                    sx={{ zIndex: 99999 }}
+                    sx={{ zIndex: 1300001 }}
+                    disablePortal={true}
                     anchorOrigin={{
                       vertical: "bottom",
                       horizontal: "left",

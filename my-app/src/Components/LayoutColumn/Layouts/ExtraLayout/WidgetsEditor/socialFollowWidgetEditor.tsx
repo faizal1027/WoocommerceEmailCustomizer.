@@ -52,7 +52,11 @@ const SocialFollowWidgetEditor = () => {
   const handleChange = (field: string) => (
     e: any
   ) => {
-    dispatch(updateSocialFollowEditorOptions({ [field]: e.target.value }));
+    let value = e.target.value;
+    if (field === 'iconSize' || field === 'spacing') {
+      value = Number(value);
+    }
+    dispatch(updateSocialFollowEditorOptions({ [field]: value }));
   };
 
   const handleColorChange = (newColor: any) => {
