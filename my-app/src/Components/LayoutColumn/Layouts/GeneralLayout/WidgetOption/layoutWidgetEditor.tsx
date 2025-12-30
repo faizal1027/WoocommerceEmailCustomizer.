@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ColorPicker from "../../../../utils/ColorPicker";
 import {
   Box, Typography, TextField,
   Select, MenuItem, FormControl,
@@ -9,7 +10,6 @@ import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-import { ChromePicker } from "react-color";
 import { useDispatch, useSelector } from "react-redux";
 import {
   closeEditor, setSelectedBlockId, updateSelectedColumnIndex,
@@ -23,11 +23,6 @@ import {
 import { RootState } from "../../../../../Store/store";
 
 const LayoutEditorWidget = () => {
-  const [showBgPicker, setShowBgPicker] = useState(false);
-  const [showBorderTopPicker, setShowBorderTopPicker] = useState(false);
-  const [showBorderBottomPicker, setShowBorderBottomPicker] = useState(false);
-  const [showBorderLeftPicker, setShowBorderLeftPicker] = useState(false);
-  const [showBorderRightPicker, setShowBorderRightPicker] = useState(false);
   const dispatch = useDispatch();
 
   const selectedBlockForEditor = useSelector(
@@ -85,14 +80,6 @@ const LayoutEditorWidget = () => {
     gap: "8px",
   };
 
-  const colorSwatchStyle = (color: string) => ({
-    width: 32,
-    height: 32,
-    borderRadius: "4px",
-    backgroundColor: color,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
   const isEditorEnabled = !!selectedBlockForEditor;
   const numberOfColumns = selectedBlock?.columns.length || 0;
 
@@ -172,31 +159,17 @@ const LayoutEditorWidget = () => {
 
           {isColumnSelected && currentBgColor && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Background Color
-              </Typography>
-              <ClickAwayListener onClickAway={() => setShowBgPicker(false)}>
-                <div>
-                  <Box
-                    sx={colorSwatchStyle(currentBgColor)}
-                    onClick={() => setShowBgPicker((prev) => !prev)}
-                  />
-                  {showBgPicker && (
-                    <Box sx={{ position: "absolute", zIndex: 2, mt: 1 }}>
-                      <ChromePicker
-                        color={currentBgColor}
-                        onChange={(color) =>
-                          dispatchStyleUpdate(
-                            () => { },
-                            updateColumnBgColor,
-                            { blockId: selectedBlockForEditor!, color: color.hex }
-                          )
-                        }
-                      />
-                    </Box>
-                  )}
-                </div>
-              </ClickAwayListener>
+              <ColorPicker
+                label="Background Color"
+                value={currentBgColor}
+                onChange={(color) =>
+                  dispatchStyleUpdate(
+                    () => { },
+                    updateColumnBgColor,
+                    { blockId: selectedBlockForEditor!, color: color }
+                  )
+                }
+              />
             </Box>
           )}
 
@@ -258,25 +231,17 @@ const LayoutEditorWidget = () => {
                       type="number"
                       sx={textFieldStyle}
                     />
-                    <ClickAwayListener onClickAway={() => setShowBorderTopPicker(false)}>
-                      <div>
-                        <Box sx={colorSwatchStyle(currentBorderTopColor || "#000000")} onClick={() => setShowBorderTopPicker((prev) => !prev)} />
-                        {showBorderTopPicker && (
-                          <Box sx={{ position: "absolute", zIndex: 2, mt: 1 }}>
-                            <ChromePicker
-                              color={currentBorderTopColor || "#000000"}
-                              onChange={(color) =>
-                                dispatchStyleUpdate(
-                                  () => { },
-                                  updateColumnBorderTopColor,
-                                  { blockId: selectedBlockForEditor!, color: color.hex }
-                                )
-                              }
-                            />
-                          </Box>
-                        )}
-                      </div>
-                    </ClickAwayListener>
+                    <ColorPicker
+                      label="Top Color"
+                      value={currentBorderTopColor || "#000000"}
+                      onChange={(color) =>
+                        dispatchStyleUpdate(
+                          () => { },
+                          updateColumnBorderTopColor,
+                          { blockId: selectedBlockForEditor!, color: color }
+                        )
+                      }
+                    />
                   </Box>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Bottom</Typography>
@@ -299,25 +264,17 @@ const LayoutEditorWidget = () => {
                       type="number"
                       sx={textFieldStyle}
                     />
-                    <ClickAwayListener onClickAway={() => setShowBorderBottomPicker(false)}>
-                      <div>
-                        <Box sx={colorSwatchStyle(currentBorderBottomColor || "#000000")} onClick={() => setShowBorderBottomPicker((prev) => !prev)} />
-                        {showBorderBottomPicker && (
-                          <Box sx={{ position: "absolute", zIndex: 2, mt: 1 }}>
-                            <ChromePicker
-                              color={currentBorderBottomColor || "#000000"}
-                              onChange={(color) =>
-                                dispatchStyleUpdate(
-                                  () => { },
-                                  updateColumnBorderBottomColor,
-                                  { blockId: selectedBlockForEditor!, color: color.hex }
-                                )
-                              }
-                            />
-                          </Box>
-                        )}
-                      </div>
-                    </ClickAwayListener>
+                    <ColorPicker
+                      label="Bottom Color"
+                      value={currentBorderBottomColor || "#000000"}
+                      onChange={(color) =>
+                        dispatchStyleUpdate(
+                          () => { },
+                          updateColumnBorderBottomColor,
+                          { blockId: selectedBlockForEditor!, color: color }
+                        )
+                      }
+                    />
                   </Box>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Left</Typography>
@@ -339,25 +296,17 @@ const LayoutEditorWidget = () => {
                       type="number"
                       sx={textFieldStyle}
                     />
-                    <ClickAwayListener onClickAway={() => setShowBorderLeftPicker(false)}>
-                      <div>
-                        <Box sx={colorSwatchStyle(currentBorderLeftColor || "#000000")} onClick={() => setShowBorderLeftPicker((prev) => !prev)} />
-                        {showBorderLeftPicker && (
-                          <Box sx={{ position: "absolute", zIndex: 2, mt: 1 }}>
-                            <ChromePicker
-                              color={currentBorderLeftColor || "#000000"}
-                              onChange={(color) =>
-                                dispatchStyleUpdate(
-                                  () => { },
-                                  updateColumnBorderLeftColor,
-                                  { blockId: selectedBlockForEditor!, color: color.hex }
-                                )
-                              }
-                            />
-                          </Box>
-                        )}
-                      </div>
-                    </ClickAwayListener>
+                    <ColorPicker
+                      label="Left Color"
+                      value={currentBorderLeftColor || "#000000"}
+                      onChange={(color) =>
+                        dispatchStyleUpdate(
+                          () => { },
+                          updateColumnBorderLeftColor,
+                          { blockId: selectedBlockForEditor!, color: color }
+                        )
+                      }
+                    />
                   </Box>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Right</Typography>
@@ -379,25 +328,17 @@ const LayoutEditorWidget = () => {
                       type="number"
                       sx={textFieldStyle}
                     />
-                    <ClickAwayListener onClickAway={() => setShowBorderRightPicker(false)}>
-                      <div>
-                        <Box sx={colorSwatchStyle(currentBorderRightColor || "#000000")} onClick={() => setShowBorderRightPicker((prev) => !prev)} />
-                        {showBorderRightPicker && (
-                          <Box sx={{ position: "absolute", zIndex: 2, mt: 1 }}>
-                            <ChromePicker
-                              color={currentBorderRightColor || "#000000"}
-                              onChange={(color) =>
-                                dispatchStyleUpdate(
-                                  () => { },
-                                  updateColumnBorderRightColor,
-                                  { blockId: selectedBlockForEditor!, color: color.hex }
-                                )
-                              }
-                            />
-                          </Box>
-                        )}
-                      </div>
-                    </ClickAwayListener>
+                    <ColorPicker
+                      label="Right Color"
+                      value={currentBorderRightColor || "#000000"}
+                      onChange={(color) =>
+                        dispatchStyleUpdate(
+                          () => { },
+                          updateColumnBorderRightColor,
+                          { blockId: selectedBlockForEditor!, color: color }
+                        )
+                      }
+                    />
                   </Box>
                 </Box>
               </Box>

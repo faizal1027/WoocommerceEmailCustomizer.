@@ -5,7 +5,7 @@ import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateIconEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const IconWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -13,17 +13,6 @@ const IconWidgetEditor = () => {
   const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
     (state: RootState) => state.workspace
   );
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const openColorPicker = Boolean(anchorEl);
-
-  const handleColorClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleColorClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleChange = (field: keyof typeof iconEditorOptions) => (
     e: any
@@ -35,8 +24,8 @@ const IconWidgetEditor = () => {
     dispatch(updateIconEditorOptions({ [field]: value }));
   };
 
-  const handleColorChange = (newColor: any) => {
-    dispatch(updateIconEditorOptions({ color: newColor.hex }));
+  const handleColorChange = (newColor: string) => {
+    dispatch(updateIconEditorOptions({ color: newColor }));
   };
 
   const handleCloseEditor = () => {
@@ -54,15 +43,6 @@ const IconWidgetEditor = () => {
       );
     }
   };
-
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   const iconTypes = [
     'star', 'heart', 'check', 'info', 'warning', 'error',
@@ -164,42 +144,11 @@ const IconWidgetEditor = () => {
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Color
                 </Typography>
-                <Box position="relative">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      border: '1px solid #ccc',
-                      borderRadius: 1,
-                      p: '4px 8px',
-                      height: '40px'
-                    }}
-                    onClick={handleColorClick}
-                  >
-                    <Box sx={colorSwatchStyle(iconEditorOptions.color || '#000000')} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{iconEditorOptions.color || '#000000'}</Typography>
-                  </Box>
-                  <Popover
-                    open={openColorPicker}
-                    anchorEl={anchorEl}
-                    onClose={handleColorClose}
-                    sx={{ zIndex: 1300001 }}
-                    disablePortal={true}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "left",
-                    }}
-                  >
-                    <ChromePicker
-                      color={iconEditorOptions.color || '#000000'}
-                      onChange={handleColorChange}
-                    />
-                  </Popover>
-                </Box>
+                <ColorPicker
+                  label="Color"
+                  value={iconEditorOptions.color || '#000000'}
+                  onChange={handleColorChange}
+                />
               </Box>
 
               <Box>

@@ -434,10 +434,6 @@ const Block = ({
       // Time to actually perform the action
       dispatch(reorderBlocks({ sourceId: item.id, targetId: block.id }));
 
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.index = hoverIndex;
     },
     collect: (monitor) => ({
@@ -633,7 +629,6 @@ const ColumnDropTarget = ({
           border: { width: 1, style: 'solid', color: '#ddd', radius: 0 }
         });
       } else {
-        // For new widgets, send empty JSON or default data
         contentDataToSend = JSON.stringify({});
       }
 

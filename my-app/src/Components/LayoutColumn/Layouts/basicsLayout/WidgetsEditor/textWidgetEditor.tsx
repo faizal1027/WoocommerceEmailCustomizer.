@@ -14,7 +14,6 @@ import {
   Divider,
   InputLabel,
 } from "@mui/material";
-import { ChromePicker } from "react-color";
 import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
 import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
 import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
@@ -33,6 +32,7 @@ import {
 // CKEditor is now loaded via CDN in WordPress to avoid bundling conflicts
 // No imports needed here for ClassicEditor or plugins
 import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const TextWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -89,8 +89,6 @@ const TextWidgetEditor = () => {
   } = textEditorOptions;
 
   const [editorContent, setEditorContent] = useState(content);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
   const [editorInstance, setEditorInstance] = useState<any>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializingRef = useRef(false);
@@ -200,14 +198,6 @@ const TextWidgetEditor = () => {
     debouncedUpdate({ content: data });
   };
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor || 'transparent',
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   return (
     <Box p={2}>
@@ -292,39 +282,17 @@ const TextWidgetEditor = () => {
                   fullWidth
                 />
               </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Text Color
-                </Typography>
-                <Box position="relative">
-                  <Box sx={colorSwatchStyle(color)} onClick={() => setShowColorPicker(!showColorPicker)} />
-                  {showColorPicker && (
-                    <Box sx={{
-                      position: "absolute",
-                      zIndex: 1000,
-                      mt: 1,
-                      right: 0,
-                      backgroundColor: "#fff",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                      borderRadius: 1,
-                      overflow: 'hidden'
-                    }}>
-                      <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowColorPicker(false)}
-                          sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                        >
-                          <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Box>
-                      <ChromePicker
-                        color={color}
-                        onChange={(newColor) => debouncedUpdate({ color: newColor.hex })}
-                      />
-                    </Box>
-                  )}
-                </Box>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <ColorPicker
+                  label="Text Color"
+                  value={color}
+                  onChange={(newColor) => debouncedUpdate({ color: newColor })}
+                />
+                <ColorPicker
+                  label="Background Color"
+                  value={backgroundColor}
+                  onChange={(newColor) => debouncedUpdate({ backgroundColor: newColor })}
+                />
               </Box>
             </Box>
 
@@ -355,40 +323,6 @@ const TextWidgetEditor = () => {
               </Box>
             </Box>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Background Color
-              </Typography>
-              <Box position="relative">
-                <Box sx={colorSwatchStyle(backgroundColor)} onClick={() => setShowBgColorPicker(!showBgColorPicker)} />
-                {showBgColorPicker && (
-                  <Box sx={{
-                    position: "absolute",
-                    zIndex: 1000,
-                    mt: 1,
-                    right: 0,
-                    backgroundColor: "#fff",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                    borderRadius: 1,
-                    overflow: 'hidden'
-                  }}>
-                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowBgColorPicker(false)}
-                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                      >
-                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                    <ChromePicker
-                      color={backgroundColor || 'transparent'}
-                      onChange={(newColor) => debouncedUpdate({ backgroundColor: newColor.hex })}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
 
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

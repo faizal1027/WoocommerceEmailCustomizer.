@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const SelectWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -17,18 +17,9 @@ const SelectWidgetEditor = () => {
   );
 
   const [newOption, setNewOption] = useState({ label: '', value: '' });
-  const [anchorEl, setAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
 
-  const handleColorClick = (field: string) => (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl({ ...anchorEl, [field]: event.currentTarget });
-  };
-
-  const handleColorClose = (field: string) => () => {
-    setAnchorEl({ ...anchorEl, [field]: null });
-  };
-
-  const handleColorChange = (field: string) => (newColor: any) => {
-    dispatch(updateSelectEditorOptions({ [field]: newColor.hex }));
+  const handleColorChange = (field: string) => (newColor: string) => {
+    dispatch(updateSelectEditorOptions({ [field]: newColor }));
   };
 
   const handleAddOption = () => {
@@ -52,15 +43,6 @@ const SelectWidgetEditor = () => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     dispatch(updateSelectEditorOptions({ [field]: value }));
   };
-
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   const handleCloseEditor = () => {
     dispatch(closeEditor());
@@ -272,125 +254,26 @@ const SelectWidgetEditor = () => {
           </Typography>
           <Stack spacing={2}>
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Font Color
-                </Typography>
-                <Box position="relative">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      border: '1px solid #ccc',
-                      borderRadius: 1,
-                      p: '4px 8px',
-                      height: '40px'
-                    }}
-                    onClick={handleColorClick('color')}
-                  >
-                    <Box sx={colorSwatchStyle(selectEditorOptions.color || '#000000')} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{selectEditorOptions.color || '#000000'}</Typography>
-                  </Box>
-                  <Tooltip title="Close Picker" placement="top">
-                    <Box
-                      component="span"
-                      sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        display: anchorEl['color'] ? 'block' : 'none'
-                      }}
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={handleColorClose('color')}
-                        sx={{ p: 0.5 }}
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Tooltip>
-                  {anchorEl['color'] && (
-                    <Box sx={{ position: "absolute", zIndex: 10, mt: 1, left: 0 }}>
-                      <ChromePicker
-                        color={selectEditorOptions.color || '#000000'}
-                        onChange={handleColorChange('color')}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Background Color
-                </Typography>
-                <Box position="relative">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      border: '1px solid #ccc',
-                      borderRadius: 1,
-                      p: '4px 8px',
-                      height: '40px'
-                    }}
-                    onClick={handleColorClick('backgroundColor')}
-                  >
-                    <Box sx={colorSwatchStyle(selectEditorOptions.backgroundColor || '#ffffff')} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{selectEditorOptions.backgroundColor || '#ffffff'}</Typography>
-                  </Box>
-                  {anchorEl['backgroundColor'] && (
-                    <Box sx={{ position: "absolute", zIndex: 10, mt: 1, left: 0 }}>
-                      <Box display="flex" justifyContent="flex-end" mb={0.5} sx={{ backgroundColor: 'white', border: '1px solid #ccc', borderBottom: 'none' }}>
-                        <IconButton size="small" onClick={handleColorClose('backgroundColor')}>
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                      <ChromePicker
-                        color={selectEditorOptions.backgroundColor || '#ffffff'}
-                        onChange={handleColorChange('backgroundColor')}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
+              <ColorPicker
+                label="Font Color"
+                value={selectEditorOptions.color || '#000000'}
+                onChange={handleColorChange('color')}
+              />
+
+              <ColorPicker
+                label="Background Color"
+                value={selectEditorOptions.backgroundColor || '#ffffff'}
+                onChange={handleColorChange('backgroundColor')}
+              />
+
             </Box>
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Border Color
-                </Typography>
-                <Box position="relative">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      border: '1px solid #ccc',
-                      borderRadius: 1,
-                      p: '4px 8px',
-                      height: '40px'
-                    }}
-                    onClick={handleColorClick('borderColor')}
-                  >
-                    <Box sx={colorSwatchStyle(selectEditorOptions.borderColor || '#cccccc')} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{selectEditorOptions.borderColor || '#cccccc'}</Typography>
-                  </Box>
-                  {anchorEl['borderColor'] && (
-                    <Box sx={{ position: "absolute", zIndex: 10, mt: 1, left: 0 }}>
-                      <Box display="flex" justifyContent="flex-end" mb={0.5} sx={{ backgroundColor: 'white', border: '1px solid #ccc', borderBottom: 'none' }}>
-                        <IconButton size="small" onClick={handleColorClose('borderColor')}>
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                      <ChromePicker
-                        color={selectEditorOptions.borderColor || '#cccccc'}
-                        onChange={handleColorChange('borderColor')}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
+              <ColorPicker
+                label="Border Color"
+                value={selectEditorOptions.borderColor || '#cccccc'}
+                onChange={handleColorChange('borderColor')}
+              />
+
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Border Radius

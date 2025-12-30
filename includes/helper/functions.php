@@ -74,7 +74,22 @@ class WETC_Email_Handler {
         add_action('woocommerce_new_customer_note', [$this, 'customer_note_email'], 10, 1);
         add_action('woocommerce_email_customer_invoice', [$this, 'customer_invoice_email'], 10, 1);
         add_action('woocommerce_after_resend_order_email', [$this, 'handle_resend_notification'], 10, 2);
-        add_action('woocommerce_before_resend_order_emails', [$this, 'handle_resend_notification'], 10, 2);
+
+        /* // Commented out to prevent double emails now that standard hooks are confirmed working
+        add_action('woocommerce_order_action_send_email_customer_processing_order', function($order) { 
+            $this->processing_order_email($order->get_id(), true); 
+        });
+        add_action('woocommerce_order_action_send_email_customer_completed_order', function($order) { 
+            $this->completed_order_email($order->get_id(), true); 
+        });
+        add_action('woocommerce_order_action_send_email_customer_invoice', function($order) { 
+            $this->customer_invoice_email($order->get_id(), true); 
+        });
+        add_action('woocommerce_order_action_resend_order_notification', function($order) { 
+            $this->new_order_admin_email($order->get_id(), true); 
+        });
+        */
+
         add_filter('retrieve_password_message', [$this, 'reset_password_email'], 10, 4);
         add_action('init', [$this, 'custom_email_open_tracker']);
         add_action('init', [$this, 'custom_email_click_tracker']);
@@ -125,32 +140,31 @@ public static function get_instance() {
         return null;
     }
 
-    private function send_email_for_type($order_id, $content_type, $default_subject = '', $to_admin = false, $extra_replacements = []) {
+    private function send_email_for_type($order_id, $content_type, $default_subject = '', $to_admin = false, $extra_replacements = [], $force = false) {
         $order = wc_get_order($order_id);
-        if (!$order) {
-            self::log("WETC: Invalid order ID $order_id for type $content_type");
-            error_log("WETC: Invalid order ID $order_id for type $content_type");
+        
+        if (!$order && $order_id > 0 && strpos($content_type, 'new_user') === false) {
             return;
         }
 
-        // --- Prevent Duplicate Emails ---
-        if ($order_id > 0) {
+        // --- Prevent Duplicate Emails (unless forced) ---
+        if ($order_id > 0 && !$force && $order) {
             $sent_key = '_wetc_sent_' . $content_type;
             if ($order->get_meta($sent_key)) {
-                self::log("WETC: Skipping $content_type for #$order_id (already sent/meta exists: $sent_key)");
                 return;
             }
         }
         
         $template = $this->get_active_template_for_type($content_type);
 
-        if (!$template) {
-            self::log("WETC: No template found for $content_type");
+        if (!$template || empty($content_type)) {
             return;
         }
 
-        // Only mark as sent if template found
-        if ($order_id > 0) {
+        $sent_key = '_wetc_sent_' . $content_type;
+
+        // Only mark as sent if template found and we have a valid key
+        if ($order_id > 0 && !empty($sent_key)) {
             $order->update_meta_data($sent_key, 'yes');
             $order->save();
         }
@@ -200,15 +214,13 @@ public static function get_instance() {
             $to = $order->get_billing_email();
         }
 
+        // Send Email
         $headers = ['Content-Type: text/html; charset=UTF-8'];
-        self::log("WETC: Attempting to send $content_type email to $to for order #$order_id...");
-        $mail_sent = wp_mail($to, $subject, $body, $headers);
+        $sent = wp_mail($to, $subject, $body, $headers);
 
-        if ($mail_sent) {
-            self::log("WETC: Email SENT successfully for #$order_id");
+        if ($sent) {
             $this->log_analytics($template_id);
         } else {
-            self::log("WETC: Email SEND FAILED for #$order_id");
             error_log("WETC: Failed sending $content_type to $to for order #$order_id");
         }
 
@@ -508,9 +520,7 @@ public static function get_instance() {
 
         // Execute Replacements with Notification Logic
         foreach ($replacements as $placeholder => $value) {
-            // We only replace if the placeholder exists in the body to save processing? 
-            // str_replace is fast, but we need to check $value for notification.
-            // But we only notify if the body *actually contains* the placeholder and the value is missing.
+            // Process placeholders if they exist in the body
             
             if (strpos($body, $placeholder) !== false) {
                  $replacement_value = $safe_replace($placeholder, $value);
@@ -518,18 +528,14 @@ public static function get_instance() {
             }
         }
         
-        // Handling Related Products Placeholders that might NOT have data (e.g. {{product_name_4}} when only 2 exist)
-        // We should check for any remaining {{product_...}} placeholders and notify/clear them?
-        // The user said: "if any data missed it shows placeholder & notify". 
-        // So if {{product_name_4}} is in the body but we didn't have data for it, it wasn't in our $replacements array.
-        // We should detect standard related product placeholders.
+        // Check for missing related product data
         
         for ($i=1; $i<=4; $i++) {
             $prefixes = ["{{product_name_$i}}", "{{product_price_$i}}"];
             foreach ($prefixes as $ph) {
                  if (strpos($body, $ph) !== false && !isset($related_products_data[$ph])) {
                       // Found a placeholder but no data was fetched for it
-                      error_log("WETC Missing Data Notification: Value for placeholder '{$ph}' is missing (no related product found).");
+                      error_log("WETC: Missing data for placeholder '{$ph}'");
                       // It remains in body, satisfying "shows placeholder".
                  }
             }
@@ -543,16 +549,16 @@ public static function get_instance() {
 //processing order to admin
   
 //processing order to admin
-public function processing_order_admin($order_id) {
-    $this->send_email_for_type($order_id, 'processing_order_admin', 'New Customer Order - Processing', true);
+public function processing_order_admin($order_id, $force = false) {
+    $this->send_email_for_type($order_id, 'processing_order_admin', 'New Customer Order - Processing', true, [], $force);
 }
 
 
 //processing order to customer
 
 //processing order to customer
-public function processing_order_email($order_id) {
-    $this->send_email_for_type($order_id, 'processing_order_customer', 'Your Order is Processing', false);
+public function processing_order_email($order_id, $force = false) {
+    $this->send_email_for_type($order_id, 'processing_order_customer', 'Your Order is Processing', false, [], $force);
 }
 
 
@@ -570,7 +576,7 @@ public function failed_order_email_admin($order_id) {
 
 
 //refunded customer
-public function refunded_order_email($order_id, $refund_id = null) {
+public function refunded_order_email($order_id, $refund_id = null, $force = false) {
     $extra = [];
     if ($refund_id) {
         $refund = wc_get_refund($refund_id);
@@ -581,16 +587,16 @@ public function refunded_order_email($order_id, $refund_id = null) {
             ];
         }
     }
-    $this->send_email_for_type($order_id, 'refunded_order_customer', 'Order Refunded', false, $extra);
+    $this->send_email_for_type($order_id, 'refunded_order_customer', 'Order Refunded', false, $extra, $force);
     
     // Also trigger admin email from here to ensure it uses the same data
-    $this->refunded_order_email_admin($order_id, $refund_id);
+    $this->refunded_order_email_admin($order_id, $refund_id, $force);
 }
 
 //refunded customer admin
-public function refunded_order_email_admin($order_id, $refund_id = null) {
+public function refunded_order_email_admin($order_id, $refund_id = null, $force = false) {
     static $last_refund_sent = null;
-    if ($last_refund_sent === $refund_id && $refund_id !== null) return;
+    if ($last_refund_sent === $refund_id && $refund_id !== null && !$force) return;
     $last_refund_sent = $refund_id;
 
     $extra = [];
@@ -603,14 +609,14 @@ public function refunded_order_email_admin($order_id, $refund_id = null) {
             ];
         }
     }
-    $this->send_email_for_type($order_id, 'refunded_order_admin', 'Order Refunded (Admin)', true, $extra);
+    $this->send_email_for_type($order_id, 'refunded_order_admin', 'Order Refunded (Admin)', true, $extra, $force);
 }
 
 //cancelled_order
 public function cancelled_order_email($order_id) {
     $this->send_email_for_type($order_id, 'cancelled_order_customer', 'Order Cancelled', false);
 }
-//cancelled_order_admin - was missing in view but likely exists or should exist
+//cancelled_order_admin
 public function cancelled_order_email_admin($order_id) {
     $this->send_email_for_type($order_id, 'cancelled_order_admin', 'Order Cancelled (Admin)', true);
 }
@@ -624,14 +630,14 @@ public function on_hold_order_email($order_id) {
 
 //Completed Order Template
 
-public function completed_order_email($order_id) {
-    $this->send_email_for_type($order_id, 'completed_order_customer', 'Your Order is Complete', false);
+public function completed_order_email($order_id, $force = false) {
+    $this->send_email_for_type($order_id, 'completed_order_customer', 'Your Order is Complete', false, [], $force);
 }
 
 //new order admin email
 
-public function new_order_admin_email($order_id) {
-    $this->send_email_for_type($order_id, 'new_order_admin', 'New Customer Order', true);
+public function new_order_admin_email($order_id, $force = false) {
+    $this->send_email_for_type($order_id, 'new_order_admin', 'New Customer Order', true, [], $force);
 }
 
 
@@ -665,7 +671,6 @@ public function new_user_registration_email_admin($order_id) {
     $this->send_email_for_type($order_id, 'new_user_registration_admin', 'New User Registered', true);
 }
 
-////////////////////////////////////////////change///////////////////////////////////////////////////////////
 
 //change
 public function customer_note_email($args) {
@@ -675,9 +680,9 @@ public function customer_note_email($args) {
     }
 }
 
-public function customer_invoice_email($order) {
+public function customer_invoice_email($order, $force = false) {
     $order_id = ($order instanceof \WC_Order) ? $order->get_id() : $order;
-    $this->send_email_for_type($order_id, 'customer_invoice', 'Invoice for Your Order', false);
+    $this->send_email_for_type($order_id, 'customer_invoice', 'Invoice for Your Order', false, [], $force);
 }
 
 
@@ -707,8 +712,7 @@ public function reset_password_email_admin($message, $key, $user_login, $user_da
     $this->send_email_for_type(0, 'admin_password_reset', 'Password Reset Request (Admin)', true, $extra_replacements);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//
 public function custom_email_open_tracker() {
 
     if (isset($_GET['email-tracker']) && $_GET['email-tracker'] == '1' && isset($_GET['order_id'])) {
@@ -816,23 +820,22 @@ public function custom_email_open_tracker() {
 
     public function handle_resend_notification($order, $email_id) {
         $order_id = $order->get_id();
-        error_log("WETC Hook: handle_resend_notification triggered for #$order_id (Email: $email_id)");
         
         switch ($email_id) {
             case 'new_order':
-                $this->new_order_admin_email($order_id);
+                $this->new_order_admin_email($order_id, true);
                 break;
             case 'customer_processing_order':
-                $this->processing_order_email($order_id);
+                $this->processing_order_email($order_id, true);
                 break;
             case 'customer_completed_order':
-                $this->completed_order_email($order_id);
+                $this->completed_order_email($order_id, true);
                 break;
             case 'customer_refunded_order':
-                $this->refunded_order_email($order_id);
+                $this->refunded_order_email($order_id, null, true);
                 break;
             case 'customer_invoice':
-                $this->customer_invoice_email($order_id);
+                $this->customer_invoice_email($order_id, true);
                 break;
         }
     }

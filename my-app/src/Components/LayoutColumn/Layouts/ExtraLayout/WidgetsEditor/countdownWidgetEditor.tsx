@@ -20,7 +20,7 @@ import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateCountdownEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const CountdownWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -28,9 +28,6 @@ const CountdownWidgetEditor = () => {
   const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
     (state: RootState) => state.workspace
   );
-
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
-  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
 
   // Initialize targetDate from countdownEditorOptions
   const getInitialDate = () => {
@@ -79,8 +76,8 @@ const CountdownWidgetEditor = () => {
     }
   };
 
-  const handleColorChange = (field: string, newColor: any) => {
-    dispatch(updateCountdownEditorOptions({ [field]: newColor.hex }));
+  const handleColorChange = (field: string, newColor: string) => {
+    dispatch(updateCountdownEditorOptions({ [field]: newColor }));
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,15 +110,6 @@ const CountdownWidgetEditor = () => {
       );
     }
   };
-
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   return (
     <Box sx={{ padding: 2 }}>
@@ -251,69 +239,18 @@ const CountdownWidgetEditor = () => {
             Appearance
           </Typography>
           <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Background Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}
-                  onClick={() => setShowBgColorPicker(!showBgColorPicker)}
-                >
-                  <Box sx={colorSwatchStyle(countdownEditorOptions.backgroundColor || '#f8f9fa')} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{countdownEditorOptions.backgroundColor || '#f8f9fa'}</Typography>
-                </Box>
-                {showBgColorPicker && (
-                  <Box sx={{ position: "absolute", zIndex: 10, mt: 1, right: 0, backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.2)", borderRadius: 1, overflow: 'hidden' }}>
-                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowBgColorPicker(false)}
-                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                      >
-                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                    <ChromePicker
-                      color={countdownEditorOptions.backgroundColor || '#f8f9fa'}
-                      onChange={(color) => handleColorChange('backgroundColor', color)}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Background Color"
+              value={countdownEditorOptions.backgroundColor || '#f8f9fa'}
+              onChange={(color) => handleColorChange('backgroundColor', color)}
+            />
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Text Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}
-                  onClick={() => setShowTextColorPicker(!showTextColorPicker)}
-                >
-                  <Box sx={colorSwatchStyle(countdownEditorOptions.textColor || '#333333')} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{countdownEditorOptions.textColor || '#333333'}</Typography>
-                </Box>
-                {showTextColorPicker && (
-                  <Box sx={{ position: "absolute", zIndex: 10, mt: 1, right: 0, backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.2)", borderRadius: 1, overflow: 'hidden' }}>
-                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowTextColorPicker(false)}
-                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                      >
-                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                    <ChromePicker
-                      color={countdownEditorOptions.textColor || '#333333'}
-                      onChange={(color) => handleColorChange('textColor', color)}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Text Color"
+              value={countdownEditorOptions.textColor || '#333333'}
+              onChange={(color) => handleColorChange('textColor', color)}
+            />
+
           </Stack>
         </Box>
 

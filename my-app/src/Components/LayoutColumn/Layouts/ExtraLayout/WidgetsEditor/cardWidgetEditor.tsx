@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from '@mui/icons-material/Image';
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 import CropOriginalIcon from "@mui/icons-material/CropOriginal";
 
 const CardWidgetEditor = () => {
@@ -16,32 +16,6 @@ const CardWidgetEditor = () => {
   const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
     (state: RootState) => state.workspace
   );
-
-  const [bgAnchorEl, setBgAnchorEl] = useState<null | HTMLElement>(null);
-  const [textAnchorEl, setTextAnchorEl] = useState<null | HTMLElement>(null);
-  const [borderAnchorEl, setBorderAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleBgColorClick = (event: React.MouseEvent<HTMLElement>) => {
-    setBgAnchorEl(event.currentTarget);
-  };
-
-  const handleTextColorClick = (event: React.MouseEvent<HTMLElement>) => {
-    setTextAnchorEl(event.currentTarget);
-  };
-
-  const handleBorderColorClick = (event: React.MouseEvent<HTMLElement>) => {
-    setBorderAnchorEl(event.currentTarget);
-  };
-
-  const handleColorClose = () => {
-    setBgAnchorEl(null);
-    setTextAnchorEl(null);
-    setBorderAnchorEl(null);
-  };
-
-  const openBgUser = Boolean(bgAnchorEl);
-  const openTextUser = Boolean(textAnchorEl);
-  const openBorderUser = Boolean(borderAnchorEl);
 
   const handleChange = (field: keyof typeof cardEditorOptions) => (
     e: any
@@ -72,8 +46,8 @@ const CardWidgetEditor = () => {
     }
   };
 
-  const handleColorChange = (field: string, newColor: any) => {
-    dispatch(updateCardEditorOptions({ [field]: newColor.hex }));
+  const handleColorChange = (field: string, newColor: string) => {
+    dispatch(updateCardEditorOptions({ [field]: newColor }));
   };
 
   const handleCloseEditor = () => {
@@ -91,15 +65,6 @@ const CardWidgetEditor = () => {
       );
     }
   };
-
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   return (
     <Box sx={{ padding: 2 }}>
@@ -244,97 +209,18 @@ const CardWidgetEditor = () => {
             Appearance
           </Typography>
           <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Background
-              </Typography>
-              <OutlinedInput
-                size="small"
-                fullWidth
-                value={cardEditorOptions.backgroundColor || '#ffffff'}
-                readOnly
-                endAdornment={
-                  <InputAdornment position="end">
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        backgroundColor: cardEditorOptions.backgroundColor || '#ffffff',
-                        borderRadius: 0.5,
-                        cursor: "pointer",
-                        border: "1px solid #ccc"
-                      }}
-                      onClick={handleBgColorClick}
-                    />
-                    <Popover
-                      open={openBgUser}
-                      anchorEl={bgAnchorEl}
-                      onClose={handleColorClose}
-                      sx={{ zIndex: 2147483647 }}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left',
-                      }}
-                    >
-                      <ChromePicker
-                        color={cardEditorOptions.backgroundColor || '#ffffff'}
-                        onChange={(color) => handleColorChange('backgroundColor', color)}
-                      />
-                    </Popover>
-                  </InputAdornment>
-                }
-              />
-            </Box>
+            <ColorPicker
+              label="Background"
+              value={cardEditorOptions.backgroundColor || '#ffffff'}
+              onChange={(color) => handleColorChange('backgroundColor', color)}
+            />
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Text Color
-              </Typography>
-              <OutlinedInput
-                size="small"
-                fullWidth
-                value={cardEditorOptions.textColor || '#333333'}
-                readOnly
-                endAdornment={
-                  <InputAdornment position="end">
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        backgroundColor: cardEditorOptions.textColor || '#333333',
-                        borderRadius: 0.5,
-                        cursor: "pointer",
-                        border: "1px solid #ccc"
-                      }}
-                      onClick={handleTextColorClick}
-                    />
-                    <Popover
-                      open={openTextUser}
-                      anchorEl={textAnchorEl}
-                      onClose={handleColorClose}
-                      sx={{ zIndex: 2147483647 }}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left',
-                      }}
-                    >
-                      <ChromePicker
-                        color={cardEditorOptions.textColor || '#333333'}
-                        onChange={(color) => handleColorChange('textColor', color)}
-                      />
-                    </Popover>
-                  </InputAdornment>
-                }
-              />
-            </Box>
+            <ColorPicker
+              label="Text Color"
+              value={cardEditorOptions.textColor || '#333333'}
+              onChange={(color) => handleColorChange('textColor', color)}
+            />
+
           </Stack>
         </Box>
 
@@ -343,51 +229,11 @@ const CardWidgetEditor = () => {
             Border Settings
           </Typography>
           <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Border Color
-              </Typography>
-              <OutlinedInput
-                size="small"
-                fullWidth
-                value={cardEditorOptions.borderColor || '#ddd'}
-                readOnly
-                endAdornment={
-                  <InputAdornment position="end">
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        backgroundColor: cardEditorOptions.borderColor || '#ddd',
-                        borderRadius: 0.5,
-                        cursor: "pointer",
-                        border: "1px solid #ccc"
-                      }}
-                      onClick={handleBorderColorClick}
-                    />
-                    <Popover
-                      open={openBorderUser}
-                      anchorEl={borderAnchorEl}
-                      onClose={handleColorClose}
-                      sx={{ zIndex: 2147483647 }}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left',
-                      }}
-                    >
-                      <ChromePicker
-                        color={cardEditorOptions.borderColor || '#ddd'}
-                        onChange={(color) => handleColorChange('borderColor', color)}
-                      />
-                    </Popover>
-                  </InputAdornment>
-                }
-              />
-            </Box>
+            <ColorPicker
+              label="Border Color"
+              value={cardEditorOptions.borderColor || '#ddd'}
+              onChange={(color) => handleColorChange('borderColor', color)}
+            />
 
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

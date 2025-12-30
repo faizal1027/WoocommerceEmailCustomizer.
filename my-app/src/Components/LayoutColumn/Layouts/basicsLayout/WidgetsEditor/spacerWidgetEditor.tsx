@@ -5,7 +5,7 @@ import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateSpacerEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const SpacerWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -14,7 +14,6 @@ const SpacerWidgetEditor = () => {
     (state: RootState) => state.workspace
   );
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleChange = (field: keyof typeof spacerEditorOptions) => (
     e: React.ChangeEvent<HTMLInputElement>
@@ -22,8 +21,8 @@ const SpacerWidgetEditor = () => {
     dispatch(updateSpacerEditorOptions({ [field]: e.target.value }));
   };
 
-  const handleColorChange = (newColor: any) => {
-    dispatch(updateSpacerEditorOptions({ backgroundColor: newColor.hex }));
+  const handleColorChange = (newColor: string) => {
+    dispatch(updateSpacerEditorOptions({ backgroundColor: newColor }));
   };
 
   const handleCloseEditor = () => {
@@ -42,14 +41,6 @@ const SpacerWidgetEditor = () => {
     }
   };
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   return (
     <Box sx={{ padding: 2 }}>
@@ -130,37 +121,11 @@ const SpacerWidgetEditor = () => {
               />
             </Box>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Background Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                >
-                  <Box sx={colorSwatchStyle(spacerEditorOptions.backgroundColor || 'transparent')} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{spacerEditorOptions.backgroundColor || 'transparent'}</Typography>
-                </Box>
-                {showColorPicker && (
-                  <Box sx={{ position: "absolute", zIndex: 10, mt: 1, right: 0, backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.2)", borderRadius: 1, overflow: 'hidden' }}>
-                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowColorPicker(false)}
-                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                      >
-                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                    <ChromePicker
-                      color={spacerEditorOptions.backgroundColor || 'transparent'}
-                      onChange={handleColorChange}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Background Color"
+              value={spacerEditorOptions.backgroundColor || 'transparent'}
+              onChange={handleColorChange}
+            />
           </Stack>
         </Box>
       </Stack>

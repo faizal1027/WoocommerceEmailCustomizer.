@@ -14,8 +14,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../Store/store";
 import CloseIcon from "@mui/icons-material/Close";
 import { updateWidgetContentData, deleteColumnContent, closeEditor } from "../../../../../Store/Slice/workspaceSlice";
-import { ChromePicker } from "react-color";
 import { useState } from "react";
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const DividerWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -50,8 +50,6 @@ const DividerWidgetEditor = () => {
     "left",
   ];
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const openColorPicker = Boolean(anchorEl);
 
   if (!widgetContent) {
     return (
@@ -61,13 +59,6 @@ const DividerWidgetEditor = () => {
     );
   }
 
-  const handleColorClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleColorClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleOptionChange = (field: keyof typeof dividerOptions, value: any) => {
     if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
@@ -114,14 +105,6 @@ const DividerWidgetEditor = () => {
     }
   };
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
 
   return (
@@ -241,39 +224,11 @@ const DividerWidgetEditor = () => {
               </Box>
             </Box>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}
-                  onClick={handleColorClick}
-                >
-                  <Box sx={colorSwatchStyle(dividerOptions.color)} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{dividerOptions.color}</Typography>
-                </Box>
-                <Popover
-                  open={openColorPicker}
-                  anchorEl={anchorEl}
-                  onClose={handleColorClose}
-                  sx={{ zIndex: 99999 }}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  <ChromePicker
-                    color={dividerOptions.color}
-                    onChange={(color) => handleOptionChange("color", color.hex)}
-                  />
-                </Popover>
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Color"
+              value={dividerOptions.color}
+              onChange={(color) => handleOptionChange("color", color)}
+            />
 
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

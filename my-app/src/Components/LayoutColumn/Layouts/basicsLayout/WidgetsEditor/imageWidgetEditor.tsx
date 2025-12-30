@@ -103,7 +103,7 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
   };
 
   const handleBrowseImage = () => {
-    // Check if wp.media is available (it should be since we enqueued it in PHP)
+    // Check if wp.media is available
     const wp = (window as any).wp;
     if (wp && wp.media) {
       const mediaFrame = wp.media({

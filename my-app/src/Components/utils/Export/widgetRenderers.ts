@@ -1,5 +1,12 @@
 export function widgetToHTML(widget: any): string {
-  const type = widget.type || widget.contentType || 'unknown';
+  if (!widget) return '';
+  const type = widget.type || widget.contentType;
+
+  if (!type) {
+    // If no type, it's effectively an empty slot or null widget
+    return '';
+  }
+
   const data = widget.data || parseContentData(widget.contentData);
 
   // Get renderer from mapping
@@ -599,7 +606,54 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     return `<div style="${styles}">${elementsHtml || '<div style="text-align: center; color: #6c757d; padding: 20px;">No elements in group</div>'}</div>`;
   },
 
-  // ========== 21. SOCIAL FOLLOW WIDGET ==========
+  // ========== 21. SECTION WIDGET ==========
+  'section': (d) => {
+    const data = d || {};
+    const styles = [
+      `background-color: ${data.backgroundColor || '#f5f5f5'}`,
+      data.padding ? `padding: ${data.padding.top || 20}px ${data.padding.right || 20}px ${data.padding.bottom || 20}px ${data.padding.left || 20}px` : 'padding: 20px',
+      data.border ? `border: ${data.border.width || 1}px ${data.border.style || 'solid'} ${data.border.color || '#ddd'}` : 'border: 1px solid #ddd',
+      data.border?.radius ? `border-radius: ${data.border.radius}px` : '',
+      'width: 100%',
+      'box-sizing: border-box'
+    ].filter(Boolean).join('; ');
+
+    return `
+      <div style="${styles}">
+        <div style="text-align: center; color: #999; font-size: 14px;">Section Content Area</div>
+      </div>`;
+  },
+
+  // ========== 22. ROW WIDGET ==========
+  'row': (d) => {
+    const data = d || {};
+    const colCount = data.columns || 2;
+    const gap = data.gap || 20;
+    const colWidth = Math.floor(100 / colCount);
+
+    const containerStyles = [
+      `background-color: ${data.backgroundColor || 'transparent'}`,
+      'width: 100%',
+      'border-collapse: collapse'
+    ].filter(Boolean).join('; ');
+
+    let colsHtml = '';
+    for (let i = 0; i < colCount; i++) {
+      colsHtml += `
+          <td width="${colWidth}%" style="width: ${colWidth}%; padding: ${gap / 2}px; border: 1px dashed #ccc; text-align: center; color: #aaa; font-size: 12px; vertical-align: top;">
+            Column ${i + 1}
+          </td>`;
+    }
+
+    return `
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${containerStyles}">
+        <tr>
+          ${colsHtml}
+        </tr>
+      </table>`;
+  },
+
+  // ========== 23. SOCIAL FOLLOW WIDGET ==========
   'socialFollow': (d) => {
     const data = d || {};
     const platforms = data.platforms || [];

@@ -326,11 +326,13 @@ class WETC_Connector {
         echo '<h2>Email Customizer';
         
         echo '<a href="' . esc_url(admin_url('admin.php?page=email-customizer-add-new')) . '" class="page-title-action">Add New</a>';
+        /*
         echo '<form id="importForm" method="post" action="' . esc_url(admin_url('admin-post.php?action=sm_mail_customizer_import_template')) . '" enctype="multipart/form-data" style="display:inline;">';
         echo '<input type="file" name="import_file" id="importFileInput" style="display: none;" onchange="document.getElementById(\'importForm\').submit();" required>';
         wp_nonce_field('import_template_nonce', '_wpnonce');
         echo '<a href="javascript:void(0);" class="page-title-action" onclick="document.getElementById(\'importFileInput\').click();">Import</a>';
         echo '</form>';
+        */
         echo '</h2>';
         
         // Add inline CSS to remove bottom space
@@ -567,7 +569,7 @@ class WETC_Connector {
                 $content_type = 'on_hold_order';
             } elseif (strpos($lower_name, 'note') !== false) {
                 $content_type = 'customer_note';
-            } elseif (strpos($lower_name, 'invoice') !== false) {
+            } elseif (strpos($lower_name, 'invoice') !== false || strpos($lower_name, 'order details') !== false) {
                 $content_type = 'customer_invoice';
             } elseif (strpos($lower_name, 'abandoned') !== false) {
                 $content_type = 'abandoned_cart';

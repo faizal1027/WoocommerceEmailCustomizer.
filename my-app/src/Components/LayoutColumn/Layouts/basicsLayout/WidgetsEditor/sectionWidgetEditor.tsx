@@ -5,7 +5,7 @@ import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateSectionEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const SectionWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -14,24 +14,7 @@ const SectionWidgetEditor = () => {
     (state: RootState) => state.workspace
   );
 
-  const [bgAnchorEl, setBgAnchorEl] = useState<null | HTMLElement>(null);
-  const [borderAnchorEl, setBorderAnchorEl] = useState<null | HTMLElement>(null);
 
-  const openBgPicker = Boolean(bgAnchorEl);
-  const openBorderPicker = Boolean(borderAnchorEl);
-
-  const handleBgClick = (event: React.MouseEvent<HTMLElement>) => {
-    setBgAnchorEl(event.currentTarget);
-  };
-
-  const handleBorderClick = (event: React.MouseEvent<HTMLElement>) => {
-    setBorderAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setBgAnchorEl(null);
-    setBorderAnchorEl(null);
-  };
 
   if (!sectionEditorOptions) return null;
 
@@ -56,7 +39,7 @@ const SectionWidgetEditor = () => {
     }
   };
 
-  const handleColorChange = (field: string, newColor: any) => {
+  const handleColorChange = (field: string, newColor: string) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       const currentParent = (sectionEditorOptions as any)?.[parent];
@@ -64,22 +47,14 @@ const SectionWidgetEditor = () => {
       dispatch(updateSectionEditorOptions({
         [parent]: {
           ...(currentParent || {}),
-          [child]: newColor.hex,
+          [child]: newColor,
         },
       } as any));
     } else {
-      dispatch(updateSectionEditorOptions({ [field]: newColor.hex } as any));
+      dispatch(updateSectionEditorOptions({ [field]: newColor } as any));
     }
   };
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   // Handler for Select components
   const handleSelectChange = (field: string) => (
@@ -184,46 +159,11 @@ const SectionWidgetEditor = () => {
             Background
           </Typography>
           <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Background Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    border: '1px solid #ccc',
-                    borderRadius: 1,
-                    p: '4px 8px',
-                    height: '40px'
-                  }}
-                  onClick={handleBgClick}
-                >
-                  <Box sx={colorSwatchStyle(sectionEditorOptions.backgroundColor || '#f5f5f5')} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{sectionEditorOptions.backgroundColor || '#f5f5f5'}</Typography>
-                </Box>
-                <Popover
-                  open={openBgPicker}
-                  anchorEl={bgAnchorEl}
-                  onClose={handleClose}
-                  sx={{ zIndex: 99999 }}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  <ChromePicker
-                    color={sectionEditorOptions.backgroundColor || '#f5f5f5'}
-                    onChange={(color) => handleColorChange('backgroundColor', color)}
-                  />
-                </Popover>
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Background Color"
+              value={sectionEditorOptions.backgroundColor || '#f5f5f5'}
+              onChange={(color) => handleColorChange('backgroundColor', color)}
+            />
           </Stack>
         </Box>
 
@@ -334,46 +274,11 @@ const SectionWidgetEditor = () => {
             </Box>
 
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Color
-                </Typography>
-                <Box position="relative">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      border: '1px solid #ccc',
-                      borderRadius: 1,
-                      p: '4px 8px',
-                      height: '40px'
-                    }}
-                    onClick={handleBorderClick}
-                  >
-                    <Box sx={colorSwatchStyle(sectionEditorOptions.border?.color || '#ddd')} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{sectionEditorOptions.border?.color || '#ddd'}</Typography>
-                  </Box>
-                  <Popover
-                    open={openBorderPicker}
-                    anchorEl={borderAnchorEl}
-                    onClose={handleClose}
-                    sx={{ zIndex: 1300001 }}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "left",
-                    }}
-                  >
-                    <ChromePicker
-                      color={sectionEditorOptions.border?.color || '#ddd'}
-                      onChange={(color) => handleColorChange('border.color', color)}
-                    />
-                  </Popover>
-                </Box>
-              </Box>
+              <ColorPicker
+                label="Color"
+                value={sectionEditorOptions.border?.color || '#ddd'}
+                onChange={(color) => handleColorChange('border.color', color)}
+              />
 
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

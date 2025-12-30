@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { ChromePicker } from 'react-color';
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const SocialFollowWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -17,7 +17,6 @@ const SocialFollowWidgetEditor = () => {
   );
 
   const [newPlatform, setNewPlatform] = useState({ name: '', url: '', icon: 'facebook' });
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleCloseEditor = () => {
     dispatch(closeEditor());
@@ -59,18 +58,10 @@ const SocialFollowWidgetEditor = () => {
     dispatch(updateSocialFollowEditorOptions({ [field]: value }));
   };
 
-  const handleColorChange = (newColor: any) => {
-    dispatch(updateSocialFollowEditorOptions({ iconColor: newColor.hex }));
+  const handleColorChange = (newColor: string) => {
+    dispatch(updateSocialFollowEditorOptions({ iconColor: newColor }));
   };
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 30,
-    height: 30,
-    backgroundColor: bgColor,
-    borderRadius: 1,
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  });
 
   const iconOptions = [
     'facebook', 'twitter', 'instagram', 'linkedin', 'youtube',
@@ -242,37 +233,11 @@ const SocialFollowWidgetEditor = () => {
             Appearance
           </Typography>
           <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Icon Color
-              </Typography>
-              <Box position="relative">
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                >
-                  <Box sx={colorSwatchStyle(socialFollowEditorOptions.iconColor || '#000000')} />
-                  <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{socialFollowEditorOptions.iconColor || '#000000'}</Typography>
-                </Box>
-                {showColorPicker && (
-                  <Box sx={{ position: "absolute", zIndex: 10, mt: 1, right: 0, backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.2)", borderRadius: 1, overflow: 'hidden' }}>
-                    <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setShowColorPicker(false)}
-                        sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                      >
-                        <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                    <ChromePicker
-                      color={socialFollowEditorOptions.iconColor || '#000000'}
-                      onChange={handleColorChange}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
+            <ColorPicker
+              label="Icon Color"
+              value={socialFollowEditorOptions.iconColor || '#000000'}
+              onChange={handleColorChange}
+            />
 
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

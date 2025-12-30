@@ -180,8 +180,7 @@ const ExportColumn = () => {
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId);
 
-    // Robust check for Edit Mode: Only strictly "Edit Mode" if ID is in the URL.
-    // This prevents accidental content replacement on the "Add New" page.
+    // Verify Edit Mode to prevent accidental content replacement
     const urlParams = new URLSearchParams(window.location.search);
     const isEditModeByUrl = !!urlParams.get('id');
 
@@ -632,7 +631,7 @@ const ExportColumn = () => {
 
               let typeInfo = EMAIL_TYPES.find(t => t.name === baseNameForLookup || t.name === selectedBaseTemplateName || (isEditMode && t.name === templateName));
 
-              // Fallback: Fuzzy match logic for legacy names that might not exactly match EMAIL_TYPES.name
+              // Fallback: Fuzzy match logic for legacy names
               if (!typeInfo) {
                 const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '').replace('template', '');
                 const currentNormalized = normalize(baseNameForLookup);
@@ -696,10 +695,7 @@ const ExportColumn = () => {
 
                 showSnackbar(message, 'success');
 
-                // If created new, switch to edit mode for the new template ?? 
-                // Or just stay here? User didn't specify, but usually you'd want to keep editing what you just saved.
-                // However, the user flow implies they might want to create multiple copies. 
-                // For now, let's just refresh the list.
+                // Refresh the list and update state for the new template
 
                 const fetchResponse = await axios.post(
                   window.emailTemplateAjax.ajax_url,
@@ -724,11 +720,7 @@ const ExportColumn = () => {
                   setSelectedTemplateId(String(response.data.data.template_id));
                 }
 
-                // If it was a new template, optionally redirect or update state to prevent creating "Template 1 1" on next click
-                // But the user workflow suggests "if i created new order admin template it should b saved as new order admin template 1".
-                // If they click save AGAIN without changing name, logic suggests it might create "Template 1 1" if we don't switch to edit mode.
-                // But if we switch to edit mode, we replace "Adding New".
-                // Let's rely on the fact that if they stay in "Add New" mode, they can keep creating copies.
+                // Stay in Add New mode to allow creating multiple copies if needed
 
               } else {
                 showSnackbar(`Save failed: ${response.data.data?.message || 'Unknown error'}`, 'error');

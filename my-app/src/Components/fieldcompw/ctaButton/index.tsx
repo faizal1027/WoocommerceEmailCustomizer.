@@ -64,7 +64,7 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
             sx={{
                 width: '100%',
                 padding: ctaButtonEditorOptions?.padding || '20px',
-                textAlign: ctaButtonEditorOptions?.alignment || 'center',
+                textAlign: ctaButtonEditorOptions?.textAlign || ctaButtonEditorOptions?.alignment || 'center',
                 border: isSelected ? '2px dashed blue' : 'none',
                 cursor: 'pointer',
             }}

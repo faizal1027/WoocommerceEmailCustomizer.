@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
 import { RootState } from '../../../Store/store';
 
-import { defaultPriceEditorOptions } from '../../../Store/Slice/workspaceSlice'; // Check import path if needed, usually passed
+import { defaultPriceEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
 interface PriceFieldComponentProps {
   blockId: string;

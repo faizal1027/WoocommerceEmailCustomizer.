@@ -19,7 +19,6 @@ import {
   OutlinedInput,
   InputAdornment,
 } from "@mui/material";
-import { ChromePicker } from "react-color";
 import {
   FormatAlignLeft,
   FormatAlignCenter,
@@ -36,6 +35,7 @@ import {
 } from "../../../../../Store/Slice/workspaceSlice";
 import { ButtonEditorOptions, defaultButtonEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
 import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const ButtonWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -51,8 +51,6 @@ const ButtonWidgetEditor = () => {
     ? JSON.parse(widgetContent.contentData)
     : { ...defaultButtonEditorOptions };
 
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
-  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
 
   const optionsRef = useRef(buttonData);
   useEffect(() => {
@@ -121,14 +119,6 @@ const ButtonWidgetEditor = () => {
     }
   }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
 
-  const colorSwatchStyle = (bgColor: string) => ({
-    width: 24,
-    height: 24,
-    backgroundColor: bgColor || 'transparent',
-    borderRadius: 0.5,
-    cursor: "pointer",
-    border: "1px solid #ccc"
-  });
 
   return (
     <Box p={2} position="relative">
@@ -224,80 +214,17 @@ const ButtonWidgetEditor = () => {
           <Stack spacing={2}>
 
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Background
-                </Typography>
-                <Box position="relative">
-                  <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}>
-                    <Box sx={colorSwatchStyle(buttonData.bgColor)} onClick={() => setShowBgColorPicker(!showBgColorPicker)} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{buttonData.bgColor}</Typography>
-                  </Box>
-                  {showBgColorPicker && (
-                    <Box sx={{
-                      position: "absolute",
-                      zIndex: 1000,
-                      mt: 1,
-                      right: 0,
-                      backgroundColor: "#fff",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                      borderRadius: 1,
-                      overflow: 'hidden'
-                    }}>
-                      <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowBgColorPicker(false)}
-                          sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                        >
-                          <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Box>
-                      <ChromePicker
-                        color={buttonData.bgColor}
-                        onChange={(newColor) => handleChange("bgColor", newColor.hex)}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Text Color
-                </Typography>
-                <Box position="relative">
-                  <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: '4px 8px', height: '40px' }}>
-                    <Box sx={colorSwatchStyle(buttonData.textColor)} onClick={() => setShowTextColorPicker(!showTextColorPicker)} />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>{buttonData.textColor}</Typography>
-                  </Box>
-                  {showTextColorPicker && (
-                    <Box sx={{
-                      position: "absolute",
-                      zIndex: 1000,
-                      mt: 1,
-                      right: 0,
-                      backgroundColor: "#fff",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                      borderRadius: 1,
-                      overflow: 'hidden'
-                    }}>
-                      <Box display="flex" justifyContent="flex-end" mb={0.5}>
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowTextColorPicker(false)}
-                          sx={{ color: "white", backgroundColor: "rgba(0,0,0,0.5)", p: 0.5, '&:hover': { backgroundColor: "rgba(0,0,0,0.7)" } }}
-                        >
-                          <CloseIcon fontSize="small" sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Box>
-                      <ChromePicker
-                        color={buttonData.textColor}
-                        onChange={(newColor) => handleChange("textColor", newColor.hex)}
-                      />
-                    </Box>
-                  )}
-                </Box>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <ColorPicker
+                  label="Background"
+                  value={buttonData.bgColor}
+                  onChange={(color) => handleChange("bgColor", color)}
+                />
+                <ColorPicker
+                  label="Text Color"
+                  value={buttonData.textColor}
+                  onChange={(color) => handleChange("textColor", color)}
+                />
               </Box>
             </Box>
 
