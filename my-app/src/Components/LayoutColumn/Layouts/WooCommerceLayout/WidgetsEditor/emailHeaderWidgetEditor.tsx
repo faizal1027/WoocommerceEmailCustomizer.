@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { Box, TextField, Typography, Switch, FormControlLabel, Slider, Button, IconButton, Stack, Divider, InputLabel, Tooltip } from '@mui/material';
+import {
+    Box, TextField, Typography, Switch, FormControlLabel, Slider, Button, IconButton, Stack, Divider, InputLabel, Tooltip
+} from '@mui/material';
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
-import { updateEmailHeaderEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
+import { updateEmailHeaderEditorOptions, closeEditor, deleteColumnContent } from '../../../../../Store/Slice/workspaceSlice';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CropOriginalIcon from "@mui/icons-material/CropOriginal";
@@ -10,11 +13,27 @@ import CommonStylingControls from '../../../../utils/CommonStylingControls';
 
 const EmailHeaderWidgetEditor: React.FC = () => {
     const dispatch = useDispatch();
-    const { emailHeaderEditorOptions } = useSelector((state: RootState) => state.workspace);
+    const { emailHeaderEditorOptions, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector((state: RootState) => state.workspace);
     const [previewUrl, setPreviewUrl] = useState<string | null>(emailHeaderEditorOptions?.logoUrl || null);
 
     const handleChange = (field: string, value: any) => {
         dispatch(updateEmailHeaderEditorOptions({ [field]: value }));
+    };
+
+    const handleCloseEditor = () => {
+        dispatch(closeEditor());
+    };
+
+    const handleDeleteContent = () => {
+        if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+            dispatch(
+                deleteColumnContent({
+                    blockId: selectedBlockForEditor,
+                    columnIndex: selectedColumnIndex,
+                    widgetIndex: selectedWidgetIndex,
+                })
+            );
+        }
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,14 +93,36 @@ const EmailHeaderWidgetEditor: React.FC = () => {
     return (
         <Box sx={{ padding: '20px' }}>
             <Stack spacing={3}>
-                <Box>
-                    <Typography variant="h6" gutterBottom>
-                        Email Header
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Customize your email header branding and layout.
-                    </Typography>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1
+                    }}
+                >
+                    <Box>
+                        <Typography variant="h6">
+                            Email Header
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                            Customize your email header branding and layout.
+                        </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Tooltip title="Close">
+                            <IconButton onClick={handleCloseEditor} size="small" sx={{ bgcolor: '#eee' }}>
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                            <IconButton onClick={handleDeleteContent} size="small" sx={{ bgcolor: '#eee' }}>
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
+
 
                 <Divider />
 
@@ -91,125 +132,79 @@ const EmailHeaderWidgetEditor: React.FC = () => {
                         Branding
                     </Typography>
                     <Stack spacing={2}>
-                        <Box>
-                            {renderLabel("Store Name")}
-                            <TextField
-                                fullWidth
-                                size="small"
-                                value={emailHeaderEditorOptions?.storeName || ''}
-                                onChange={(e) => handleChange('storeName', e.target.value)}
+                        <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2, bgcolor: '#fafafa' }}>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                                <Typography variant="caption" fontWeight="bold">
+                                    Logo Upload
+                                </Typography>
+                                {(previewUrl || emailHeaderEditorOptions?.logoUrl) && (
+                                    <IconButton onClick={handleRemoveImage} size="small">
+                                        <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                )}
+                            </Box>
+                            <Box sx={{ textAlign: "center", mb: 2 }}>
+                                <Box
+                                    component="img"
+                                    src={previewUrl || emailHeaderEditorOptions?.logoUrl || 'https://via.placeholder.com/150x50?text=Logo+Preview'}
+                                    alt="Logo Preview"
+                                    sx={{
+                                        maxWidth: "100%",
+                                        maxHeight: 100,
+                                        border: "1px solid #eee",
+                                        borderRadius: 1,
+                                        objectFit: "contain",
+                                        bgcolor: 'white'
+                                    }}
+                                />
+                            </Box>
+                            <Button
+                                component="label"
                                 variant="outlined"
-                            />
-                        </Box>
-
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailHeaderEditorOptions?.showLogo || false}
-                                    onChange={(e) => handleChange('showLogo', e.target.checked)}
+                                fullWidth
+                                startIcon={<CloudUploadIcon />}
+                                size="small"
+                                sx={{ mb: 1, border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
+                            >
+                                Choose Logo
+                                <input
+                                    type="file"
+                                    hidden
+                                    accept="image/*"
+                                    onChange={handleFileChange}
                                 />
-                            }
-                            label={<Typography variant="body2">Show Logo</Typography>}
-                        />
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                fullWidth
+                                startIcon={<CropOriginalIcon />}
+                                size="small"
+                                onClick={handleBrowseImage}
+                                sx={{ border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
+                            >
+                                Browse Media Library
+                            </Button>
 
-                        {emailHeaderEditorOptions?.showLogo && (
-                            <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2, bgcolor: '#fafafa' }}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                                    <Typography variant="caption" fontWeight="bold">
-                                        Logo Upload
+                            <Box sx={{ mt: 2 }}>
+                                {renderLabel("Logo Width")}
+                                <Stack spacing={2} direction="row" alignItems="center">
+                                    <Slider
+                                        value={currentWidth}
+                                        onChange={handleWidthChange}
+                                        min={50}
+                                        max={400}
+                                        step={10}
+                                        sx={{ flexGrow: 1 }}
+                                        valueLabelDisplay="auto"
+                                        valueLabelFormat={(value) => `${value}px`}
+                                        size="small"
+                                    />
+                                    <Typography variant="body2" sx={{ minWidth: 40, textAlign: "right", fontSize: '12px' }}>
+                                        {currentWidth}px
                                     </Typography>
-                                    {(previewUrl || emailHeaderEditorOptions?.logoUrl) && (
-                                        <IconButton onClick={handleRemoveImage} size="small">
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    )}
-                                </Box>
-                                <Box sx={{ textAlign: "center", mb: 2 }}>
-                                    <Box
-                                        component="img"
-                                        src={previewUrl || emailHeaderEditorOptions?.logoUrl || 'https://via.placeholder.com/150x50?text=Logo+Preview'}
-                                        alt="Logo Preview"
-                                        sx={{
-                                            maxWidth: "100%",
-                                            maxHeight: 100,
-                                            border: "1px solid #eee",
-                                            borderRadius: 1,
-                                            objectFit: "contain",
-                                            bgcolor: 'white'
-                                        }}
-                                    />
-                                </Box>
-                                <Button
-                                    component="label"
-                                    variant="outlined"
-                                    fullWidth
-                                    startIcon={<CloudUploadIcon />}
-                                    size="small"
-                                    sx={{ mb: 1, border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
-                                >
-                                    Choose Logo
-                                    <input
-                                        type="file"
-                                        hidden
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                    />
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    fullWidth
-                                    startIcon={<CropOriginalIcon />}
-                                    size="small"
-                                    onClick={handleBrowseImage}
-                                    sx={{ border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
-                                >
-                                    Browse Media Library
-                                </Button>
-
-                                <Box sx={{ mt: 2 }}>
-                                    {renderLabel("Logo Width")}
-                                    <Stack spacing={2} direction="row" alignItems="center">
-                                        <Slider
-                                            value={currentWidth}
-                                            onChange={handleWidthChange}
-                                            min={50}
-                                            max={400}
-                                            step={10}
-                                            sx={{ flexGrow: 1 }}
-                                            valueLabelDisplay="auto"
-                                            valueLabelFormat={(value) => `${value}px`}
-                                            size="small"
-                                        />
-                                        <Typography variant="body2" sx={{ minWidth: 40, textAlign: "right", fontSize: '12px' }}>
-                                            {currentWidth}px
-                                        </Typography>
-                                    </Stack>
-                                </Box>
+                                </Stack>
                             </Box>
-                        )}
-
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailHeaderEditorOptions?.showTagline || false}
-                                    onChange={(e) => handleChange('showTagline', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Tagline</Typography>}
-                        />
-                        {emailHeaderEditorOptions?.showTagline && (
-                            <Box>
-                                {renderLabel("Tagline")}
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    value={emailHeaderEditorOptions?.tagline || ''}
-                                    onChange={(e) => handleChange('tagline', e.target.value)}
-                                />
-                            </Box>
-                        )}
+                        </Box>
                     </Stack>
                 </Box>
 
@@ -217,6 +212,9 @@ const EmailHeaderWidgetEditor: React.FC = () => {
                     options={emailHeaderEditorOptions}
                     onUpdate={(updatedOptions) => dispatch(updateEmailHeaderEditorOptions(updatedOptions))}
                     title="Appearance & Styling"
+                    showTypography={false}
+                    showTextColor={false}
+                    textAlignLabel="Icon Alignment"
                 />
             </Stack>
         </Box>

@@ -127,3 +127,12 @@ fieldset.MuiOutlinedInput-notchedOutline legend span {
 .media-modal-close {
   z-index: 2147483647 !important;
 }
+
+/* CKEditor Balloon / Modal z-index fix */
+.ck.ck-balloon-panel {
+  z-index: 9999999 !important;
+}
+
+.ck-body-wrapper {
+  z-index: 9999999 !important;
+}

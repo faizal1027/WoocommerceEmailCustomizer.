@@ -56,10 +56,7 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
     return (
         <Box
             onClick={(e) => {
-                e.stopPropagation();
-                onWidgetClick(e);
-                onClick();
-                dispatch(setSelectedBlockId(blockId));
+                // Allow bubbling
             }}
             sx={{
                 width: '100%',

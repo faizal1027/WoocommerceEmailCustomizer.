@@ -14,7 +14,7 @@ import { RootState } from '../../../Store/store';
 import GeneralLayout, { layoutOptions } from './GeneralLayout';
 import MainLayout, { basicsWidgets } from './basicsLayout';
 import WooCommerceLayout, { wooCommerceWidgets } from './WooCommerceLayout';
-import FormsLayout, { formsWidgets } from './FormsLayout';
+// import FormsLayout, { formsWidgets } from './FormsLayout';
 import LayoutBlockLayout, { blockLayoutWidgets } from './BlockLayout';
 import ExtraLayout, { extraWidgets } from './ExtraLayout';
 
@@ -31,9 +31,9 @@ import ImageWidgetEditor from './basicsLayout/WidgetsEditor/imageWidgetEditor';
 import SectionWidgetEditor from './basicsLayout/WidgetsEditor/sectionWidgetEditor';
 import SpacerWidgetEditor from './basicsLayout/WidgetsEditor/spacerWidgetEditor';
 import LinkWidgetEditor from './basicsLayout/WidgetsEditor/linkWidgetEditor';
-import LinkBoxWidgetEditor from './basicsLayout/WidgetsEditor/linkBoxWidgetEditor';
-import ImageBoxWidgetEditor from './basicsLayout/WidgetsEditor/imageBoxWidgetEditor';
-import MapWidgetEditor from './basicsLayout/WidgetsEditor/mapWidgetEditor';
+// import LinkBoxWidgetEditor from './basicsLayout/WidgetsEditor/linkBoxWidgetEditor';
+// import ImageBoxWidgetEditor from './basicsLayout/WidgetsEditor/imageBoxWidgetEditor';
+// import MapWidgetEditor from './basicsLayout/WidgetsEditor/mapWidgetEditor';
 import IconWidgetEditor from './basicsLayout/WidgetsEditor/iconWidgetEditor';
 
 // Layout Block Editors 
@@ -42,29 +42,29 @@ import ContainerWidgetEditor from './BlockLayout/WidgetsEditor/containerWidgetEd
 import GroupWidgetEditor from './BlockLayout/WidgetsEditor/groupWidgetEditor';
 
 // Forms Editors
-import FormWidgetEditor from './FormsLayout/WidgetsEditor/formWidgetEditor';
-import SurveyWidgetEditor from './FormsLayout/WidgetsEditor/surveyWidgetEditor';
-import InputWidgetEditor from './FormsLayout/WidgetsEditor/inputWidgetEditor';
-import TextareaWidgetEditor from './FormsLayout/WidgetsEditor/textareaWidgetEditor';
-import SelectWidgetEditor from './FormsLayout/WidgetsEditor/selectWidgetEditor';
-import CheckboxWidgetEditor from './FormsLayout/WidgetsEditor/checkboxWidgetEditor';
-import RadioWidgetEditor from './FormsLayout/WidgetsEditor/radioWidgetEditor';
-import LabelWidgetEditor from './FormsLayout/WidgetsEditor/labelWidgetEditor';
+// import FormWidgetEditor from './FormsLayout/WidgetsEditor/formWidgetEditor';
+// import SurveyWidgetEditor from './FormsLayout/WidgetsEditor/surveyWidgetEditor';
+// import InputWidgetEditor from './FormsLayout/WidgetsEditor/inputWidgetEditor';
+// import TextareaWidgetEditor from './FormsLayout/WidgetsEditor/textareaWidgetEditor';
+// import SelectWidgetEditor from './FormsLayout/WidgetsEditor/selectWidgetEditor';
+// import CheckboxWidgetEditor from './FormsLayout/WidgetsEditor/checkboxWidgetEditor';
+// import RadioWidgetEditor from './FormsLayout/WidgetsEditor/radioWidgetEditor';
+// import LabelWidgetEditor from './FormsLayout/WidgetsEditor/labelWidgetEditor';
 
 // Extra Block Editors 
 import SocialFollowWidgetEditor from './ExtraLayout/WidgetsEditor/socialFollowWidgetEditor';
 import VideoWidgetEditor from './ExtraLayout/WidgetsEditor/videoWidgetEditor';
 import CodeWidgetEditor from './ExtraLayout/WidgetsEditor/codeWidgetEditor';
 import CountdownWidgetEditor from './ExtraLayout/WidgetsEditor/countdownWidgetEditor';
-import ProgressBarWidgetEditor from './ExtraLayout/WidgetsEditor/progressBarWidgetEditor';
+// import ProgressBarWidgetEditor from './ExtraLayout/WidgetsEditor/progressBarWidgetEditor';
 import ProductWidgetEditor from './ExtraLayout/WidgetsEditor/productWidgetEditor';
 import PromoCodeWidgetEditor from './ExtraLayout/WidgetsEditor/promoCodeWidgetEditor';
 import PriceWidgetEditor from './ExtraLayout/WidgetsEditor/priceWidgetEditor';
-import TestimonialWidgetEditor from './ExtraLayout/WidgetsEditor/testimonialWidgetEditor';
-import NavbarWidgetEditor from './ExtraLayout/WidgetsEditor/navbarWidgetEditor';
-import CardWidgetEditor from './ExtraLayout/WidgetsEditor/cardWidgetEditor';
-import AlertWidgetEditor from './ExtraLayout/WidgetsEditor/alertWidgetEditor';
-import ProgressWidgetEditor from './ExtraLayout/WidgetsEditor/progressWidgetEditor';
+// import TestimonialWidgetEditor from './ExtraLayout/WidgetsEditor/testimonialWidgetEditor';
+// import NavbarWidgetEditor from './ExtraLayout/WidgetsEditor/navbarWidgetEditor';
+// import CardWidgetEditor from './ExtraLayout/WidgetsEditor/cardWidgetEditor';
+// import AlertWidgetEditor from './ExtraLayout/WidgetsEditor/alertWidgetEditor';
+// import ProgressWidgetEditor from './ExtraLayout/WidgetsEditor/progressWidgetEditor';
 
 // Woocommerce Editors
 import ShippingAddressWidgetEditor from './WooCommerceLayout/WidgetsEditor/shippingAddressWidgetEditor';
@@ -118,12 +118,12 @@ const OverallLayout = () => {
         return <SpacerWidgetEditor />;
       case 'link':
         return <LinkWidgetEditor />;
-      case 'linkBox':
-        return <LinkBoxWidgetEditor />;
-      case 'imageBox':
-        return <ImageBoxWidgetEditor />;
-      case 'map':
-        return <MapWidgetEditor />;
+      // case 'linkBox':
+      //   return <LinkBoxWidgetEditor />;
+      // case 'imageBox':
+      //   return <ImageBoxWidgetEditor />;
+      // case 'map':
+      //   return <MapWidgetEditor />;
       case 'icon':
         return <IconWidgetEditor />;
 
@@ -136,22 +136,22 @@ const OverallLayout = () => {
         return <GroupWidgetEditor />;
 
       // Forms Editors
-      case 'form':
-        return <FormWidgetEditor />;
-      case 'survey':
-        return <SurveyWidgetEditor />;
-      case 'input':
-        return <InputWidgetEditor />;
-      case 'textarea':
-        return <TextareaWidgetEditor />;
-      case 'select':
-        return <SelectWidgetEditor />;
-      case 'checkbox':
-        return <CheckboxWidgetEditor />;
-      case 'radio':
-        return <RadioWidgetEditor />;
-      case 'label':
-        return <LabelWidgetEditor />;
+      // case 'form':
+      //   return <FormWidgetEditor />;
+      // case 'survey':
+      //   return <SurveyWidgetEditor />;
+      // case 'input':
+      //   return <InputWidgetEditor />;
+      // case 'textarea':
+      //   return <TextareaWidgetEditor />;
+      // case 'select':
+      //   return <SelectWidgetEditor />;
+      // case 'checkbox':
+      //   return <CheckboxWidgetEditor />;
+      // case 'radio':
+      //   return <RadioWidgetEditor />;
+      // case 'label':
+      //   return <LabelWidgetEditor />;
 
       // Extra Block Editors 
       case 'socialFollow':
@@ -162,24 +162,24 @@ const OverallLayout = () => {
         return <CodeWidgetEditor />;
       case 'countdown':
         return <CountdownWidgetEditor />;
-      case 'progressBar':
-        return <ProgressBarWidgetEditor />;
+      // case 'progressBar':
+      //   return <ProgressBarWidgetEditor />;
       case 'product':
         return <ProductWidgetEditor />;
       case 'promoCode':
         return <PromoCodeWidgetEditor />;
       case 'price':
         return <PriceWidgetEditor />;
-      case 'testimonial':
-        return <TestimonialWidgetEditor />;
-      case 'navbar':
-        return <NavbarWidgetEditor />;
-      case 'card':
-        return <CardWidgetEditor />;
-      case 'alert':
-        return <AlertWidgetEditor />;
-      case 'progress':
-        return <ProgressWidgetEditor />;
+      // case 'testimonial':
+      //   return <TestimonialWidgetEditor />;
+      // case 'navbar':
+      //   return <NavbarWidgetEditor />;
+      // case 'card':
+      //   return <CardWidgetEditor />;
+      // case 'alert':
+      //   return <AlertWidgetEditor />;
+      // case 'progress':
+      //   return <ProgressWidgetEditor />;
 
       // Woocommerce Editors
       case 'shippingAddress':
@@ -234,7 +234,7 @@ const OverallLayout = () => {
   const showGeneral = hasGeneralMatches;
   const showBasics = hasMatches(basicsWidgets, searchTerm);
   const showLayoutBlocks = hasMatches(blockLayoutWidgets, searchTerm);
-  const showForms = hasMatches(formsWidgets, searchTerm);
+  // const showForms = hasMatches(formsWidgets, searchTerm);
   const showExtra = hasMatches(extraWidgets, searchTerm);
   const showWooCommerce = hasMatches(wooCommerceWidgets, searchTerm);
 
@@ -325,17 +325,7 @@ const OverallLayout = () => {
           </Accordion>
         )}
 
-        {/* Forms */}
-        {showForms && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Forms</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormsLayout searchTerm={searchTerm} />
-            </AccordionDetails>
-          </Accordion>
-        )}
+
 
         {/* Extra Block  */}
         {showExtra && (
@@ -361,7 +351,7 @@ const OverallLayout = () => {
           </Accordion>
         )}
 
-        {!showGeneral && !showBasics && !showLayoutBlocks && !showForms && !showExtra && !showWooCommerce && (
+        {!showGeneral && !showBasics && !showLayoutBlocks && !showExtra && !showWooCommerce && (
           <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
             <Typography>No matching blocks found</Typography>
           </Box>

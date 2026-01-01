@@ -3,11 +3,9 @@ import ButtonWidget from './Widgets/buttonWidget';
 import DividerWidget from './Widgets/dividerWidget';
 import HeadingWidget from './Widgets/headingWidget';
 import IconWidget from './Widgets/iconWidget';
-import ImageBoxWidget from './Widgets/imageBoxWidget';
+// import ImageBoxWidget from './Widgets/imageBoxWidget';
 import ImageWidget from './Widgets/imageWidget';
-import LinkBoxWidget from './Widgets/linkBoxWidget';
 import LinkWidget from './Widgets/linkWidget';
-import MapWidget from './Widgets/mapWidget';
 import SectionWidget from './Widgets/sectionWidget';
 import SpacerWidget from './Widgets/spacerWidget';
 import TextWidget from './Widgets/textWidget';
@@ -17,12 +15,9 @@ export const basicsWidgets = [
   { Component: ButtonWidget, name: 'Button' },
   { Component: HeadingWidget, name: 'Heading' },
   { Component: IconWidget, name: 'Icon' },
-  { Component: ImageBoxWidget, name: 'Image Box' },
   { Component: TextWidget, name: 'Text' },
   { Component: ImageWidget, name: 'Image' },
-  { Component: LinkBoxWidget, name: 'Link Box' },
   { Component: LinkWidget, name: 'Link' },
-  { Component: MapWidget, name: 'Map' },
   { Component: SectionWidget, name: 'Section' },
   { Component: SpacerWidget, name: 'Spacer' },
   { Component: DividerWidget, name: 'Divider' },

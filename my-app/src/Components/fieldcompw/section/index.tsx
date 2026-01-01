@@ -41,6 +41,11 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
       border: { width: 1, style: 'solid', color: '#ddd', radius: 0 }
     };
 
+  // Ensure padding exists
+  if (!sectionOptions.padding) {
+    sectionOptions.padding = { top: 20, right: 20, bottom: 20, left: 20 };
+  }
+
   return (
     <Box
       onClick={(e) => {

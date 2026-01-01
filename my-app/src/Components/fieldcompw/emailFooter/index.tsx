@@ -3,9 +3,31 @@ import { Box, Typography, Link, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
 import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from "@mui/icons-material/Facebook";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import PinterestIcon from "@mui/icons-material/Pinterest";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import RedditIcon from "@mui/icons-material/Reddit";
+import MailIcon from "@mui/icons-material/Mail";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import TelegramIcon from "@mui/icons-material/Telegram";
+
+const socialIconsMap: any = {
+    facebook: { icon: <FacebookIcon />, fallback: "f", color: "#3b5998" },
+    twitter: { icon: <TwitterIcon />, fallback: "x", color: "#1DA1F2" },
+    linkedin: { icon: <LinkedInIcon />, fallback: "l", color: "#0077B5" },
+    instagram: { icon: <InstagramIcon />, fallback: "i", color: "#E1306C" },
+    pinterest: { icon: <PinterestIcon />, fallback: "p", color: "#Bd081C" },
+    youtube: { icon: <YouTubeIcon />, fallback: "y", color: "#FF0000" },
+    whatsapp: { icon: <WhatsAppIcon />, fallback: "w", color: "#25D366" },
+    reddit: { icon: <RedditIcon />, fallback: "r", color: "#FF4500" },
+    github: { icon: <GitHubIcon />, fallback: "g", color: "#181717" },
+    telegram: { icon: <TelegramIcon />, fallback: "t", color: "#0088CC" },
+    envelope: { icon: <MailIcon />, fallback: "e", color: "#0072C6" },
+};
 
 interface EmailFooterFieldComponentProps {
     blockId: string;
@@ -52,17 +74,14 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
     return (
         <Box
             onClick={(e) => {
-                e.stopPropagation();
-                onWidgetClick(e);
-                onClick();
-                dispatch(setSelectedBlockId(blockId));
+                // Allow bubbling
             }}
             sx={{
                 width: '100%',
                 backgroundColor: emailFooterEditorOptions?.backgroundColor || '#333333',
                 color: emailFooterEditorOptions?.textColor || '#ffffff',
                 padding: emailFooterEditorOptions?.padding || '30px 20px',
-                textAlign: 'center',
+                textAlign: (emailFooterEditorOptions?.textAlign as any) || 'center',
                 border: isSelected ? '2px dashed blue' : 'none',
                 cursor: 'pointer',
                 fontFamily: emailFooterEditorOptions?.fontFamily === 'inherit' || !emailFooterEditorOptions?.fontFamily ? 'inherit' : emailFooterEditorOptions?.fontFamily,
@@ -71,51 +90,76 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
         >
             {/* Social Media Icons */}
             {emailFooterEditorOptions?.showSocialMedia !== false && (
-                <Box sx={{ marginBottom: '15px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                    <a href="#" onClick={(e) => e.preventDefault()}>
-                        <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" width="32" height="32" style={{ display: 'block', border: 0 }} />
-                    </a>
-                    <a href="#" onClick={(e) => e.preventDefault()}>
-                        <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" width="32" height="32" style={{ display: 'block', border: 0 }} />
-                    </a>
-                    <a href="#" onClick={(e) => e.preventDefault()}>
-                        <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram" width="32" height="32" style={{ display: 'block', border: 0 }} />
-                    </a>
+                <Box sx={{
+                    marginBottom: '15px',
+                    display: 'flex',
+                    justifyContent: (emailFooterEditorOptions?.textAlign === 'left' ? 'flex-start' :
+                        emailFooterEditorOptions?.textAlign === 'right' ? 'flex-end' :
+                            'center'),
+                    gap: '10px'
+                }}>
+                    {emailFooterEditorOptions?.socialIcons?.icons?.map((key: string, index: number) => {
+                        const iconData = socialIconsMap[key];
+                        if (!iconData) return null;
+                        const url = emailFooterEditorOptions?.socialIcons?.urls?.[index] || '#';
+                        return (
+                            <a href={url} key={key} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ textDecoration: 'none' }}>
+                                {React.cloneElement(iconData.icon, {
+                                    sx: {
+                                        width: 32,
+                                        height: 32,
+                                        color: iconData.color, // Default to color as requested
+                                        display: 'block'
+                                    }
+                                })}
+                            </a>
+                        );
+                    })}
                 </Box>
             )}
 
             {/* Store Address */}
             {emailFooterEditorOptions?.showAddress !== false && (
-                <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: '12px' }}>
+                <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit' }}>
                     {emailFooterEditorOptions?.storeAddress || '{{store_address}}'}
                 </Typography>
             )}
 
             {/* Contact Info */}
             {emailFooterEditorOptions?.showContact !== false && (
-                <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: '12px' }}>
+                <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit' }}>
                     Email: {emailFooterEditorOptions?.contactEmail || '{{store_email}}'} |
                     Phone: {emailFooterEditorOptions?.contactPhone || '{{store_phone}}'}
                 </Typography>
             )}
 
-            {/* Links */}
-            <Box sx={{ marginBottom: '15px' }}>
-                <Link href="#" sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: '12px' }}>
-                    Privacy Policy
-                </Link>
-                <Link href="#" sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: '12px' }}>
-                    Terms of Service
-                </Link>
-                <Link href="#" sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: '12px' }}>
-                    Unsubscribe
-                </Link>
-            </Box>
+            {/* Legal Section: Links & Copyright */}
+            {emailFooterEditorOptions?.showLegal !== false && (
+                <Box>
+                    <Box sx={{ marginBottom: '10px' }}>
+                        {emailFooterEditorOptions?.privacyLinkUrl && (
+                            <Link href={emailFooterEditorOptions.privacyLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
+                                {emailFooterEditorOptions.privacyLinkText || 'Privacy Policy'}
+                            </Link>
+                        )}
+                        {emailFooterEditorOptions?.termsLinkUrl && (
+                            <Link href={emailFooterEditorOptions.termsLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
+                                Terms & Conditions
+                            </Link>
+                        )}
 
-            {/* Copyright */}
-            <Typography variant="body2" sx={{ fontSize: '11px', opacity: 0.8 }}>
-                © {currentYear} {emailFooterEditorOptions?.storeName || '{{store_name}}'}. All rights reserved.
-            </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit', opacity: 0.8 }}
+                        dangerouslySetInnerHTML={{
+                            __html: emailFooterEditorOptions?.copyrightText
+                                ? emailFooterEditorOptions.copyrightText
+                                    .replace('{{year}}', currentYear.toString())
+                                    .replace('{{current_year}}', currentYear.toString())
+                                : `© ${currentYear} ${emailFooterEditorOptions?.storeName || '{{store_name}}'}. All rights reserved.`
+                        }}
+                    />
+                </Box>
+            )}
         </Box>
     );
 };

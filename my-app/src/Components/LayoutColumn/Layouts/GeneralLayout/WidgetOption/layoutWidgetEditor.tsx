@@ -53,7 +53,22 @@ const LayoutEditorWidget = () => {
   const currentBorderBottomColor = isColumnSelected ? selectedStyle?.borderBottomColor || "#000000" : undefined;
   const currentBorderLeftColor = isColumnSelected ? selectedStyle?.borderLeftColor || "#000000" : undefined;
   const currentBorderRightColor = isColumnSelected ? selectedStyle?.borderRightColor || "#000000" : undefined;
-  const currentPadding = isColumnSelected ? selectedStyle?.padding || { top: 0, right: 0, bottom: 0, left: 0 } : undefined;
+  const getPaddingObject = (padding: any) => {
+    if (!padding) return { top: 0, right: 0, bottom: 0, left: 0 };
+    if (typeof padding === 'object') return {
+      top: Number(padding.top) || 0,
+      right: Number(padding.right) || 0,
+      bottom: Number(padding.bottom) || 0,
+      left: Number(padding.left) || 0
+    };
+    // Handle string "20px" or "10px 20px..."
+    const parts = String(padding).replace(/px/g, '').split(' ').map(Number);
+    if (parts.length === 1) return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };
+    if (parts.length >= 4) return { top: parts[0], right: parts[1], bottom: parts[2], left: parts[3] };
+    return { top: 0, right: 0, bottom: 0, left: 0 }; // Fallback
+  };
+
+  const currentPadding = isColumnSelected ? getPaddingObject(selectedStyle?.padding) : undefined;
   const currentTextAlign = isColumnSelected ? (selectedStyle as any)?.textAlign || 'left' : undefined;
 
   const textFieldStyle = {

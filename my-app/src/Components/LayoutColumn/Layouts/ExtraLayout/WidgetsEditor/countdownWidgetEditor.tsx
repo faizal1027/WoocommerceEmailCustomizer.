@@ -192,44 +192,119 @@ const CountdownWidgetEditor = () => {
             <Typography variant="caption" color="text.secondary">
               Selected: {targetDate.toLocaleString()}
             </Typography>
+          </Stack>
+        </Box>
 
+        <Divider />
+
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Text Settings
+          </Typography>
+          <Stack spacing={2}>
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Format
+                Title Text
               </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  id="format-select"
-                  value={countdownEditorOptions.format || 'DD:HH:MM:SS'}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({
-                    format: e.target.value as string
-                  }))}
-                >
-                  <MenuItem value="DD:HH:MM:SS">Days:Hours:Minutes:Seconds</MenuItem>
-                  <MenuItem value="HH:MM:SS">Hours:Minutes:Seconds</MenuItem>
-                  <MenuItem value="MM:SS">Minutes:Seconds</MenuItem>
-                  <MenuItem value="DD days HH hours">Days & Hours</MenuItem>
-                  <MenuItem value="DDd HHh MMm SSs">Compact Format</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                value={countdownEditorOptions.title || ''}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ title: e.target.value }))}
+                size="small"
+                fullWidth
+                placeholder="e.g. SALES ENDS IN"
+              />
             </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Footer Text
+              </Typography>
+              <TextField
+                value={countdownEditorOptions.footer || ''}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ footer: e.target.value }))}
+                size="small"
+                fullWidth
+                placeholder="e.g. All courses 50% off"
+              />
+            </Box>
+            <Divider sx={{ my: 1 }} />
+            <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Unit Labels</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <TextField
+                label="Days"
+                value={countdownEditorOptions.daysLabel || 'Days'}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ daysLabel: e.target.value }))}
+                size="small"
+              />
+              <TextField
+                label="Hours"
+                value={countdownEditorOptions.hoursLabel || 'Hours'}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ hoursLabel: e.target.value }))}
+                size="small"
+              />
+              <TextField
+                label="Minutes"
+                value={countdownEditorOptions.minutesLabel || 'Minutes'}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ minutesLabel: e.target.value }))}
+                size="small"
+              />
+              <TextField
+                label="Seconds"
+                value={countdownEditorOptions.secondsLabel || 'Seconds'}
+                onChange={(e) => dispatch(updateCountdownEditorOptions({ secondsLabel: e.target.value }))}
+                size="small"
+              />
+            </Box>
+          </Stack>
+        </Box>
+
+        <Divider />
+
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Visibility
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={countdownEditorOptions.showLabels !== false}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({
-                    showLabels: e.target.checked
-                  }))}
+                  checked={countdownEditorOptions.showDays !== false}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showDays: e.target.checked }))}
                   size="small"
                 />
               }
-              label={
-                <Typography variant="body2">
-                  Show time labels
-                </Typography>
-              }
+              label={<Typography variant="caption">Days</Typography>}
             />
-          </Stack>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={countdownEditorOptions.showHours !== false}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showHours: e.target.checked }))}
+                  size="small"
+                />
+              }
+              label={<Typography variant="caption">Hours</Typography>}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={countdownEditorOptions.showMinutes !== false}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showMinutes: e.target.checked }))}
+                  size="small"
+                />
+              }
+              label={<Typography variant="caption">Minutes</Typography>}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={countdownEditorOptions.showSeconds !== false}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showSeconds: e.target.checked }))}
+                  size="small"
+                />
+              }
+              label={<Typography variant="caption">Seconds</Typography>}
+            />
+          </Box>
         </Box>
 
         <Divider />
@@ -240,48 +315,42 @@ const CountdownWidgetEditor = () => {
           </Typography>
           <Stack spacing={2}>
             <ColorPicker
-              label="Background Color"
-              value={countdownEditorOptions.backgroundColor || '#f8f9fa'}
+              label="Box Background"
+              value={countdownEditorOptions.backgroundColor || '#d32f2f'}
               onChange={(color) => handleColorChange('backgroundColor', color)}
             />
 
             <ColorPicker
-              label="Text Color"
-              value={countdownEditorOptions.textColor || '#333333'}
+              label="Box Text Color"
+              value={countdownEditorOptions.textColor || '#ffffff'}
               onChange={(color) => handleColorChange('textColor', color)}
             />
 
+            <ColorPicker
+              label="Label Color"
+              value={countdownEditorOptions.labelColor || '#333333'}
+              onChange={(color) => handleColorChange('labelColor', color)}
+            />
+
+            <ColorPicker
+              label="Title Color"
+              value={countdownEditorOptions.titleColor || '#000000'}
+              onChange={(color) => handleColorChange('titleColor', color)}
+            />
+
+            <ColorPicker
+              label="Footer Color"
+              value={countdownEditorOptions.footerColor || '#000000'}
+              onChange={(color) => handleColorChange('footerColor', color)}
+            />
+
+            <ColorPicker
+              label="Container Background"
+              value={countdownEditorOptions.containerBgColor || 'transparent'}
+              onChange={(color) => handleColorChange('containerBgColor', color)}
+            />
+
           </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box sx={{
-          p: 2,
-          bgcolor: countdownEditorOptions.backgroundColor || '#f8f9fa',
-          borderRadius: 1,
-          border: '1px solid #e0e0e0'
-        }}>
-          <Typography variant="caption" sx={{ mb: 1, display: 'block', color: countdownEditorOptions.textColor || '#333333', fontWeight: 'bold' }}>
-            Preview
-          </Typography>
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            bgcolor: 'rgba(255, 255, 255, 0.5)',
-            borderRadius: 1,
-            p: 1,
-            minHeight: '40px'
-          }}>
-            <Typography variant="body2" color="text.secondary" align="center">
-              {countdownEditorOptions.format || 'DD:HH:MM:SS'}
-              <br />
-              <Typography variant="caption" component="div">
-                {countdownEditorOptions.showLabels !== false ? '(Labels On)' : '(Labels Off)'}
-              </Typography>
-            </Typography>
-          </Box>
         </Box>
       </Stack>
     </Box>

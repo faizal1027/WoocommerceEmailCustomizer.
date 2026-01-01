@@ -40,10 +40,7 @@ const CodeFieldComponent: React.FC<CodeFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: '100%',

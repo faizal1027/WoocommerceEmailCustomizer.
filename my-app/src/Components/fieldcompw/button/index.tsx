@@ -41,7 +41,10 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
   const textAlign = buttonData?.textAlign || 'center';
   const fontStyle = buttonData?.fontStyle || 'normal';
   const width = buttonData?.widthAuto === false && buttonData?.width ? `${buttonData.width}%` : undefined;
+
+  // Ensure padding exists
   const padding = buttonData?.padding || { top: 8, right: 16, bottom: 8, left: 16 };
+
   const borderRadius = buttonData?.borderRadius || { topLeft: 4, topRight: 4, bottomRight: 4, bottomLeft: 4 };
   const urlDisabled = buttonData?.urlDisabled || false;
   const url = buttonData?.url || '#';
@@ -102,10 +105,7 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
       px={`${padding.left}px`}
       py={`${padding.top}px`}
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling to wrapper
       }}
       sx={{
         cursor: 'pointer',
@@ -129,7 +129,7 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
           height: "auto",
           minWidth: '64px',
           padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
-          borderRadius: `${borderRadius.topLeft}px ${borderRadius.topRight}px ${borderRadius.bottomRight}px ${borderRadius.bottomLeft}px`,
+          borderRadius: `${borderRadius?.topLeft ?? 4}px ${borderRadius?.topRight ?? 4}px ${borderRadius?.bottomRight ?? 4}px ${borderRadius?.bottomLeft ?? 4}px`,
           '&:hover': {
             backgroundColor: bgColor,
             opacity: urlDisabled ? 1 : 0.9,

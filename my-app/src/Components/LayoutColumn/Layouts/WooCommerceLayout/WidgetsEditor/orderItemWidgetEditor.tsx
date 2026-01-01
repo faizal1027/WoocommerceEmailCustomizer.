@@ -32,10 +32,7 @@ const OrderItemsWidgetEditor = () => {
     dispatch(updateOrderItemsEditorOptions({ items: newItems }));
   };
 
-  const addNewItem = () => {
-    const newItems = [...orderItemsEditorOptions.items, { product: '', quantity: 1, price: '' }];
-    dispatch(updateOrderItemsEditorOptions({ items: newItems }));
-  };
+
 
   const removeItem = (index: number) => {
     const newItems = orderItemsEditorOptions.items.filter((_, i) => i !== index);
@@ -115,69 +112,7 @@ const OrderItemsWidgetEditor = () => {
 
         <Divider />
 
-        {/* Section: Items Table */}
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Items
-          </Typography>
-          <Table size="small" sx={{ mb: 2, border: '1px solid #eee', borderRadius: 1 }}>
-            <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell width="80px">Qty</TableCell>
-                <TableCell width="100px">Price</TableCell>
-                <TableCell width="40px"></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {orderItemsEditorOptions.items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell sx={{ p: 1 }}>
-                    <TextField
-                      value={item.product}
-                      onChange={(e) => handleItemChange(index, 'product', e.target.value)}
-                      size="small"
-                      fullWidth
-                      variant="standard"
-                      InputProps={{ disableUnderline: true }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ p: 1 }}>
-                    <TextField
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                      size="small"
-                      fullWidth
-                      variant="standard"
-                      InputProps={{ disableUnderline: true }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ p: 1 }}>
-                    <TextField
-                      value={item.price}
-                      onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                      size="small"
-                      fullWidth
-                      variant="standard"
-                      InputProps={{ disableUnderline: true }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ p: 0 }}>
-                    <IconButton onClick={() => removeItem(index)} size="small" color="error">
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Button onClick={addNewItem} variant="contained" size="small" sx={{ textTransform: 'none' }}>
-            Add Item
-          </Button>
-        </Box>
 
-        <Divider />
 
         {/* Section: Order Totals */}
         <Box>

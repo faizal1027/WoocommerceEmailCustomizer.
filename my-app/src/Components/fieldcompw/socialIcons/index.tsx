@@ -60,13 +60,18 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
     ? JSON.parse(widgetContentData)
     : { ...defaultSocialIconsEditorOptions };
 
+  // Ensure padding exists
+  if (!socialIconsEditorOptions.padding) {
+    socialIconsEditorOptions.padding = { top: 10, right: 10, bottom: 10, left: 10 };
+  }
+
   const { iconAlign, padding, iconColor, iconSize, iconSpace, addedIcons } = socialIconsEditorOptions;
   const hasContent = addedIcons.icons.length > 0;
 
   const measureHeight = useCallback(() => {
     if (contentRef.current) {
       const contentHeight = contentRef.current.scrollHeight;
-      dispatch(updateColumnHeight({ 
+      dispatch(updateColumnHeight({
         blockId,
         columnIndex,
         height: contentHeight,
@@ -104,9 +109,7 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
     <Box
       ref={contentRef}
       onClick={(e) => {
-        e.stopPropagation();
-        onClick(e);
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: '100%',

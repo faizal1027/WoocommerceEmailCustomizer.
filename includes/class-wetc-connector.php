@@ -25,6 +25,69 @@ class WETC_Connector {
         add_action('wp_ajax_get_email_template_names', [$this, 'get_email_template_names_callback']);
         add_action('wp_ajax_save_email_template', [$this, 'save_email_template_callback']);
         add_action('wp_ajax_send_test_email', [$this, 'send_test_email_callback']);
+
+        // Handle List Table Actions
+        add_action('admin_post_wetc_trash_template', [$this, 'handle_trash_template']);
+        add_action('admin_post_wetc_restore_template', [$this, 'handle_restore_template']);
+        add_action('admin_post_wetc_delete_template', [$this, 'handle_delete_template']);
+        add_action('admin_post_wetc_duplicate_template', [$this, 'handle_duplicate_template']);
+
+        add_filter('set-screen-option', [__CLASS__, 'set_screen_option'], 10, 3);
+    }
+
+    public function handle_trash_template() {
+        $this->handle_template_status_change('trash');
+    }
+
+    public function handle_restore_template() {
+        $this->handle_template_status_change('publish');
+    }
+
+    private function handle_template_status_change($new_status) {
+        if (!isset($_GET['id'])) wp_die('No ID provided');
+        $id = intval($_GET['id']);
+        
+        // Use either specific nonce or generic one based on context, but match creation
+        check_admin_referer('wetc_' . ($new_status == 'trash' ? 'trash' : 'restore') . '_template_' . $id);
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wetc_email_templates';
+        $wpdb->update($table_name, ['status' => $new_status], ['id' => $id]);
+
+        wp_redirect(remove_query_arg(['action', 'id', '_wpnonce'], wp_get_referer()));
+        exit;
+    }
+
+    public function handle_delete_template() {
+        if (!isset($_GET['id'])) wp_die('No ID provided');
+        $id = intval($_GET['id']);
+        check_admin_referer('wetc_delete_template_' . $id);
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wetc_email_templates';
+        $wpdb->delete($table_name, ['id' => $id]);
+
+        wp_redirect(remove_query_arg(['action', 'id', '_wpnonce'], wp_get_referer()));
+        exit;
+    }
+
+    public function handle_duplicate_template() {
+        if (!isset($_GET['id'])) wp_die('No ID provided');
+        $id = intval($_GET['id']);
+        check_admin_referer('wetc_duplicate_template_' . $id);
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wetc_email_templates';
+        $original = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id), ARRAY_A);
+
+        if ($original) {
+            unset($original['id']);
+            $original['email_template_name'] .= ' (Copy)';
+            $wpdb->insert($table_name, $original);
+        }
+
+        wp_redirect(remove_query_arg(['action', 'id', '_wpnonce'], wp_get_referer()));
+        exit;
     }
 
     public static function get_instance() {
@@ -260,7 +323,7 @@ class WETC_Connector {
     }
 
     public function add_posts_menu_items() {
-        add_menu_page(
+        $hook = add_menu_page(
             __('Smack Mails', 'wp-posts-list'),
             __('Smack Mails', 'wp-posts-list'),
             'edit_posts',
@@ -270,14 +333,63 @@ class WETC_Connector {
             1
         );
 
+        add_action("load-$hook", [$this, 'init_screen_options']);
+
         add_submenu_page(
             'posts_list_table',
             __('Add New', 'wp-posts-list'),
-            '',
+            __('Add New', 'woocommerce'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'submenu_add_new_page']
         );
+    }
+
+    public function init_screen_options() {
+        $option = 'per_page';
+        $args = [
+            'label'   => __('Email Templates per page', 'woocommerce'),
+            'default' => 20,
+            'option'  => 'wetc_templates_per_page'
+        ];
+        add_screen_option($option, $args);
+        
+        // Ensure the class is loaded for column headers logic if needed
+        $this->list_table = new Posts_List_Table();
+        
+        $screen = get_current_screen();
+        if ($screen) {
+            // Force reset hidden columns preference so they are always checked by default
+            // Using update_user_option to explicitly set it to 'empty' (nothing hidden)
+            update_user_option(get_current_user_id(), "manage{$screen->id}columnshidden", []);
+            
+            add_filter("manage_{$screen->id}_columns", [$this, 'get_screen_columns']);
+            add_filter("default_hidden_columns", [$this, 'get_default_hidden_columns'], 10, 2);
+        }
+    }
+
+    public function get_screen_columns($columns) {
+        // Remove columns we don't want in Screen Options checkboxes
+        if (isset($columns['email_template_name'])) {
+            unset($columns['email_template_name']);
+        }
+        if (isset($columns['cb'])) {
+            unset($columns['cb']);
+        }
+        return $columns;
+    }
+
+    public function get_default_hidden_columns($hidden, $screen) {
+        // Default to showing all columns (return empty array of hidden items)
+        return [];
+    }
+    
+    // Filter to handle saving screen options
+    public static function set_screen_option($status, $option, $value) {
+        if ('wetc_templates_per_page' === $option) {
+            return $value;
+        }
+        return $status;
     }
 
     public function submenu_add_new_page() {
@@ -319,107 +431,82 @@ class WETC_Connector {
     }
 
     public function posts_list_init() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wetc_email_templates';
-        $email_templates = $wpdb->get_results("SELECT * FROM $table_name");
+        $list_table = new Posts_List_Table();
+        $list_table->prepare_items();
+        
         echo '<div class="wrap">';
-        echo '<h2>Email Customizer';
-        
+        echo '<h1 class="wp-heading-inline">' . __('Email Templates', 'woocommerce') . '</h1>';
         echo '<a href="' . esc_url(admin_url('admin.php?page=email-customizer-add-new')) . '" class="page-title-action">Add New</a>';
-        /*
-        echo '<form id="importForm" method="post" action="' . esc_url(admin_url('admin-post.php?action=sm_mail_customizer_import_template')) . '" enctype="multipart/form-data" style="display:inline;">';
-        echo '<input type="file" name="import_file" id="importFileInput" style="display: none;" onchange="document.getElementById(\'importForm\').submit();" required>';
-        wp_nonce_field('import_template_nonce', '_wpnonce');
-        echo '<a href="javascript:void(0);" class="page-title-action" onclick="document.getElementById(\'importFileInput\').click();">Import</a>';
-        echo '</form>';
-        */
-        echo '</h2>';
         
-        // Add inline CSS to remove bottom space
+        // Import Button and Logic
+        echo '<button id="wetc-import-btn" class="page-title-action">Import</button>';
+        echo '<input type="file" id="wetc-import-file" accept=".json" style="display:none;" />';
         ?>
-        <style>
-            /* Remove bottom space from WordPress admin wrappers */
-            #wpbody-content {
-                padding-bottom: 0 !important;
-            }
-            #wpbody {
-                padding-bottom: 0 !important;
-            }
-            #wpcontent {
-                padding-bottom: 0 !important;
-            }
-            #wpfooter {
-                display: none !important;
-            .wrap {
-                height: calc(100vh - 32px);
-                overflow-y: auto;
-            }
-        </style>
-        <?php
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                $('#wetc-import-btn').on('click', function(e) {
+                    e.preventDefault();
+                    $('#wetc-import-file').click();
+                });
 
-        ?>
-        <div class="wc_emails_wrapper">
-            <h3><?php _e('Custom Email Templates', 'woocommerce'); ?></h3>
-            <p><?php _e('Custom email templates are listed below. Click on a template to configure it.', 'woocommerce'); ?></p>
-            <table class="wc_emails widefat" cellspacing="0">
-                <thead>
-                    <tr>
-                        <?php
-                        $columns = apply_filters('woocommerce_email_setting_columns', [
-                            'email_template_name' => __('Email Template', 'woocommerce'),
-                            'content_type' => __('Content Type', 'woocommerce'),
-                            'recipient' => __('Recipient(s)', 'woocommerce'),
-                            'actions' => __('Actions', 'woocommerce')
-                        ]);
-                        foreach ($columns as $key => $column) {
-                            echo '<th class="wc-email-settings-table-' . esc_attr($key) . '">' . esc_html($column) . '</th>';
-                        }
-                        ?>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($email_templates) {
-                        foreach ($email_templates as $email) {
-                            echo '<tr>';
-                            foreach ($columns as $key => $column) {
-                                switch ($key) {
-                                    case 'email_template_name':
-                                        echo '<td class="wc-email-settings-table-' . esc_attr($key) . '">';
-                                        echo '<a href="' . esc_url(admin_url('admin.php?page=email-customizer-add-new&id=' . absint($email->id))) . '">' . esc_html($email->email_template_name) . '</a>';
-                                        echo '</td>';
-                                        break;
-                                    case 'content_type':
-                                        echo '<td class="wc-email-settings-table-' . esc_attr($key) . '">';
-                                        echo esc_html($email->content_type);
-                                        echo '</td>';
-                                        break;
-                                    case 'recipient':
-                                        echo '<td class="wc-email-settings-table-' . esc_attr($key) . '">';
-                                        echo esc_html($email->recipient);
-                                        echo '</td>';
-                                        break;
-                                    case 'actions':
-                                        echo '<td class="wc-email-settings-table-' . esc_attr($key) . '">';
-                                        echo '<a class="button" data-template-id="' . absint($email->id) . '" href="' . esc_url(admin_url('admin.php?page=email-customizer-add-new&id=' . absint($email->id))) . '">' . esc_html__('Manage', 'woocommerce') . '</a>';
-                                        echo '</td>';
-                                        break;
-                                }
+                $('#wetc-import-file').on('change', function(e) {
+                    var file = e.target.files[0];
+                    if (!file) return;
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            var jsonContent = e.target.result;
+                            var parsedTest = JSON.parse(jsonContent); // Validate JSON
+
+                            // EXTRACT BLOCKS: The app expects json_data to be the blocks array, 
+                            // but exportToJSON saves an object with metadata.
+                            var jsonToSend = jsonContent;
+                            if (parsedTest && parsedTest.blocks && Array.isArray(parsedTest.blocks)) {
+                                jsonToSend = JSON.stringify(parsedTest.blocks);
                             }
-                            echo '</tr>';
+
+                            // Prepare data for saving
+                            var data = {
+                                action: 'save_email_template',
+                                _ajax_nonce: '<?php echo wp_create_nonce('get_email_template_names_nonce'); ?>',
+                                template_name: file.name.replace('.json', '') + ' (Imported)',
+                                json_data: jsonToSend,
+                                content_type: 'JSON' // Default type, backend will try to deduce
+                            };
+
+                            // Use existing AJAX save mechanism
+                            $.post(ajaxurl, data, function(response) {
+                                if (response.success) {
+                                    alert('Template imported successfully!');
+                                    location.reload();
+                                } else {
+                                    alert('Error importing template: ' + (response.data.message || 'Unknown error'));
+                                }
+                            });
+
+                        } catch (err) {
+                            alert('Invalid JSON file');
+                            console.error(err);
                         }
-                    } else {
-                        echo '<tr><td colspan="' . count($columns) . '">' . esc_html__('No email templates found.', 'woocommerce') . '</td></tr>';
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
+                    };
+                    reader.readAsText(file);
+                    // Reset input so same file can be selected again if needed
+                    this.value = '';
+                });
+            });
+        </script>
         <?php
-
+        echo '<hr class="wp-header-end">';
+        
+        // Output search box
+        echo '<form method="get">';
+        echo '<input type="hidden" name="page" value="' . esc_attr($_REQUEST['page']) . '" />';
+        $list_table->views(); // Display status views (All | Published | Trash)
+        $list_table->search_box('search', 'search_id');
+        $list_table->display();
+        echo '</form>';
         echo '</div>';
-        // echo '<ul id="email-template-list"></ul>';
-
     }
 
     public function get_email_template_json_callback() {

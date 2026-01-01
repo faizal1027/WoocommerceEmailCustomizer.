@@ -23,7 +23,7 @@ const CountdownFieldComponent: React.FC<CountdownFieldComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { countdownEditorOptions } = useSelector((state: RootState) => state.workspace);
-  
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -34,10 +34,10 @@ const CountdownFieldComponent: React.FC<CountdownFieldComponentProps> = ({
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const targetDate = countdownEditorOptions.targetDate 
+      const targetDate = countdownEditorOptions.targetDate
         ? new Date(countdownEditorOptions.targetDate)
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      
+
       const now = new Date().getTime();
       const distance = targetDate.getTime() - now;
 
@@ -72,55 +72,105 @@ const CountdownFieldComponent: React.FC<CountdownFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        border: isSelected ? '2px dashed blue' : '1px solid #ddd',
+        border: isSelected ? '2px dashed blue' : '1px solid transparent',
         borderRadius: '8px',
         padding: '20px',
-        backgroundColor: countdownEditorOptions.backgroundColor || '#f8f9fa',
-        color: countdownEditorOptions.textColor || '#333333',
+        backgroundColor: countdownEditorOptions.containerBgColor || 'transparent',
         position: 'relative',
         textAlign: 'center',
+        '&:hover': {
+          border: isSelected ? '2px dashed blue' : '1px dashed #ccc',
+        }
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-        {countdownEditorOptions.title || 'Sale Ends In'}
-      </Typography>
-      
+      {countdownEditorOptions.title && (
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 4,
+            fontWeight: 900,
+            color: countdownEditorOptions.titleColor || '#000',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            fontSize: '2.5rem'
+          }}
+        >
+          {countdownEditorOptions.title}
+        </Typography>
+      )}
+
       {timeLeft.expired ? (
         <Typography variant="h5" sx={{ color: '#dc3545', fontWeight: 'bold' }}>
           {countdownEditorOptions.endMessage || 'The offer has ended!'}
         </Typography>
       ) : (
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap', mb: 4 }}>
           {[
-            { value: timeLeft.days, label: 'Days' },
-            { value: timeLeft.hours, label: 'Hours' },
-            { value: timeLeft.minutes, label: 'Minutes' },
-            { value: timeLeft.seconds, label: 'Seconds' }
-          ].map((item, index) => (
+            { value: timeLeft.days, label: countdownEditorOptions.daysLabel || 'Days', show: countdownEditorOptions.showDays !== false },
+            { value: timeLeft.hours, label: countdownEditorOptions.hoursLabel || 'Hours', show: countdownEditorOptions.showHours !== false },
+            { value: timeLeft.minutes, label: countdownEditorOptions.minutesLabel || 'Minutes', show: countdownEditorOptions.showMinutes !== false },
+            { value: timeLeft.seconds, label: countdownEditorOptions.secondsLabel || 'Seconds', show: countdownEditorOptions.showSeconds !== false }
+          ].filter(item => item.show).map((item, index) => (
             <Box
               key={index}
               sx={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                padding: '10px 15px',
-                minWidth: '80px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1
               }}
             >
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#007bff' }}>
-                {item.value.toString().padStart(2, '0')}
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#666', fontSize: '12px' }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: countdownEditorOptions.labelColor || '#333',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}
+              >
                 {item.label}
               </Typography>
+              <Box
+                sx={{
+                  backgroundColor: countdownEditorOptions.backgroundColor || '#d32f2f',
+                  borderRadius: '15px',
+                  width: '90px',
+                  height: '90px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                }}
+              >
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: countdownEditorOptions.textColor || '#fff',
+                    fontSize: '2.5rem'
+                  }}
+                >
+                  {item.value.toString().padStart(2, '0')}
+                </Typography>
+              </Box>
             </Box>
           ))}
         </Box>
       )}
-      
-      <Typography variant="caption" sx={{ mt: 2, display: 'block', color: '#666' }}>
-        Target: {new Date(countdownEditorOptions.targetDate || Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleString()}
-      </Typography>
+
+      {countdownEditorOptions.footer && (
+        <Typography
+          variant="h5"
+          sx={{
+            mt: 2,
+            fontWeight: 'bold',
+            color: countdownEditorOptions.footerColor || '#000',
+            fontSize: '1.8rem'
+          }}
+        >
+          {countdownEditorOptions.footer}
+        </Typography>
+      )}
     </Box>
   );
 };

@@ -24,6 +24,8 @@ interface CommonStylingControlsProps {
     title?: string;
     showTextColor?: boolean;
     showTextAlign?: boolean;
+    showTypography?: boolean;
+    textAlignLabel?: string;
 }
 
 const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
@@ -32,6 +34,8 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
     title = 'Styling',
     showTextColor = true,
     showTextAlign = true,
+    showTypography = true,
+    textAlignLabel = 'Text Alignment',
 }) => {
     const handleChange = (field: string, value: any) => {
         onUpdate({ [field]: value });
@@ -45,51 +49,55 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 1.5 }}>
                 {/* Font Family */}
-                <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
-                        Font Family
-                    </Typography>
-                    <FormControl size="small" fullWidth>
-                        <Select
-                            value={options.fontFamily === 'inherit' || !options.fontFamily ? 'inherit' : (FONT_FAMILIES.includes(options.fontFamily.split(',')[0].replace(/'/g, '').trim()) ? options.fontFamily.split(',')[0].replace(/'/g, '').trim() : 'inherit')}
-                            onChange={(e) => handleChange('fontFamily', e.target.value)}
-                            MenuProps={{
-                                disablePortal: false,
-                                sx: { zIndex: 1300001 },
-                                style: { zIndex: 1300001 },
-                                PaperProps: {
-                                    sx: {
-                                        maxHeight: 300,
+                {showTypography && (
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                            Font Family
+                        </Typography>
+                        <FormControl size="small" fullWidth>
+                            <Select
+                                value={options.fontFamily === 'inherit' || !options.fontFamily ? 'inherit' : (FONT_FAMILIES.includes(options.fontFamily.split(',')[0].replace(/'/g, '').trim()) ? options.fontFamily.split(',')[0].replace(/'/g, '').trim() : 'inherit')}
+                                onChange={(e) => handleChange('fontFamily', e.target.value)}
+                                MenuProps={{
+                                    disablePortal: false,
+                                    sx: { zIndex: 1300001 },
+                                    style: { zIndex: 1300001 },
+                                    PaperProps: {
+                                        sx: {
+                                            maxHeight: 300,
+                                        }
                                     }
-                                }
-                            }}
-                        >
-                            {FONT_FAMILIES.map((font) => (
-                                <MenuItem key={font} value={font === 'Global' ? 'inherit' : font}>
-                                    {font}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Box>
+                                }}
+                            >
+                                {FONT_FAMILIES.map((font) => (
+                                    <MenuItem key={font} value={font === 'Global' ? 'inherit' : font}>
+                                        {font}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                )}
 
                 {/* Font Size */}
-                <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
-                        Font Size
-                    </Typography>
-                    <TextField
-                        type="number"
-                        value={parseInt(options.fontSize) || 14}
-                        onChange={(e) => handleChange('fontSize', `${e.target.value}px`)}
-                        size="small"
-                        fullWidth
-                        placeholder="14"
-                        InputProps={{
-                            inputProps: { min: 1 }
-                        }}
-                    />
-                </Box>
+                {showTypography && (
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                            Font Size
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={parseInt(options.fontSize) || 14}
+                            onChange={(e) => handleChange('fontSize', `${e.target.value}px`)}
+                            size="small"
+                            fullWidth
+                            placeholder="14"
+                            InputProps={{
+                                inputProps: { min: 1 }
+                            }}
+                        />
+                    </Box>
+                )}
 
                 {/* Text Color */}
                 {showTextColor && (
@@ -136,7 +144,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {showTextAlign && (
                     <Box>
                         <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
-                            Text Alignment
+                            {textAlignLabel}
                         </Typography>
                         <ToggleButtonGroup
                             value={options.textAlign || 'left'}
@@ -162,15 +170,52 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 )}
                 <Box>
                     <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
-                        Padding
+                        Padding (px)
                     </Typography>
-                    <TextField
-                        value={options.padding || ''}
-                        onChange={(e) => handleChange('padding', e.target.value)}
-                        size="small"
-                        fullWidth
-                        placeholder="10px 20px"
-                    />
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                        {['Top', 'Right', 'Bottom', 'Left'].map((side) => {
+                            let pTop = '0';
+                            let pRight = '0';
+                            let pBottom = '0';
+                            let pLeft = '0';
+
+                            if (options.padding && typeof options.padding === 'object') {
+                                pTop = String(options.padding.top || 0);
+                                pRight = String(options.padding.right || 0);
+                                pBottom = String(options.padding.bottom || 0);
+                                pLeft = String(options.padding.left || 0);
+                            } else {
+                                const paddingValues = (options.padding || '0px 0px 0px 0px').replace(/px/g, '').split(' ');
+                                pTop = paddingValues[0] || '0';
+                                pRight = paddingValues[1] || pTop;
+                                pBottom = paddingValues[2] || pTop;
+                                pLeft = paddingValues[3] || pRight;
+                            }
+
+                            const currentValues = { Top: pTop, Right: pRight, Bottom: pBottom, Left: pLeft };
+
+                            return (
+                                <Box key={side} sx={{ minWidth: 0 }}>
+                                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '13px' }}>
+                                        {side}
+                                    </Typography>
+                                    <TextField
+                                        type="number"
+                                        size="small"
+                                        fullWidth
+                                        value={parseInt((currentValues as any)[side])}
+                                        onChange={(e) => {
+                                            const newVal = e.target.value;
+                                            const newValues = { ...currentValues, [side]: newVal };
+                                            const newPadding = `${newValues.Top}px ${newValues.Right}px ${newValues.Bottom}px ${newValues.Left}px`;
+                                            handleChange('padding', newPadding);
+                                        }}
+                                        inputProps={{ style: { fontSize: '14px' }, min: 0 }}
+                                    />
+                                </Box>
+                            );
+                        })}
+                    </Box>
                 </Box>
             </Box>
         </Box>

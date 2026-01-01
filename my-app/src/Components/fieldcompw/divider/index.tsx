@@ -33,6 +33,16 @@ const DividerFieldComponent: React.FC<DividerFieldComponentProps> = ({ blockId, 
       padding: { top: 10, right: 0, bottom: 10, left: 0 },
     };
 
+  // Ensure padding exists
+  if (!dividerOptions.padding) {
+    dividerOptions.padding = { top: 10, right: 0, bottom: 10, left: 0 };
+  }
+
+  // Ensure padding exists
+  if (!dividerOptions.padding) {
+    dividerOptions.padding = { top: 10, right: 0, bottom: 10, left: 0 };
+  }
+
   const { width, style, thickness, color, alignment, padding } = dividerOptions;
 
   const measureHeight = useCallback(() => {
@@ -76,10 +86,7 @@ const DividerFieldComponent: React.FC<DividerFieldComponentProps> = ({ blockId, 
     <Box
       ref={contentRef}
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: '100%',

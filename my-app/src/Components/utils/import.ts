@@ -179,7 +179,7 @@ function validateImportSchema(data: any, options: ImportOptions): { isValid: boo
 /**
  * Convert imported blocks to DroppedBlock format
  */
-function convertToDroppedBlocks(importedBlocks: any[], options: ImportOptions): DroppedBlock[] {
+export function convertToDroppedBlocks(importedBlocks: any[], options: ImportOptions): DroppedBlock[] {
   return importedBlocks.map(block => ({
     id: options.regenerateIds ? generateId('block') : block.id || generateId('block'),
     style: convertStyleToBlockStyle(block.style),
@@ -202,9 +202,6 @@ function convertToDroppedBlocks(importedBlocks: any[], options: ImportOptions): 
       sectionEditorOptions: {} as any,
       spacerEditorOptions: {} as any,
       linkEditorOptions: {} as any,
-      linkBoxEditorOptions: {} as any,
-      imageBoxEditorOptions: {} as any,
-      mapEditorOptions: {} as any,
       iconEditorOptions: {} as any,
       shippingAddressEditorOptions: {} as any,
       billingAddressEditorOptions: {} as any,
@@ -247,10 +244,10 @@ function convertStyleToBlockStyle(style: any): any {
     borderLeftSize: parseBorderSize(style.borderLeft),
     borderRightSize: parseBorderSize(style.borderRight),
     padding: {
-      top: style.paddingTop || 0,
-      right: style.paddingRight || 0,
-      bottom: style.paddingBottom || 0,
-      left: style.paddingLeft || 0
+      top: style.paddingTop || style.padding?.top || 0,
+      right: style.paddingRight || style.padding?.right || 0,
+      bottom: style.paddingBottom || style.padding?.bottom || 0,
+      left: style.paddingLeft || style.padding?.left || 0
     },
     height: style.height || 'auto'
   };
@@ -289,10 +286,10 @@ function convertStyleToColumnStyle(style: any): any {
     borderLeftSize: parseBorderSize(style.borderLeft),
     borderRightSize: parseBorderSize(style.borderRight),
     padding: {
-      top: style.paddingTop || 10,
-      right: style.paddingRight || 10,
-      bottom: style.paddingBottom || 10,
-      left: style.paddingLeft || 10
+      top: style.paddingTop || style.padding?.top || 10,
+      right: style.paddingRight || style.padding?.right || 10,
+      bottom: style.paddingBottom || style.padding?.bottom || 10,
+      left: style.paddingLeft || style.padding?.left || 10
     },
     height: style.height || 'auto'
   };

@@ -500,6 +500,8 @@ public static function get_instance() {
             '{{store_phone}}' => (isset($store_phone) ? $store_phone : ''),
             '{{store_tagline}}' => (isset($store_tagline) ? $store_tagline : get_bloginfo('description')),
             '{{logo_url}}' => (isset($logo_url) ? $logo_url : ''),
+            '{{current_year}}' => date('Y'),
+            '{{site_title}}' => get_bloginfo('name'),
             '{{related_products_title}}' => 'You Might Also Like',
             '{{shop_url}}' => get_home_url(),
             '{{cancellation_date}}' => current_time('Y-m-d'),

@@ -4,30 +4,18 @@ import SocialFollowWidget from './Widgets/socialFollowWidget';
 import VideoWidget from './Widgets/videoWidget';
 import CodeWidget from './Widgets/codeWidget';
 import CountdownWidget from './Widgets/countdownWidget';
-import ProgressBarWidget from './Widgets/progressBarWidget';
 import ProductWidget from './Widgets/productWidget';
 import PromoCodeWidget from './Widgets/promoCodeWidget';
 import PriceWidget from './Widgets/priceWidget';
-import TestimonialWidget from './Widgets/testimonialWidget';
-import NavbarWidget from './Widgets/navbarWidget';
-import CardWidget from './Widgets/cardWidget';
-import AlertWidget from './Widgets/alertWidget';
-import ProgressWidget from './Widgets/progressWidget';
 
 export const extraWidgets = [
   { Component: SocialFollowWidget, name: 'Social Follow' },
   { Component: VideoWidget, name: 'Video' },
   { Component: CodeWidget, name: 'Code' },
   { Component: CountdownWidget, name: 'Countdown' },
-  { Component: ProgressBarWidget, name: 'Progress Bar' },
   { Component: ProductWidget, name: 'Product' },
   { Component: PromoCodeWidget, name: 'Promo Code' },
   { Component: PriceWidget, name: 'Price' },
-  { Component: TestimonialWidget, name: 'Testimonial' },
-  { Component: NavbarWidget, name: 'Navbar' },
-  { Component: CardWidget, name: 'Card' },
-  { Component: AlertWidget, name: 'Alert' },
-  { Component: ProgressWidget, name: 'Progress' },
 ];
 
 const ExtraLayout = ({ searchTerm = '' }: { searchTerm?: string }) => {

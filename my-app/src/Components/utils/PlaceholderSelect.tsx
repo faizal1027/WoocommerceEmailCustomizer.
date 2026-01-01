@@ -25,6 +25,7 @@ export const PLACEHOLDERS = [
     { label: 'Refund Amount', value: '{{refund_amount}}' },
     { label: 'Refund Reason', value: '{{refund_reason}}' },
     { label: 'Customer Note', value: '{{customer_note}}' },
+    { label: 'Current Year', value: '{{current_year}}' },
 ];
 
 interface PlaceholderSelectProps {

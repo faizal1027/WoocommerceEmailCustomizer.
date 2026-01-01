@@ -59,7 +59,7 @@ const SocialFollowFieldComponent: React.FC<SocialFollowFieldComponentProps> = ({
   };
 
   const handleIconClick = (e: React.MouseEvent, url: string) => {
-    e.stopPropagation();
+    // e.stopPropagation(); // Bubbling allowed
     if (url) {
       window.open(url, '_blank');
     }
@@ -68,10 +68,7 @@ const SocialFollowFieldComponent: React.FC<SocialFollowFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: '100%',

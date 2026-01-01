@@ -370,10 +370,23 @@ export interface CountdownEditorOptions {
   targetDate: string;
   format: string;
   showLabels: boolean;
-  backgroundColor: string;
-  textColor: string;
+  backgroundColor: string; // This will now be the Box background
+  textColor: string;       // This will now be the Value text color
   title?: string;
+  titleColor?: string;
+  footer?: string;
+  footerColor?: string;
+  labelColor?: string;
   endMessage?: string;
+  daysLabel?: string;
+  hoursLabel?: string;
+  minutesLabel?: string;
+  secondsLabel?: string;
+  showDays?: boolean;
+  showHours?: boolean;
+  showMinutes?: boolean;
+  showSeconds?: boolean;
+  containerBgColor?: string;
 }
 
 export interface ProgressBarEditorOptions {
@@ -726,6 +739,7 @@ export interface OrderItemsEditorOptions {
 
 export interface EmailHeaderEditorOptions {
   storeName: string;
+  showStoreName?: boolean;
   showLogo: boolean;
   logoUrl: string;
   logoWidth: string;
@@ -753,8 +767,19 @@ export interface EmailFooterEditorOptions {
   textColor: string;
   linkColor: string;
   padding: string;
+  textAlign?: string;
   fontFamily: string;
   fontSize: string;
+  copyrightText?: string;
+  showLegal?: boolean;
+  privacyLinkText?: string;
+  privacyLinkUrl?: string;
+  termsLinkUrl?: string;
+  storeUrl?: string;
+  socialIcons?: {
+    icons: string[];
+    urls: string[];
+  };
 }
 
 export interface CtaButtonEditorOptions {
@@ -944,7 +969,7 @@ export const defaultTextEditorOptions: TextEditorOptions = {
   lineHeight: 140,
   letterSpace: 1,
   padding: { top: 0, left: 0, right: 0, bottom: 0 },
-  content: '<p>Click to edit text</p>',
+  content: 'Click to edit text',
 };
 
 export const defaultButtonEditorOptions: ButtonEditorOptions = {
@@ -1129,11 +1154,26 @@ export const defaultCodeEditorOptions: CodeEditorOptions = {
 };
 
 const defaultCountdownEditorOptions: CountdownEditorOptions = {
-  targetDate: '2024-12-31T23:59:59',
+  targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   format: 'DD:HH:MM:SS',
   showLabels: true,
-  backgroundColor: '#333',
-  textColor: '#fff'
+  backgroundColor: '#d32f2f', // Red boxes
+  textColor: '#ffffff',       // White text
+  title: 'SALES ENDS IN',
+  titleColor: '#000000',
+  footer: 'All courses 50% off',
+  footerColor: '#000000',
+  labelColor: '#333333',
+  endMessage: 'The offer has ended!',
+  daysLabel: 'Days',
+  hoursLabel: 'Hours',
+  minutesLabel: 'Minutes',
+  secondsLabel: 'Seconds',
+  showDays: true,
+  showHours: true,
+  showMinutes: true,
+  showSeconds: true,
+  containerBgColor: 'transparent',
 };
 
 const defaultProgressBarEditorOptions: ProgressBarEditorOptions = {
@@ -1407,7 +1447,17 @@ export const defaultEmailFooterEditorOptions: EmailFooterEditorOptions = {
   linkColor: '#4CAF50',
   padding: '30px 20px',
   fontFamily: 'Arial, sans-serif',
-  fontSize: '14px'
+  fontSize: '14px',
+  copyrightText: '© {{current_year}} {{store_name}}. All rights reserved.',
+  showLegal: true,
+  privacyLinkText: 'Privacy Policy',
+  privacyLinkUrl: '#',
+  termsLinkUrl: '#',
+  storeUrl: '{{store_url}}',
+  socialIcons: {
+    icons: ['facebook', 'twitter', 'instagram'],
+    urls: ['https://facebook.com', 'https://twitter.com', 'https://instagram.com']
+  }
 };
 
 export const defaultCtaButtonEditorOptions: CtaButtonEditorOptions = {
@@ -1684,17 +1734,23 @@ const workspaceSlice = createSlice({
     },
 
     copyBlock: (state, action: PayloadAction<string | null>) => {
+      console.log('REDUCER: copyBlock called with ID:', action.payload);
       state.past = [...state.past, current(state.blocks)];
       state.future = [];
       const blockToCopy = state.blocks.find((block) => block.id === action.payload);
       if (blockToCopy && action.payload) {
         const newBlockId = `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`;
+        console.log('REDUCER: Creating new block with ID:', newBlockId);
+
         const newColumns = blockToCopy.columns.map((col) => ({
           id: `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`,
           style: { ...col.style },
           contentType: col.contentType,
           contentData: col.contentData,
-          widgetContents: [...col.widgetContents],
+          // Fix: Deep copy widgetContents to prevent shared references
+          widgetContents: col.widgetContents.map(widget => ({
+            ...widget,
+          })),
 
           // Basic Layout
           sectionEditorOptions: { ...col.sectionEditorOptions },
@@ -1761,14 +1817,19 @@ const workspaceSlice = createSlice({
           columns: newColumns,
           style: { ...blockToCopy.style },
         });
+        console.log('REDUCER: Block copied successfully');
       }
     },
 
     deleteBlock: (state, action: PayloadAction<string | null>) => {
+      console.log('REDUCER: deleteBlock called with ID:', action.payload);
       if (action.payload) {
         state.past = [...state.past, current(state.blocks)];
         state.future = [];
+        const originalLength = state.blocks.length;
         state.blocks = state.blocks.filter((block) => block.id !== action.payload);
+        console.log(`REDUCER: Block deleted. Count before: ${originalLength}, after: ${state.blocks.length}`);
+
         if (state.selectedBlockId === action.payload) {
           state.selectedBlockId = null;
         }
@@ -1781,12 +1842,14 @@ const workspaceSlice = createSlice({
     },
 
     deleteColumnContent: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; widgetIndex: number }>) => {
+      console.log('REDUCER: deleteColumnContent called', action.payload);
       state.past = [...state.past, current(state.blocks)];
       state.future = [];
       const { blockId, columnIndex, widgetIndex } = action.payload;
       if (blockId) {
         const block = state.blocks.find((b) => b.id === blockId);
         if (block && block.columns[columnIndex] && widgetIndex !== null) {
+          console.log(`REDUCER: Deleting widget at index ${widgetIndex} in col ${columnIndex} of block ${blockId}`);
           block.columns[columnIndex].widgetContents.splice(widgetIndex, 1);
           if (block.columns[columnIndex].widgetContents.length === 0) {
             block.columns[columnIndex].contentType = null;
@@ -1799,6 +1862,8 @@ const workspaceSlice = createSlice({
             state.selectedColumnIndex = null;
             state.selectedWidgetIndex = null;
           }
+        } else {
+          console.error('REDUCER: Block or column not found for widget deletion');
         }
       }
     },
@@ -1813,6 +1878,43 @@ const workspaceSlice = createSlice({
       if (sourceIndex !== -1 && targetIndex !== -1) {
         const [movedBlock] = state.blocks.splice(sourceIndex, 1);
         state.blocks.splice(targetIndex, 0, movedBlock);
+      }
+    },
+
+    reorderColumnContent: (state, action: PayloadAction<{ blockId: string; columnIndex: number; sourceIndex: number; targetIndex: number }>) => {
+      const { blockId, columnIndex, sourceIndex, targetIndex } = action.payload;
+      const block = state.blocks.find(b => b.id === blockId);
+      if (block && block.columns[columnIndex]) {
+        state.past = [...state.past, current(state.blocks)];
+        state.future = [];
+        const widgetContents = block.columns[columnIndex].widgetContents;
+        const [movedWidget] = widgetContents.splice(sourceIndex, 1);
+        widgetContents.splice(targetIndex, 0, movedWidget);
+
+        // Update selected index if necessary
+        if (state.selectedBlockForEditor === blockId && state.selectedColumnIndex === columnIndex) {
+          if (state.selectedWidgetIndex === sourceIndex) {
+            state.selectedWidgetIndex = targetIndex;
+          } else if (sourceIndex < targetIndex && state.selectedWidgetIndex !== null && state.selectedWidgetIndex > sourceIndex && state.selectedWidgetIndex <= targetIndex) {
+            state.selectedWidgetIndex--;
+          } else if (sourceIndex > targetIndex && state.selectedWidgetIndex !== null && state.selectedWidgetIndex < sourceIndex && state.selectedWidgetIndex >= targetIndex) {
+            state.selectedWidgetIndex++;
+          }
+        }
+      }
+    },
+
+    copyColumnContent: (state, action: PayloadAction<{ blockId: string; columnIndex: number; widgetIndex: number }>) => {
+      const { blockId, columnIndex, widgetIndex } = action.payload;
+      const block = state.blocks.find(b => b.id === blockId);
+      if (block && block.columns[columnIndex]) {
+        state.past = [...state.past, current(state.blocks)];
+        state.future = [];
+        const widgetToCopy = block.columns[columnIndex].widgetContents[widgetIndex];
+        if (widgetToCopy) {
+          const newWidget = { ...widgetToCopy }; // Shallow copy is enough for now as contentData is string
+          block.columns[columnIndex].widgetContents.splice(widgetIndex + 1, 0, newWidget);
+        }
       }
     },
 
@@ -3984,7 +4086,7 @@ export const {
 
   // Content Management
   updateWidgetContentData, updateColumnContentData,
-  addColumnContent, deleteColumnContent,
+  addColumnContent, deleteColumnContent, reorderColumnContent, copyColumnContent,
 
   // Basic Layout Editor Options
   updateColumnTextEditorOptions,

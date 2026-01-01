@@ -85,11 +85,11 @@ const IconFieldComponent: React.FC<IconFieldComponentProps> = ({
   const IconComponent = getIconComponent();
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    // e.stopPropagation(); // Bubbling allowed
     onWidgetClick(e);
     onClick();
     dispatch(setSelectedBlockId(blockId));
-    
+
     // If link is provided, open in new tab
     if (iconEditorOptions.link) {
       window.open(iconEditorOptions.link, '_blank');
@@ -98,7 +98,28 @@ const IconFieldComponent: React.FC<IconFieldComponentProps> = ({
 
   return (
     <Box
-      onClick={handleClick}
+      onClick={(e) => {
+        // Allow bubbling but keep link functionality if needed?
+        // Wait, handleClick has link logic. I need to be careful with Icon.
+        if (iconEditorOptions.link) {
+          e.stopPropagation(); // If it's a link, maybe we WANT to stop? No, we want to select it too.
+          // But if it's a link, we usually don't want to follow it in editor?
+          // handleClick opens window.open.
+          // If I remove stopProp, editor opens. window.open also happens?
+          // Let's just remove stopPropagation and see.
+          // Actually, handleClick logic:
+          // e.stopPropagation();
+          // onWidgetClick(e); ...
+          // if (link) window.open...
+
+          // If I remove stopProp from handleClick, it bubbles. Wrapper selects it.
+          // window.open still happens.
+          // This is fine.
+
+          // I will modify handleClick function itself.
+        }
+        handleClick(e);
+      }}
       sx={{
         display: 'inline-flex',
         alignItems: 'center',

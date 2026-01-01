@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../Store/store";
 import { DroppedBlock, setBlocks } from "../../Store/Slice/workspaceSlice";
 import { exportToHTML, exportToJSON, ExportDialogModal } from "../utils/Export";
-import { importTemplate, importFromText } from "../utils/import";
+import { importTemplate, importFromText, convertToDroppedBlocks } from "../utils/import";
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -58,6 +58,8 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
+
+
 
 const ExportColumn = () => {
   const dispatch = useDispatch();
@@ -160,9 +162,12 @@ const ExportColumn = () => {
       if (template && template.json_data) {
         try {
           // Parse JSON if it's a string, or use directly if it's already an object (though usually string from DB)
-          const parsedBlocks: DroppedBlock[] = typeof template.json_data === 'string'
+          const rawBlocks = typeof template.json_data === 'string'
             ? JSON.parse(template.json_data)
             : template.json_data;
+
+          // Use shared conversion logic to ensure all styles are present
+          const parsedBlocks = convertToDroppedBlocks(rawBlocks, { regenerateIds: false });
 
           dispatch(setBlocks(parsedBlocks));
           setSelectedTemplateId(template.id);
@@ -171,6 +176,7 @@ const ExportColumn = () => {
           setTemplateName(template.email_template_name);
           setPriority(template.priority ? parseInt(template.priority, 10) : 0);
         } catch (e) {
+          console.error("Error parsing template JSON:", e);
         }
       }
     }
@@ -194,9 +200,12 @@ const ExportColumn = () => {
         if (isEditModeByUrl) {
           // In Edit mode (URL has ID), we load the content
           if (selectedTemplate.json_data) {
-            const parsedBlocks: DroppedBlock[] = typeof selectedTemplate.json_data === 'string'
+            const rawBlocks = typeof selectedTemplate.json_data === 'string'
               ? JSON.parse(selectedTemplate.json_data)
               : selectedTemplate.json_data;
+
+            // Use shared conversion logic to ensure all styles are present
+            const parsedBlocks = convertToDroppedBlocks(rawBlocks, { regenerateIds: false });
 
             dispatch(setBlocks(parsedBlocks));
           }
@@ -876,40 +885,15 @@ const ExportColumn = () => {
       <Divider sx={{ my: 2 }} />
 
 
+      {/* ====== EXPORT SECTION ====== */}
       {/* ====== EXPORT/IMPORT SECTION ====== */}
       <Box>
         <Typography sx={{ fontWeight: "bold", fontSize: "16px", mb: 1.5 }}>
-          Export/Import
+          {isEditMode ? "Export" : "Export/Import"}
         </Typography>
 
-        {/* Export and Import buttons side by side */}
-        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-          {/* Import Button */}
-          <Button
-            variant="outlined"
-            startIcon={<CloudUploadIcon />}
-            onClick={openImportDialog}
-            fullWidth
-            sx={{
-              backgroundColor: "#1E5AB6",
-              textTransform: "none",
-              color: "white",
-              fontWeight: "normal",
-              fontSize: "14px",
-              py: 1.5,
-              borderColor: "#ddd",
-              "&:hover": {
-                backgroundColor: "transparent",
-                color: "primary.main",
-                border: "1px solid",
-                borderColor: "primary.main",
-              },
-            }}
-          >
-            Import
-          </Button>
-
-          {/* Export Button */}
+        {isEditMode ? (
+          // Edit Mode: Only Export Template (Full Width)
           <Button
             variant="outlined"
             startIcon={<DownloadIcon />}
@@ -937,9 +921,68 @@ const ExportColumn = () => {
               },
             }}
           >
-            Export
+            Export Template
           </Button>
-        </Box>
+        ) : (
+          // Add New Mode: Import and Export Side-by-Side
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {/* Import Button */}
+            <Button
+              variant="outlined"
+              startIcon={<CloudUploadIcon />}
+              onClick={() => fileInputRef.current?.click()}
+              fullWidth
+              sx={{
+                backgroundColor: "#1E5AB6",
+                textTransform: "none",
+                color: "white",
+                fontWeight: "normal",
+                fontSize: "14px",
+                py: 1.5,
+                borderColor: "#ddd",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: "primary.main",
+                  border: "1px solid",
+                  borderColor: "primary.main",
+                },
+              }}
+            >
+              Import
+            </Button>
+
+            {/* Export Button */}
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={() => setExportDialogOpen(true)}
+              disabled={blocks.length === 0}
+              fullWidth
+              sx={{
+                backgroundColor: "#1E5AB6",
+                textTransform: "none",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: "14px",
+                py: 1.5,
+                borderColor: "#1E5AB6",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: "primary.main",
+                  border: "1px solid",
+                  borderColor: "primary.main",
+                },
+                "&:disabled": {
+                  backgroundColor: "#cccccc",
+                  color: "#666",
+                  borderColor: "#cccccc",
+                },
+              }}
+            >
+              Export
+            </Button>
+          </Box>
+        )}
       </Box>
 
       {/* Export Dialog Modal */}

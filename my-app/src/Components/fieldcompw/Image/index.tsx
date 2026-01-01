@@ -31,13 +31,18 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
   const imageOptions = widgetContent?.contentData
     ? JSON.parse(widgetContent.contentData)
     : {
-        src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
-        altText: 'Uploaded content',
-        width: '100%',
-        align: 'center',
-        autoWidth: true,
-        padding: { top: 0, left: 0, right: 0, bottom: 0 },
-      };
+      src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
+      altText: 'Uploaded content',
+      width: '100%',
+      align: 'center',
+      autoWidth: true,
+      padding: { top: 0, left: 0, right: 0, bottom: 0 },
+    };
+
+  // Ensure padding exists if it's missing from the JSON
+  if (!imageOptions.padding) {
+    imageOptions.padding = { top: 0, bottom: 0, left: 0, right: 0 };
+  }
 
   const measureHeight = useCallback(() => {
     if (contentRef.current) {
@@ -82,9 +87,7 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
     <Box
       ref={contentRef}
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         cursor: 'pointer',

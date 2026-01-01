@@ -27,10 +27,7 @@ const SpacerFieldComponent: React.FC<SpacerFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: '100%',

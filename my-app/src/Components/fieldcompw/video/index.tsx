@@ -36,10 +36,7 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
+        // Allow bubbling
       }}
       sx={{
         width: videoEditorOptions.width || '100%',

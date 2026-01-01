@@ -47,20 +47,18 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
 
     const fallback = (value: string, placeholder: string) => value?.trim() || placeholder;
 
+    const align = emailHeaderEditorOptions?.textAlign || 'center';
+
     return (
         <Box
             onClick={(e) => {
-                e.stopPropagation();
-                onWidgetClick(e);
-                onClick();
-                dispatch(setSelectedBlockId(blockId));
+                // Allow bubbling
             }}
             sx={{
                 width: '100%',
                 backgroundColor: emailHeaderEditorOptions?.backgroundColor || '#4CAF50',
                 color: emailHeaderEditorOptions?.textColor || '#ffffff',
-                padding: emailHeaderEditorOptions?.padding || '20px',
-                textAlign: emailHeaderEditorOptions?.textAlign || 'center',
+                padding: emailHeaderEditorOptions?.padding || '0px',
                 border: isSelected ? '2px dashed blue' : 'none',
                 cursor: 'pointer',
                 position: 'relative',
@@ -68,45 +66,18 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
             }}
         >
             {/* Logo */}
-            {emailHeaderEditorOptions?.showLogo && (
-                <Box
-                    component="img"
-                    src={emailHeaderEditorOptions?.logoUrl || (previewMode ? 'https://via.placeholder.com/150x50?text=Store+Logo' : '{{logo_url}}')}
-                    alt="Store Logo"
-                    sx={{
-                        maxWidth: emailHeaderEditorOptions?.logoWidth || '150px',
-                        height: 'auto',
-                        marginBottom: '10px',
-                    }}
-                />
-            )}
-
-            {/* Store Name */}
-            <Typography
-                variant="h4"
+            <Box
+                component="img"
+                src={emailHeaderEditorOptions?.logoUrl || (previewMode ? 'https://via.placeholder.com/150x50?text=Store+Logo' : '{{logo_url}}')}
+                alt="Store Logo"
                 sx={{
-                    fontFamily: emailHeaderEditorOptions?.fontFamily === 'inherit' || !emailHeaderEditorOptions?.fontFamily ? 'inherit' : emailHeaderEditorOptions?.fontFamily,
-                    fontWeight: emailHeaderEditorOptions?.fontWeight || 'bold',
-                    fontSize: emailHeaderEditorOptions?.fontSize || '28px',
-                    marginBottom: '5px',
+                    display: 'block',
+                    maxWidth: emailHeaderEditorOptions?.logoWidth || '150px',
+                    height: 'auto',
+                    marginLeft: align === 'center' || align === 'right' ? 'auto' : '0',
+                    marginRight: align === 'center' ? 'auto' : '0',
                 }}
-            >
-                {fallback(emailHeaderEditorOptions?.storeName, previewMode ? 'Your Store Name' : '{{store_name}}')}
-            </Typography>
-
-            {/* Tagline */}
-            {emailHeaderEditorOptions?.showTagline && (
-                <Typography
-                    variant="body2"
-                    sx={{
-                        fontFamily: emailHeaderEditorOptions?.fontFamily === 'inherit' || !emailHeaderEditorOptions?.fontFamily ? 'inherit' : emailHeaderEditorOptions?.fontFamily,
-                        fontSize: emailHeaderEditorOptions?.taglineFontSize || '14px',
-                        opacity: 0.9,
-                    }}
-                >
-                    {fallback(emailHeaderEditorOptions?.tagline, previewMode ? 'Quality products, delivered to your door' : '{{store_tagline}}')}
-                </Typography>
-            )}
+            />
         </Box>
     );
 };

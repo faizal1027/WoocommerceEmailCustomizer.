@@ -47,9 +47,13 @@ const ButtonWidgetEditor = () => {
       ? blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
       : null;
   const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-  const buttonData: ButtonEditorOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : { ...defaultButtonEditorOptions };
+  const parsedData = widgetContent?.contentData ? JSON.parse(widgetContent.contentData) : {};
+  const buttonData: ButtonEditorOptions = {
+    ...defaultButtonEditorOptions,
+    ...parsedData,
+    padding: { ...defaultButtonEditorOptions.padding, ...parsedData?.padding },
+    borderRadius: { ...defaultButtonEditorOptions.borderRadius, ...parsedData?.borderRadius },
+  };
 
 
   const optionsRef = useRef(buttonData);

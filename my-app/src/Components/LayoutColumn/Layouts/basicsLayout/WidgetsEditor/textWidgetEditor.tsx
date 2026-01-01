@@ -107,34 +107,52 @@ const TextWidgetEditor = () => {
 
   // Handle Editor Initialization from Global CDN Object
   useEffect(() => {
-    const GlobalClassicEditor = (window as any).ClassicEditor;
-    if (!GlobalClassicEditor || !editorRef.current || isInitializingRef.current || editorInstance) {
-      return;
+    let intervalId: NodeJS.Timer;
+
+    const initEditor = () => {
+      const GlobalClassicEditor = (window as any).ClassicEditor;
+      if (!GlobalClassicEditor || !editorRef.current || isInitializingRef.current || editorInstance) {
+        return;
+      }
+
+      isInitializingRef.current = true;
+
+      GlobalClassicEditor.create(editorRef.current, {
+        toolbar: ["heading", "|", "bold", "italic", "underline", "|", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
+      })
+        .then((editor: any) => {
+          setEditorInstance(editor);
+          editor.setData(optionsRef.current.content || "");
+
+          editor.model.document.on('change:data', () => {
+            const data = editor.getData();
+            setEditorContent(data);
+            debouncedUpdate({ content: data });
+          });
+        })
+        .catch((error: any) => {
+          console.error("CKEditor CDN Initialization Failed:", error);
+        })
+        .finally(() => {
+          isInitializingRef.current = false;
+        });
+    };
+
+    // Check immediately
+    initEditor();
+
+    // Poll if not found
+    if (!(window as any).ClassicEditor) {
+      intervalId = setInterval(() => {
+        if ((window as any).ClassicEditor) {
+          initEditor();
+          clearInterval(intervalId);
+        }
+      }, 500);
     }
 
-    isInitializingRef.current = true;
-
-    GlobalClassicEditor.create(editorRef.current, {
-      toolbar: ["heading", "|", "bold", "italic", "underline", "|", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
-    })
-      .then((editor: any) => {
-        setEditorInstance(editor);
-        editor.setData(optionsRef.current.content || "");
-
-        editor.model.document.on('change:data', () => {
-          const data = editor.getData();
-          setEditorContent(data);
-          debouncedUpdate({ content: data });
-        });
-      })
-      .catch((error: any) => {
-        console.error("CKEditor CDN Initialization Failed:", error);
-      })
-      .finally(() => {
-        isInitializingRef.current = false;
-      });
-
     return () => {
+      if (intervalId) clearInterval(intervalId);
       if (editorInstance) {
         editorInstance.destroy().catch((err: any) => console.error("Editor destroy error", err));
       }
@@ -269,10 +287,11 @@ const TextWidgetEditor = () => {
               </FormControl>
             </Box>
 
+            {/* Row 2: Font Size & Line Height */}
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Font Size
+                  Font Size (px)
                 </Typography>
                 <TextField
                   type="number"
@@ -282,21 +301,6 @@ const TextWidgetEditor = () => {
                   fullWidth
                 />
               </Box>
-              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-                <ColorPicker
-                  label="Text Color"
-                  value={color}
-                  onChange={(newColor) => debouncedUpdate({ color: newColor })}
-                />
-                <ColorPicker
-                  label="Background Color"
-                  value={backgroundColor}
-                  onChange={(newColor) => debouncedUpdate({ backgroundColor: newColor })}
-                />
-              </Box>
-            </Box>
-
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Line Height (%)
@@ -309,18 +313,34 @@ const TextWidgetEditor = () => {
                   fullWidth
                 />
               </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Letter Spacing
-                </Typography>
-                <TextField
-                  type="number"
-                  value={letterSpace}
-                  onChange={(e) => debouncedUpdate({ letterSpace: Number(e.target.value) })}
-                  size="small"
-                  fullWidth
-                />
-              </Box>
+            </Box>
+
+            {/* Row 3: Colors */}
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <ColorPicker
+                label="Text Color"
+                value={color}
+                onChange={(newColor) => debouncedUpdate({ color: newColor })}
+              />
+              <ColorPicker
+                label="Background Color"
+                value={backgroundColor}
+                onChange={(newColor) => debouncedUpdate({ backgroundColor: newColor })}
+              />
+            </Box>
+
+            {/* Row 4: Letter Spacing */}
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Letter Spacing (px)
+              </Typography>
+              <TextField
+                type="number"
+                value={letterSpace}
+                onChange={(e) => debouncedUpdate({ letterSpace: Number(e.target.value) })}
+                size="small"
+                fullWidth
+              />
             </Box>
 
 

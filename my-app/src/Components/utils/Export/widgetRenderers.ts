@@ -448,93 +448,12 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     return `<a href="${escapeHtml(data.url || '#')}" style="${styles}" target="_blank" rel="noopener">${escapeHtml(data.text || 'Link')}</a>`;
   },
 
-  // ========== 14. LINK BOX WIDGET ==========
-  'linkBox': (d) => {
-    const data = d || {};
-    const links = data.links || [];
 
-    const containerStyles = [
-      `background-color: ${data.backgroundColor || '#f9f9f9'}`,
-      `padding: ${data.padding || 10}px`,
-      data.borderRadius ? `border-radius: ${data.borderRadius}px` : ''
-    ].filter(Boolean).join('; ');
 
-    const linksHtml = links.map((link: any, index: number) => `
-      <div style="margin-bottom: ${index < links.length - 1 ? '8px' : '0'};">
-        <a href="${escapeHtml(link.url || '#')}" 
-           style="color: #007bff; text-decoration: none; font-size: 14px;"
-           target="_blank" rel="noopener">
-          ${escapeHtml(link.text || `Link ${index + 1}`)}
-        </a>
-      </div>
-    `).join('');
 
-    return `<div style="${containerStyles}">${linksHtml}</div>`;
-  },
-
-  // ========== 15. IMAGE BOX WIDGET ==========
-  'imageBox': (d) => {
-    const data = d || {};
-    const src = data.src || 'https://cdn.tools.unlayer.com/image/placeholder.png';
-    const alt = data.alt || 'Image';
-
-    const containerStyles = [
-      `width: ${data.width || '100%'}`,
-      data.height ? `height: ${data.height}` : '',
-      'margin: 0 auto'
-    ].filter(Boolean).join('; ');
-
-    const imgStyles = [
-      'width: 100%',
-      'height: auto',
-      'display: block'
-    ].filter(Boolean).join('; ');
-
-    let content = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="${imgStyles}" />`;
-
-    if (data.link) {
-      content = `<a href="${escapeHtml(data.link)}" target="_blank" rel="noopener">${content}</a>`;
-    }
-
-    if (data.caption) {
-      content += `<div style="text-align: center; font-size: 14px; color: #666; margin-top: 8px; padding: 8px; font-style: italic;">${escapeHtml(data.caption)}</div>`;
-    }
-
-    return `<div style="${containerStyles}">${content}</div>`;
-  },
 
   // ========== 16. MAP WIDGET ==========
-  'map': (d) => {
-    const data = d || {};
-    const location = encodeURIComponent(data.location || 'New York, NY');
-    const zoom = data.zoom || 12;
 
-    const styles = [
-      `width: ${data.width || '100%'}`,
-      `height: ${data.height || '300px'}`,
-      'border: 1px solid #ddd',
-      'border-radius: 4px'
-    ].filter(Boolean).join('; ');
-
-    // Use a static image for map instead of iframe (not supported in email)
-    // We link to the Google Maps URL
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${location}`;
-    const placeholderMap = 'https://cdn.tools.unlayer.com/image/placeholder.png'; // Or a generic map icon
-
-    return `
-      <div style="${styles}">
-        <a href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" style="text-decoration: none; display: block; width: 100%; height: 100%;">
-          <div style="background-color: #e9ecef; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #666; font-family: Arial, sans-serif;">
-             <div style="text-align: center;">
-               <div style="font-size: 24px; margin-bottom: 8px;">📍</div>
-               <div>Map Location</div>
-               <div style="font-size: 12px; margin-top: 4px; color: #007bff;">Click to view map</div>
-             </div>
-          </div>
-        </a>
-      </div>
-    `;
-  },
 
   // ========== 17. ICON WIDGET ==========
   'icon': (d) => {
@@ -741,64 +660,49 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 24. COUNTDOWN WIDGET ==========
   'countdown': (d) => {
     const data = d || {};
-    const styles = [
-      `background-color: ${data.backgroundColor || '#333'}`,
-      `color: ${data.textColor || '#fff'}`,
-      'padding: 20px',
-      'border-radius: 8px',
-      'text-align: center',
-      'font-family: monospace',
-      'font-size: 24px',
-      'font-weight: bold',
-      'letter-spacing: 2px'
-    ].filter(Boolean).join('; ');
+    const title = data.title || '';
+    const footer = data.footer || '';
+    const titleColor = data.titleColor || '#000000';
+    const footerColor = data.footerColor || '#000000';
+    const labelColor = data.labelColor || '#333333';
+    const boxBgColor = data.backgroundColor || '#d32f2f';
+    const valColor = data.textColor || '#ffffff';
+    const containerBg = data.containerBgColor && data.containerBgColor !== 'transparent' ? `background-color: ${data.containerBgColor}` : '';
 
-    const targetDate = data.targetDate || '2024-12-31T23:59:59';
-    const labels = data.showLabels !== false;
+    const units = [
+      { label: data.daysLabel || 'Days', value: '07', show: data.showDays !== false },
+      { label: data.hoursLabel || 'Hours', value: '02', show: data.showHours !== false },
+      { label: data.minutesLabel || 'Minutes', value: '01', show: data.showMinutes !== false },
+      { label: data.secondsLabel || 'Seconds', value: '03', show: data.showSeconds !== false }
+    ].filter(unit => unit.show);
+
+    const unitsHtml = units.map(unit => `
+      <td align="center" style="padding: 0 10px;">
+        <div style="color: ${labelColor}; font-size: 14px; font-weight: 500; margin-bottom: 8px; font-family: sans-serif;">${escapeHtml(unit.label)}</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="background-color: ${boxBgColor}; border-radius: 12px; width: 80px; height: 80px;">
+          <tr>
+            <td align="center" valign="middle" style="color: ${valColor}; font-size: 32px; font-weight: bold; font-family: sans-serif;">
+              ${unit.value}
+            </td>
+          </tr>
+        </table>
+      </td>
+    `).join('');
 
     return `
-      <div style="${styles}">
-        <div style="margin-bottom: 8px; font-size: 16px; font-weight: normal;">Countdown Timer</div>
-        <div>${labels ? 'DD:HH:MM:SS' : '--:--:--:--'}</div>
-        <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Ends: ${new Date(targetDate).toLocaleDateString()}</div>
+      <div style="padding: 30px 20px; text-align: center; ${containerBg}">
+        ${title ? `<div style="color: ${titleColor}; font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; font-family: sans-serif;">${escapeHtml(title)}</div>` : ''}
+        <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+          <tr>
+            ${unitsHtml}
+          </tr>
+        </table>
+        ${footer ? `<div style="color: ${footerColor}; font-size: 24px; font-weight: bold; margin-top: 25px; font-family: sans-serif;">${escapeHtml(footer)}</div>` : ''}
       </div>
     `;
   },
 
-  // ========== 25. PROGRESS BAR WIDGET ==========
-  'progressBar': (d) => {
-    const data = d || {};
-    const value = data.value || 0;
-    const max = data.max || 100;
-    const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
-    const containerStyles = [
-      'width: 100%',
-      'background-color: #e9ecef',
-      'border-radius: 20px',
-      'overflow: hidden'
-    ].filter(Boolean).join('; ');
-
-    const barStyles = [
-      `width: ${percentage}%`,
-      `background-color: ${data.color || '#007bff'}`,
-      'height: 20px',
-      'transition: width 0.3s ease'
-    ].filter(Boolean).join('; ');
-
-    const labelHtml = data.label ? `<div style="margin-bottom: 8px; font-weight: 500; color: #495057;">${escapeHtml(data.label)}</div>` : '';
-    const percentageHtml = data.showPercentage !== false ? `<div style="margin-top: 8px; text-align: right; font-size: 14px; color: #6c757d;">${percentage.toFixed(1)}%</div>` : '';
-
-    return `
-      <div style="width: 100%;">
-        ${labelHtml}
-        <div style="${containerStyles}">
-          <div style="${barStyles}"></div>
-        </div>
-        ${percentageHtml}
-      </div>
-    `;
-  },
 
   // ========== 26. PRODUCT WIDGET ==========
   'product': (d) => {
@@ -925,452 +829,9 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     `;
   },
 
-  // ========== 29. TESTIMONIAL WIDGET ==========
-  'testimonial': (d) => {
-    const data = d || {};
-    const stars = '★'.repeat(Math.min(data.rating || 5, 5));
 
-    const styles = [
-      'border-left: 4px solid #007bff',
-      'background-color: #f8f9fa',
-      'padding: 24px',
-      'border-radius: 0 8px 8px 0',
-      'position: relative'
-    ].filter(Boolean).join('; ');
 
-    return `
-      <div style="${styles}">
-        <div style="color: #ffc107; font-size: 20px; margin-bottom: 12px;">${stars}</div>
-        <div style="font-size: 18px; font-style: italic; color: #495057; margin-bottom: 20px; line-height: 1.6;">
-          "${escapeHtml(data.quote || 'This is an amazing product!')}"
-        </div>
-        <div style="display: flex; align-items: center;">
-          ${data.avatar ? `<img src="${escapeHtml(data.avatar)}" alt="${escapeHtml(data.author || 'Author')}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; object-fit: cover;" />` : ''}
-          <div>
-            <div style="font-weight: bold; color: #2d3748;">${escapeHtml(data.author || 'John Doe')}</div>
-            <div style="font-size: 14px; color: #6c757d;">${escapeHtml(data.position || 'CEO, Company Inc')}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  },
 
-  // ========== 30. NAVBAR WIDGET ==========
-  'navbar': (d) => {
-    const data = d || {};
-    const links = data.links || [];
-
-    const styles = [
-      `background-color: ${data.backgroundColor || '#333'}`,
-      `color: ${data.textColor || '#fff'}`,
-      'padding: 16px',
-      'border-radius: 4px'
-    ].filter(Boolean).join('; ');
-
-    const linksHtml = links.map((link: any) => `
-      <a href="${escapeHtml(link.url || '#')}" 
-         style="color: ${data.textColor || '#fff'}; text-decoration: none; margin: 0 16px; font-weight: 500;"
-         target="_blank" rel="noopener">
-        ${escapeHtml(link.text || 'Link')}
-      </a>
-    `).join('');
-
-    const logoHtml = data.logo ? `<img src="${escapeHtml(data.logo)}" alt="Logo" style="height: 32px; margin-right: 24px;" />` : '';
-
-    return `
-      <div style="${styles}">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center;">
-            ${logoHtml}
-            <div style="font-weight: bold; font-size: 20px;">Brand</div>
-          </div>
-          <div>
-            ${linksHtml}
-          </div>
-        </div>
-      </div>
-    `;
-  },
-
-  // ========== 31. CARD WIDGET ==========
-  // ========== 31. CARD WIDGET ==========
-  'card': (d) => {
-    const data = d || {};
-    const styles = [
-      `background-color: ${data.backgroundColor || '#ffffff'}`,
-      `color: ${data.textColor || '#333333'}`,
-      data.border ? `border: 1px solid ${data.borderColor || '#ddd'}` : '',
-      data.shadow ? 'box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)' : '',
-      `border-radius: ${data.borderRadius || 8}px`,
-      `max-width: 400px`,
-      'overflow: hidden',
-      'margin: 0 auto'
-    ].filter(Boolean).join('; ');
-
-    return `
-      <div style="${styles}">
-        ${data.imageUrl || data.image ? `<img src="${escapeHtml(data.imageUrl || data.image)}" alt="Card image" style="width: 100%; height: 200px; object-fit: cover; display: block;" />` : ''}
-        <div style="padding: 20px;">
-          ${data.title ? `<h3 style="margin-top: 0; margin-bottom: 16px; font-size: 20px; font-weight: bold; color: ${data.textColor || '#333333'};">${escapeHtml(data.title)}</h3>` : ''}
-          ${data.content ? `<div style="line-height: 1.6; color: ${data.textColor || '#666666'};">${escapeHtml(data.content)}</div>` : ''}
-        </div>
-      </div>
-    `;
-  },
-
-  // ========== 32. ALERT WIDGET ==========
-  'alert': (d) => {
-    const data = d || {};
-    const typeColors: Record<string, { bg: string, border: string, text: string }> = {
-      'info': { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460' },
-      'success': { bg: '#d4edda', border: '#c3e6cb', text: '#155724' },
-      'warning': { bg: '#fff3cd', border: '#ffeeba', text: '#856404' },
-      'error': { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24' }
-    };
-
-    const colors = typeColors[data.type || 'info'] || typeColors.info;
-
-    const styles = [
-      `background-color: ${data.backgroundColor || colors.bg}`,
-      `color: ${data.textColor || colors.text}`,
-      'border: 1px solid',
-      `border-color: ${colors.border}`,
-      'border-radius: 4px',
-      'padding: 16px',
-      'position: relative'
-    ].filter(Boolean).join('; ');
-
-    const closeButton = data.closable !== false ? `
-      <button style="
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        color: inherit;
-        opacity: 0.5;
-      " onclick="this.parentElement.style.display='none'">×</button>
-    ` : '';
-
-    return `
-      <div style="${styles}">
-        ${closeButton}
-        ${data.title ? `<div style="font-weight: bold; margin-bottom: 8px;">${escapeHtml(data.title)}</div>` : ''}
-        <div>${escapeHtml(data.message || 'Alert message')}</div>
-      </div>
-    `;
-  },
-
-  // ========== 33. PROGRESS WIDGET ==========
-  'progress': (d) => {
-    const data = d || {};
-    const steps = data.steps || ['Step 1', 'Step 2', 'Step 3'];
-    const currentStep = Math.min(Math.max(data.currentStep || 1, 1), steps.length);
-    const orientation = data.orientation || 'horizontal';
-
-    if (orientation === 'vertical') {
-      return `
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${steps.map((step: string, index: number) => `
-            <div style="display: flex; align-items: center;">
-              <div style="
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-                background-color: ${index + 1 <= currentStep ? '#007bff' : '#e9ecef'};
-                color: ${index + 1 <= currentStep ? 'white' : '#6c757d'};
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: bold;
-                margin-right: 12px;
-              ">${index + 1}</div>
-              <div style="color: ${index + 1 <= currentStep ? '#007bff' : '#6c757d'}; font-weight: ${index + 1 <= currentStep ? 'bold' : 'normal'}">
-                ${escapeHtml(step)}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // Horizontal progress
-    return `
-      <div style="position: relative; padding: 40px 0 20px;">
-        <div style="position: absolute; top: 12px; left: 0; right: 0; height: 4px; background-color: #e9ecef; z-index: 1;"></div>
-        <div style="position: absolute; top: 12px; left: 0; width: ${((currentStep - 1) / (steps.length - 1)) * 100}%; height: 4px; background-color: #007bff; z-index: 2; transition: width 0.3s ease;"></div>
-        <div style="display: flex; justify-content: space-between; position: relative; z-index: 3;">
-          ${steps.map((step: string, index: number) => `
-            <div style="text-align: center; flex: 1;">
-              <div style="
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                background-color: ${index + 1 <= currentStep ? '#007bff' : '#e9ecef'};
-                color: ${index + 1 <= currentStep ? 'white' : '#6c757d'};
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: bold;
-                margin: 0 auto 8px;
-              ">${index + 1}</div>
-              <div style="font-size: 12px; color: ${index + 1 <= currentStep ? '#007bff' : '#6c757d'}; max-width: 100px; margin: 0 auto;">
-                ${escapeHtml(step)}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  },
-
-  // ========== 34. FORM WIDGET ==========
-  'form': (d) => {
-    const data = d || {};
-    const fields = data.fields || [];
-
-    const styles = [
-      'background-color: #f8f9fa',
-      'border: 1px solid #dee2e6',
-      'border-radius: 8px',
-      'padding: 24px'
-    ].filter(Boolean).join('; ');
-
-    const fieldsHtml = fields.map((field: any) => {
-      const required = field.required ? 'required' : '';
-      let fieldHtml = '';
-
-      switch (field.type) {
-        case 'textarea':
-          fieldHtml = `<textarea name="${escapeHtml(field.name)}" placeholder="${escapeHtml(field.label)}" ${required} style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box;"></textarea>`;
-          break;
-        case 'select':
-          fieldHtml = `<select name="${escapeHtml(field.name)}" ${required} style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box;"></select>`;
-          break;
-        default:
-          fieldHtml = `<input type="${field.type}" name="${escapeHtml(field.name)}" placeholder="${escapeHtml(field.label)}" ${required} style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box;" />`;
-      }
-
-      return `
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #495057;">
-            ${escapeHtml(field.label)} ${field.required ? '<span style="color: #dc3545;">*</span>' : ''}
-          </label>
-          ${fieldHtml}
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <div style="${styles}">
-        <form action="${escapeHtml(data.action || '#')}" method="${data.method || 'post'}" style="width: 100%;">
-          ${fieldsHtml || '<div style="text-align: center; color: #6c757d; padding: 20px;">No form fields defined</div>'}
-          <button type="submit" style="
-            background-color: #007bff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-          ">
-            ${escapeHtml(data.submitText || 'Submit')}
-          </button>
-        </form>
-      </div>
-    `;
-  },
-
-  // ========== 35. SURVEY WIDGET ==========
-  'survey': (d) => {
-    const data = d || {};
-    const options = data.options || [];
-
-    const styles = [
-      'background-color: #ffffff',
-      'border: 2px solid #007bff',
-      'border-radius: 8px',
-      'padding: 24px'
-    ].filter(Boolean).join('; ');
-
-    const optionsHtml = options.map((option: string, index: number) => `
-      <label style="display: block; margin-bottom: 12px; padding: 12px; background-color: #f8f9fa; border-radius: 4px; cursor: pointer;">
-        <input type="${data.multiple ? 'checkbox' : 'radio'}" name="survey" value="${index}" style="margin-right: 8px;" />
-        ${escapeHtml(option)}
-      </label>
-    `).join('');
-
-    return `
-      <div style="${styles}">
-        <div style="font-size: 18px; font-weight: bold; margin-bottom: 16px; color: #2d3748;">
-          ${escapeHtml(data.question || 'Survey Question')}
-          ${data.required ? '<span style="color: #dc3545;">*</span>' : ''}
-        </div>
-        ${optionsHtml || '<div style="text-align: center; color: #6c757d; padding: 20px;">No options available</div>'}
-        <div style="margin-top: 16px; text-align: right;">
-          <button style="
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-          ">
-            Vote
-          </button>
-        </div>
-      </div>
-    `;
-  },
-
-  // ========== 36. INPUT WIDGET ==========
-  'input': (d) => {
-    const data = d || {};
-    const styles = [
-      'width: 100%',
-      'padding: 12px',
-      'border: 1px solid #ced4da',
-      'border-radius: 4px',
-      'box-sizing: border-box',
-      'font-size: 16px'
-    ].filter(Boolean).join('; ');
-
-    return `
-      <div style="width: 100%;">
-        ${data.label ? `<label style="display: block; margin-bottom: 8px; font-weight: 500; color: #495057;">${escapeHtml(data.label)}${data.required ? ' <span style="color: #dc3545;">*</span>' : ''}</label>` : ''}
-        <input type="${data.type || 'text'}" 
-               name="${escapeHtml(data.name || 'input')}" 
-               placeholder="${escapeHtml(data.placeholder || 'Enter text')}" 
-               ${data.required ? 'required' : ''}
-               style="${styles}" />
-      </div>
-    `;
-  },
-
-  // ========== 37. TEXTAREA WIDGET ==========
-  'textarea': (d) => {
-    const data = d || {};
-    const styles = [
-      'width: 100%',
-      'padding: 12px',
-      'border: 1px solid #ced4da',
-      'border-radius: 4px',
-      'box-sizing: border-box',
-      'font-size: 16px',
-      'resize: vertical',
-      'min-height: 100px'
-    ].filter(Boolean).join('; ');
-
-    return `
-      <div style="width: 100%;">
-        ${data.label ? `<label style="display: block; margin-bottom: 8px; font-weight: 500; color: #495057;">${escapeHtml(data.label)}${data.required ? ' <span style="color: #dc3545;">*</span>' : ''}</label>` : ''}
-        <textarea name="${escapeHtml(data.name || 'textarea')}" 
-                  placeholder="${escapeHtml(data.placeholder || 'Enter your message')}" 
-                  rows="${data.rows || 4}"
-                  ${data.required ? 'required' : ''}
-                  style="${styles}"></textarea>
-      </div>
-    `;
-  },
-
-  // ========== 38. SELECT WIDGET ==========
-  'select': (d) => {
-    const data = d || {};
-    const options = data.options || [];
-    const styles = [
-      'width: 100%',
-      'padding: 12px',
-      'border: 1px solid #ced4da',
-      'border-radius: 4px',
-      'box-sizing: border-box',
-      'font-size: 16px',
-      'background-color: white'
-    ].filter(Boolean).join('; ');
-
-    const optionsHtml = options.map((option: string) => `
-      <option value="${escapeHtml(option)}">${escapeHtml(option)}</option>
-    `).join('');
-
-    return `
-      <div style="width: 100%;">
-        ${data.label ? `<label style="display: block; margin-bottom: 8px; font-weight: 500; color: #495057;">${escapeHtml(data.label)}${data.required ? ' <span style="color: #dc3545;">*</span>' : ''}</label>` : ''}
-        <select name="${escapeHtml(data.name || 'select')}" 
-                ${data.multiple ? 'multiple' : ''}
-                ${data.required ? 'required' : ''}
-                style="${styles}">
-          ${optionsHtml || '<option value="">No options available</option>'}
-        </select>
-      </div>
-    `;
-  },
-
-  // ========== 39. CHECKBOX WIDGET ==========
-  'checkbox': (d) => {
-    const data = d || {};
-    const styles = [
-      'margin-right: 8px',
-      'transform: scale(1.2)'
-    ].filter(Boolean).join('; ');
-
-    return `
-      <label style="display: flex; align-items: center; cursor: pointer;">
-        <input type="checkbox" 
-               name="${escapeHtml(data.name || 'checkbox')}" 
-               value="${escapeHtml(data.value || '1')}"
-               ${data.checked ? 'checked' : ''}
-               style="${styles}" />
-        <span>${escapeHtml(data.label || 'Checkbox')}</span>
-      </label>
-    `;
-  },
-
-  // ========== 40. RADIO WIDGET ==========
-  'radio': (d) => {
-    const data = d || {};
-    const options = data.options || [];
-
-    if (options.length === 0) {
-      return '<div style="color: #6c757d; font-style: italic;">No radio options</div>';
-    }
-
-    const optionsHtml = options.map((option: string) => `
-      <label style="display: block; margin-bottom: 8px; cursor: pointer;">
-        <input type="radio" 
-               name="${escapeHtml(data.name || 'radio')}" 
-               value="${escapeHtml(option)}"
-               ${data.selected === option ? 'checked' : ''}
-               style="margin-right: 8px;" />
-        ${escapeHtml(option)}
-      </label>
-    `).join('');
-
-    return `
-      <div>
-        ${data.label ? `<div style="font-weight: 500; margin-bottom: 12px; color: #495057;">${escapeHtml(data.label)}</div>` : ''}
-        ${optionsHtml}
-      </div>
-    `;
-  },
-
-  // ========== 41. LABEL WIDGET ==========
-  'label': (d) => {
-    const data = d || {};
-    const styles = [
-      `font-size: ${data.fontSize || 14}px`,
-      `font-weight: ${data.fontWeight || 'normal'}`,
-      `color: ${data.color || '#333'}`,
-      'display: block',
-      'margin-bottom: 4px'
-    ].filter(Boolean).join('; ');
-
-    return `<label for="${escapeHtml(data.for || '')}" style="${styles}">${escapeHtml(data.text || 'Label')}</label>`;
-  },
 
   // ========== 42. EMAIL HEADER WIDGET ==========
   'emailHeader': (d) => {
@@ -1410,11 +871,13 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 43. EMAIL FOOTER WIDGET ==========
   'emailFooter': (d) => {
     const data = d || {};
+    const textAlign = data.textAlign || 'center';
+
     const styles = [
       `background-color: ${data.backgroundColor || '#333333'}`,
       `color: ${data.textColor || '#ffffff'}`,
       `padding: ${data.padding || '30px 20px'}`,
-      `text-align: center`,
+      `text-align: ${textAlign}`,
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`
     ].filter(Boolean).join('; ');
@@ -1422,39 +885,52 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const linkColor = data.linkColor || '#4CAF50';
 
     // Social icons with proper links
-    const socialIconsHtml = data.showSocialMedia !== false ? `
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto 15px; border-collapse: collapse;">
+    const icons = data.socialIcons?.icons || [];
+    const urls = data.socialIcons?.urls || [];
+
+    // Determine alignment for flex-like behavior in tables
+    const socialAlign = textAlign === 'left' ? 'left' : textAlign === 'right' ? 'right' : 'center';
+    const socialMargin = textAlign === 'left' ? '0 auto 15px 0' : textAlign === 'right' ? '0 0 15px auto' : '0 auto 15px';
+
+    const socialIconsHtml = (data.showSocialMedia !== false && icons.length > 0) ? `
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin: ${socialMargin}; border-collapse: collapse;">
         <tr>
-          <td style="padding: 0 5px;">
-            <a href="${escapeHtml(data.facebookUrl || '#')}" style="text-decoration: none;" target="_blank" rel="noopener">
-              <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" width="32" height="32" style="display: block; width: 32px; height: 32px; border: 0;" />
-            </a>
-          </td>
-          <td style="padding: 0 5px;">
-            <a href="${escapeHtml(data.twitterUrl || '#')}" style="text-decoration: none;" target="_blank" rel="noopener">
-              <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" width="32" height="32" style="display: block; width: 32px; height: 32px; border: 0;" />
-            </a>
-          </td>
-          <td style="padding: 0 5px;">
-            <a href="${escapeHtml(data.instagramUrl || '#')}" style="text-decoration: none;" target="_blank" rel="noopener">
-              <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram" width="32" height="32" style="display: block; width: 32px; height: 32px; border: 0;" />
-            </a>
-          </td>
+          ${icons.map((icon: string, index: number) => {
+      const url = urls[index] || '#';
+      const iconImg = getSocialIconHtml(icon, 32);
+      return `
+               <td style="padding: 0 5px;">
+                 <a href="${escapeHtml(url)}" style="text-decoration: none;" target="_blank" rel="noopener">
+                   ${iconImg}
+                 </a>
+               </td>`;
+    }).join('')}
         </tr>
       </table>
     ` : '';
 
     const addressHtml = data.showAddress !== false ? `
-      <div style="margin-bottom: 10px; font-size: 12px; color: ${data.textColor || '#ffffff'};">
+      <div style="margin-bottom: 10px; font-size: inherit; color: inherit;">
         ${escapeHtml(data.storeAddress || '123 Main Street, New York, NY 10001')}
       </div>
     ` : '';
 
     const contactHtml = data.showContact !== false ? `
-      <div style="margin-bottom: 10px; font-size: 12px; color: ${data.textColor || '#ffffff'};">
+      <div style="margin-bottom: 10px; font-size: inherit; color: inherit;">
         Email: ${escapeHtml(data.contactEmail || 'support@yourstore.com')} | Phone: ${escapeHtml(data.contactPhone || '+1 (555) 123-4567')}
       </div>
     ` : '';
+
+    const legalLinksHtml = data.showLegal !== false ? `
+      <div style="margin-bottom: 15px; font-size: inherit;">
+        ${data.privacyLinkUrl ? `<a href="${escapeHtml(data.privacyLinkUrl)}" style="color: ${linkColor}; margin: 0 10px; text-decoration: none;" target="_blank" rel="noopener">${escapeHtml(data.privacyLinkText || 'Privacy Policy')}</a>` : ''}
+        ${data.termsLinkUrl ? `<a href="${escapeHtml(data.termsLinkUrl)}" style="color: ${linkColor}; margin: 0 10px; text-decoration: none;" target="_blank" rel="noopener">Terms & Conditions</a>` : ''}
+      </div>
+    ` : '';
+
+    const copyrightText = data.copyrightText
+      ? data.copyrightText.replace('{{year}}', new Date().getFullYear()).replace('{{current_year}}', new Date().getFullYear())
+      : `&copy; ${new Date().getFullYear()} ${escapeHtml(data.storeName || '{{site_title}}')}. All rights reserved.`;
 
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
@@ -1463,13 +939,9 @@ const widgetRenderers: Record<string, (data: any) => string> = {
             ${socialIconsHtml}
             ${addressHtml}
             ${contactHtml}
-            <div style="margin-bottom: 15px; font-size: 12px;">
-              <a href="#" style="color: ${linkColor}; margin: 0 10px; text-decoration: none;" target="_blank" rel="noopener">Privacy Policy</a>
-              <a href="#" style="color: ${linkColor}; margin: 0 10px; text-decoration: none;" target="_blank" rel="noopener">Terms of Service</a>
-              <a href="#" style="color: ${linkColor}; margin: 0 10px; text-decoration: none;" target="_blank" rel="noopener">Unsubscribe</a>
-            </div>
-            <div style="font-size: 11px; opacity: 0.8; color: ${data.textColor || '#ffffff'};">
-              &copy; ${new Date().getFullYear()} ${escapeHtml(data.storeName || '{{site_title}}')}. All rights reserved.
+            ${legalLinksHtml}
+            <div style="font-size: inherit; opacity: 0.8; color: inherit;">
+              ${copyrightText}
             </div>
           </td>
         </tr>

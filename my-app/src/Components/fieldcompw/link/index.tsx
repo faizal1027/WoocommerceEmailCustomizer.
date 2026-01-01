@@ -25,11 +25,11 @@ const LinkFieldComponent: React.FC<LinkFieldComponentProps> = ({
   const { linkEditorOptions } = useSelector((state: RootState) => state.workspace);
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    // e.stopPropagation(); // Bubbling allowed
     onWidgetClick(e);
     onClick();
     dispatch(setSelectedBlockId(blockId));
-    
+
     // If not in preview mode, prevent navigation
     if (!linkEditorOptions.url || linkEditorOptions.url === '#') {
       e.preventDefault();

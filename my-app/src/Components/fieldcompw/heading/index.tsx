@@ -29,8 +29,14 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
   const widgetContent = column?.widgetContents[widgetIndex] || null;
   const headingContent = widgetContent?.contentData ? JSON.parse(widgetContent.contentData) : {
     ...defaultHeadingEditorOptions,
+    ...defaultHeadingEditorOptions,
     content: widgetContent ? "" : "Heading"
   };
+
+  // Ensure padding exists
+  if (!headingContent.padding) {
+    headingContent.padding = { top: 10, right: 10, bottom: 10, left: 10 };
+  }
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const updatedContent = event.target.value;
@@ -98,9 +104,7 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
     <Box
       ref={contentRef}
       onClick={(e) => {
-        e.stopPropagation();
-        dispatch(setSelectedBlockId(blockId));
-        onClick(e);
+        // Allow bubbling
       }}
       sx={{
         width: "100%",

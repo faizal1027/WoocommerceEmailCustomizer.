@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import DraggableWidgetWrapper from "./DraggableWidgetWrapper";
 import { useDrop } from "react-dnd";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -48,6 +49,7 @@ import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 import DeleteOutlineTwoToneIcon from "@mui/icons-material/DeleteOutlineTwoTone";
 
 // Basics Field Components
+// Basics Field Components
 import TextFieldComponent from "../../fieldcompw/textfielr/index";
 import ButtonFieldComponent from "../../fieldcompw/button";
 import HeadingFieldComponent from "../../fieldcompw/heading";
@@ -55,10 +57,10 @@ import SocialIconsFieldComponent from "../../fieldcompw/socialIcons";
 import DividerFieldComponent from "../../fieldcompw/divider";
 import ImageFieldComponent from "../../fieldcompw/Image";
 import IconFieldComponent from "../../fieldcompw/icon";
-import ImageBoxFieldComponent from "../../fieldcompw/imageBox";
+// import ImageBoxFieldComponent from "../../fieldcompw/imageBox";
 import LinkFieldComponent from "../../fieldcompw/link";
-import LinkBoxFieldComponent from "../../fieldcompw/linkBox";
-import MapFieldComponent from "../../fieldcompw/map";
+// import LinkBoxFieldComponent from "../../fieldcompw/linkBox";
+// import MapFieldComponent from "../../fieldcompw/map";
 import SectionFieldComponent from "../../fieldcompw/section";
 import SpacerFieldComponent from "../../fieldcompw/spacer";
 
@@ -68,29 +70,31 @@ import ContainerFieldComponent from "../../fieldcompw/container";
 import GroupFieldComponent from "../../fieldcompw/group";
 
 // Forms Field Components
-import FormFieldComponent from "../../fieldcompw/form";
-import SurveyFieldComponent from "../../fieldcompw/survey";
-import InputFieldComponent from "../../fieldcompw/input";
-import TextareaFieldComponent from "../../fieldcompw/textarea";
-import SelectFieldComponent from "../../fieldcompw/select";
-import CheckboxFieldComponent from "../../fieldcompw/checkbox";
-import RadioFieldComponent from "../../fieldcompw/radio";
-import LabelFieldComponent from "../../fieldcompw/label";
+// Forms Field Components
+// import FormFieldComponent from "../../fieldcompw/form";
+// import SurveyFieldComponent from "../../fieldcompw/survey";
+// import InputFieldComponent from "../../fieldcompw/input";
+// import TextareaFieldComponent from "../../fieldcompw/textarea";
+// import SelectFieldComponent from "../../fieldcompw/select";
+// import CheckboxFieldComponent from "../../fieldcompw/checkbox";
+// import RadioFieldComponent from "../../fieldcompw/radio";
+// import LabelFieldComponent from "../../fieldcompw/label";
 
+// Extra Block Field Components 
 // Extra Block Field Components 
 import SocialFollowFieldComponent from "../../fieldcompw/socialFollow";
 import VideoFieldComponent from "../../fieldcompw/video";
 import CodeFieldComponent from "../../fieldcompw/code";
 import CountdownFieldComponent from "../../fieldcompw/countdown";
-import ProgressBarFieldComponent from "../../fieldcompw/progressBar";
+// import ProgressBarFieldComponent from "../../fieldcompw/progressBar";
 import ProductFieldComponent from "../../fieldcompw/product";
 import PromoCodeFieldComponent from "../../fieldcompw/promoCode";
 import PriceFieldComponent from "../../fieldcompw/price";
-import TestimonialFieldComponent from "../../fieldcompw/testimonial";
-import NavbarFieldComponent from "../../fieldcompw/navbar";
-import CardFieldComponent from "../../fieldcompw/card";
-import AlertFieldComponent from "../../fieldcompw/alert";
-import ProgressFieldComponent from "../../fieldcompw/progress";
+// import TestimonialFieldComponent from "../../fieldcompw/testimonial";
+// import NavbarFieldComponent from "../../fieldcompw/navbar";
+// import CardFieldComponent from "../../fieldcompw/card";
+// import AlertFieldComponent from "../../fieldcompw/alert";
+// import ProgressFieldComponent from "../../fieldcompw/progress";
 
 // Woocommerce Field Components
 import ShippingAddressFieldComponent from "../../fieldcompw/shippingAddress/index";
@@ -247,20 +251,12 @@ const WorkspaceArea = ({
   };
 
   const handleDelete = (id: string) => {
-    if (previewMode) return;
-    setDeleteConfirmOpen(id);
-  };
-
-  const confirmDelete = (id: string) => {
+    console.log('UI: handleDelete clicked for ID:', id);
     if (previewMode) return;
     dispatch(deleteBlock(id));
-    setDeleteConfirmOpen(null);
   };
+  // Confirmation dialog removed as per user request
 
-  const cancelDelete = () => {
-    if (previewMode) return;
-    setDeleteConfirmOpen(null);
-  };
 
   const handleCopy = (id: string) => {
     if (previewMode) return;
@@ -330,28 +326,7 @@ const WorkspaceArea = ({
           previewMode={previewMode}
         />
       ))}
-      {!previewMode && (
-        <Dialog open={!!deleteConfirmOpen} onClose={cancelDelete}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this block?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={cancelDelete} color="primary">
-              Cancel
-            </Button>
-            <Button
-              onClick={() => confirmDelete(deleteConfirmOpen!)}
-              color="primary"
-              autoFocus
-            >
-              Yes
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+
     </Box>
   );
 };
@@ -688,618 +663,102 @@ const ColumnDropTarget = ({
         selectedContentType === widget.contentType &&
         selectedWidgetIndex === index;
 
-      // Main switch statement for all widget types
+      let WidgetComponent = null;
+
+      // Main switch statement to assign WidgetComponent
       switch (widget.contentType) {
         // Basics Layout Widgets
-        case "text":
-          return (
-            <TextFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              onClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "heading":
-          return (
-            <HeadingFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              onClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "socialIcons":
-          return (
-            <SocialIconsFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              onClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "divider":
-          return (
-            <DividerFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "image":
-          return (
-            <ImageFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "button":
-          return (
-            <ButtonFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "section":
-          return (
-            <SectionFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget}
-            />
-          );
-        case "spacer":
-          return (
-            <SpacerFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "link":
-          return (
-            <LinkFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "linkBox":
-          return (
-            <LinkBoxFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "imageBox":
-          return (
-            <ImageBoxFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "map":
-          return (
-            <MapFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "icon":
-          return (
-            <IconFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
+        case "text": WidgetComponent = TextFieldComponent; break;
+        case "heading": WidgetComponent = HeadingFieldComponent; break;
+        case "socialIcons": WidgetComponent = SocialIconsFieldComponent; break;
+        case "divider": WidgetComponent = DividerFieldComponent; break;
+        case "image": WidgetComponent = ImageFieldComponent; break;
+        case "button": WidgetComponent = ButtonFieldComponent; break;
+        case "section": WidgetComponent = SectionFieldComponent; break;
+        case "spacer": WidgetComponent = SpacerFieldComponent; break;
+        case 'link': WidgetComponent = LinkFieldComponent; break;
+        case 'icon': WidgetComponent = IconFieldComponent; break;
 
         // Layout Block Widgets 
-        case "row":
-          return (
-            <RowFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget}
-            />
-          );
-        case "container":
-          return (
-            <ContainerFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "group":
-          return (
-            <GroupFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
+        case "row": WidgetComponent = RowFieldComponent; break;
+        case "container": WidgetComponent = ContainerFieldComponent; break;
+        case "group": WidgetComponent = GroupFieldComponent; break;
 
-        // Forms Widgets
-        case "form":
-          return (
-            <FormFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "survey":
-          return (
-            <SurveyFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "input":
-          return (
-            <InputFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "textarea":
-          return (
-            <TextareaFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "select":
-          return (
-            <SelectFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "checkbox":
-          return (
-            <CheckboxFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "radio":
-          return (
-            <RadioFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "label":
-          return (
-            <LabelFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
+        // Extra Block Widgets
+        case "socialFollow": WidgetComponent = SocialFollowFieldComponent; break;
+        case "video": WidgetComponent = VideoFieldComponent; break;
+        case "code": WidgetComponent = CodeFieldComponent; break;
+        case "countdown": WidgetComponent = CountdownFieldComponent; break;
+        case "product": WidgetComponent = ProductFieldComponent; break;
+        case "promoCode": WidgetComponent = PromoCodeFieldComponent; break;
+        case "price": WidgetComponent = PriceFieldComponent; break;
 
-        // Extra Block Widgets 
-        case "socialFollow":
-          return (
-            <SocialFollowFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "video":
-          return (
-            <VideoFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "code":
-          return (
-            <CodeFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget}
-            />
-          );
-        case "countdown":
-          return (
-            <CountdownFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "progressBar":
-          return (
-            <ProgressBarFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "product":
-          return (
-            <ProductFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "promoCode":
-          return (
-            <PromoCodeFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "price":
-          return (
-            <PriceFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget}
-            />
-          );
-        case "testimonial":
-          return (
-            <TestimonialFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "navbar":
-          return (
-            <NavbarFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "card":
-          return (
-            <CardFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget}
-            />
-          );
-        case "alert":
-          return (
-            <AlertFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "progress":
-          return (
-            <ProgressFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
+        // WooCommerce Widgets
+        case "shippingAddress": WidgetComponent = ShippingAddressFieldComponent; break;
+        case "billingAddress": WidgetComponent = BillingAddressFieldComponent; break;
+        case "orderItems": WidgetComponent = OrderItemsFieldComponent; break;
+        case "taxBilling": WidgetComponent = TaxBillingFieldComponent; break;
+        case "emailHeader": WidgetComponent = EmailHeaderFieldComponent; break;
+        case "emailFooter": WidgetComponent = EmailFooterFieldComponent; break;
+        case "ctaButton": WidgetComponent = CtaButtonFieldComponent; break;
+        case "relatedProducts": WidgetComponent = RelatedProductsFieldComponent; break;
+        case "orderSubtotal": WidgetComponent = OrderSubtotalFieldComponent; break;
+        case "orderTotal": WidgetComponent = OrderTotalFieldComponent; break;
+        case "shippingMethod": WidgetComponent = ShippingMethodFieldComponent; break;
+        case "paymentMethod": WidgetComponent = PaymentMethodFieldComponent; break;
+        case "customerNote": WidgetComponent = CustomerNoteFieldComponent; break;
 
-        // Woocommerce Widgets
-        case "shippingAddress":
-          return (
-            <ShippingAddressFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "billingAddress":
-          return (
-            <BillingAddressFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "orderItems":
-          return (
-            <OrderItemsFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "taxBilling":
-          return (
-            <TaxBillingFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "emailHeader":
-          return (
-            <EmailHeaderFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "emailFooter":
-          return (
-            <EmailFooterFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "ctaButton":
-          return (
-            <CtaButtonFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "relatedProducts":
-          return (
-            <RelatedProductsFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "orderSubtotal":
-          return (
-            <OrderSubtotalFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "orderTotal":
-          return (
-            <OrderTotalFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "shippingMethod":
-          return (
-            <ShippingMethodFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "paymentMethod":
-          return (
-            <PaymentMethodFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-        case "customerNote":
-          return (
-            <CustomerNoteFieldComponent
-              key={index}
-              blockId={block.id}
-              columnIndex={columnIndex}
-              widgetIndex={index}
-              isSelected={isWidgetSelected}
-              onClick={defaultOnClick}
-              onWidgetClick={handleWidgetClick(widget.contentType, index)}
-            />
-          );
-
-        default:
-          return null;
+        default: return null;
       }
+
+      const commonProps = {
+        key: index,
+        blockId: block.id,
+        columnIndex: columnIndex,
+        widgetIndex: index,
+        isSelected: isWidgetSelected,
+        onClick: defaultOnClick,
+        onWidgetClick: handleWidgetClick(widget.contentType, index),
+        // Pass widgetData only for specific components if needed, or spread all props
+        widgetData: widget // Basic prop for components that might interpret it
+      };
+
+      // Special handling for components that require different props or onClick signatures
+      // However, to keep it simple and consistent with the wrapper logic:
+
+      return (
+        <DraggableWidgetWrapper
+          key={index}
+          blockId={block.id}
+          columnIndex={columnIndex}
+          widgetIndex={index}
+          isSelected={isWidgetSelected}
+          previewMode={previewMode}
+          onWidgetClick={handleWidgetClick(widget.contentType, index)}
+        >
+          {/* We manually render the specific component with its specific props to match original logic precisely if needed, 
+                 OR we use the dynamic component approach. The original code had many switch cases returning components directly.
+                 Refactoring to Dynamic Component would be cleaner but might miss specific prop variations.
+                 Let's stick to the safest way: Wrapping the SWITCH statement result is hard because the return happens inside.
+                 So we have to Wrap inside each case? No, that's too much duplication. 
+                 
+                 Let's use the Dynamic Component variable approach which is standard practice.
+                 All widgets seem to accept the same base props: blockId, columnIndex, widgetIndex, isSelected, onClick, onWidgetClick.
+                 Some accept 'widgetData'.
+              */}
+          {WidgetComponent && (
+            <WidgetComponent
+              blockId={block.id}
+              columnIndex={columnIndex}
+              widgetIndex={index}
+              isSelected={isWidgetSelected}
+              onClick={defaultOnClick}
+              onWidgetClick={handleWidgetClick(widget.contentType, index)}
+              widgetData={widget /* Some components expect this, others ignore it */}
+            />
+          )}
+        </DraggableWidgetWrapper>
+      );
     });
   };
 
@@ -1326,7 +785,9 @@ const ColumnDropTarget = ({
     borderBottom: `${column.style.borderBottomSize}px ${column.style.borderStyle} ${column.style.borderBottomColor}`,
     borderLeft: `${column.style.borderLeftSize}px ${column.style.borderStyle} ${column.style.borderLeftColor}`,
     borderRight: `${column.style.borderRightSize}px ${column.style.borderStyle} ${column.style.borderRightColor}`,
-    padding: `${column.style.padding.top}px ${column.style.padding.right}px ${column.style.padding.bottom}px ${column.style.padding.left}px`,
+    padding: column.style.padding
+      ? `${column.style.padding.top}px ${column.style.padding.right}px ${column.style.padding.bottom}px ${column.style.padding.left}px`
+      : `${(column.style as any).paddingTop || 0}px ${(column.style as any).paddingRight || 0}px ${(column.style as any).paddingBottom || 0}px ${(column.style as any).paddingLeft || 0}px`,
     minHeight: `${columnDisplayHeight}px`,
     position: 'relative',
   };
@@ -1358,7 +819,7 @@ const ColumnDropTarget = ({
         flexDirection: 'column',
         alignItems: alignItems,
         justifyContent: column.widgetContents.length ? 'flex-start' : 'center',
-        gap: '8px',
+        gap: '0px',
         minHeight: `${columnDisplayHeight}px`,
         width: '100%',
       }}>
