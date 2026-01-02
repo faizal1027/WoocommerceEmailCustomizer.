@@ -41,7 +41,6 @@ import {
   defaultCustomerNoteEditorOptions,
   defaultEmailHeaderEditorOptions,
   defaultEmailFooterEditorOptions,
-  defaultCodeEditorOptions,
   defaultPriceEditorOptions,
 } from "../../../Store/Slice/workspaceSlice";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -84,7 +83,7 @@ import GroupFieldComponent from "../../fieldcompw/group";
 // Extra Block Field Components 
 import SocialFollowFieldComponent from "../../fieldcompw/socialFollow";
 import VideoFieldComponent from "../../fieldcompw/video";
-import CodeFieldComponent from "../../fieldcompw/code";
+
 import CountdownFieldComponent from "../../fieldcompw/countdown";
 // import ProgressBarFieldComponent from "../../fieldcompw/progressBar";
 import ProductFieldComponent from "../../fieldcompw/product";
@@ -593,8 +592,7 @@ const ColumnDropTarget = ({
         contentDataToSend = JSON.stringify(defaultEmailHeaderEditorOptions);
       } else if (item.widgetType === "emailFooter") {
         contentDataToSend = JSON.stringify(defaultEmailFooterEditorOptions);
-      } else if (item.widgetType === "code") {
-        contentDataToSend = JSON.stringify(defaultCodeEditorOptions);
+
       } else if (item.widgetType === "price") {
         contentDataToSend = JSON.stringify(defaultPriceEditorOptions);
       } else if (item.widgetType === "section") {
@@ -687,7 +685,7 @@ const ColumnDropTarget = ({
         // Extra Block Widgets
         case "socialFollow": WidgetComponent = SocialFollowFieldComponent; break;
         case "video": WidgetComponent = VideoFieldComponent; break;
-        case "code": WidgetComponent = CodeFieldComponent; break;
+
         case "countdown": WidgetComponent = CountdownFieldComponent; break;
         case "product": WidgetComponent = ProductFieldComponent; break;
         case "promoCode": WidgetComponent = PromoCodeFieldComponent; break;

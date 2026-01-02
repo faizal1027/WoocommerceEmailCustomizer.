@@ -28,7 +28,7 @@ export type WidgetContentType = 'text' | 'heading' | 'button' | 'socialIcons' | 
   // Layout Block
   'row' | 'container' | 'group' |
   // Extra Block
-  'socialFollow' | 'video' | 'code' | 'countdown' | 'progressBar' | 'product' | 'promoCode' | 'price' | 'testimonial' | 'navbar' | 'card' | 'alert' | 'progress' |
+  'socialFollow' | 'video' | 'countdown' | 'progressBar' | 'product' | 'promoCode' | 'price' | 'testimonial' | 'navbar' | 'card' | 'alert' | 'progress' |
   // Forms
   'form' | 'survey' | 'input' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'label' |
   // WooCommerce Layout
@@ -70,7 +70,7 @@ interface Column {
   // Extra Block
   socialFollowEditorOptions: SocialFollowEditorOptions;
   videoEditorOptions: VideoEditorOptions;
-  codeEditorOptions: CodeEditorOptions;
+
   countdownEditorOptions: CountdownEditorOptions;
   progressBarEditorOptions: ProgressBarEditorOptions;
   productEditorOptions: ProductEditorOptions;
@@ -356,15 +356,7 @@ export interface VideoEditorOptions {
   controls: boolean;
 }
 
-export interface CodeEditorOptions {
-  language: string;
-  code: string;
-  theme: string;
-  backgroundColor?: string;
-  textColor?: string;
-  fontSize?: number;
-  content?: string;
-}
+
 
 export interface CountdownEditorOptions {
   targetDate: string;
@@ -608,10 +600,7 @@ export interface ShippingAddressEditorOptions {
   textColor: string;
   textAlign: string;
   backgroundColor: string;
-  paddingTop: string;
-  paddingRight: string;
-  paddingBottom: string;
-  paddingLeft: string;
+  padding: string; // Standardized
 }
 
 export interface BillingAddressEditorOptions {
@@ -632,10 +621,7 @@ export interface BillingAddressEditorOptions {
   backgroundColor: string;
   lineHeight: string;
   letterSpacing: string;
-  paddingTop: string;
-  paddingRight: string;
-  paddingBottom: string;
-  paddingLeft: string;
+  padding: string; // Standardized
 }
 
 export interface TaxBillingEditorOptions {
@@ -659,6 +645,7 @@ export interface TaxBillingEditorOptions {
   textColor: string;
   textAlign: string;
   backgroundColor: string;
+  padding: string;
 }
 
 export interface OrderSubtotalEditorOptions {
@@ -670,6 +657,9 @@ export interface OrderSubtotalEditorOptions {
   textAlign: string;
   backgroundColor: string;
   spacing?: number;
+  padding?: string;
+  labelAlign?: string;
+  valueAlign?: string;
 }
 
 export interface OrderTotalEditorOptions {
@@ -681,6 +671,9 @@ export interface OrderTotalEditorOptions {
   textAlign: string;
   backgroundColor: string;
   spacing?: number;
+  padding?: string;
+  labelAlign?: string;
+  valueAlign?: string;
 }
 
 export interface ShippingMethodEditorOptions {
@@ -692,6 +685,9 @@ export interface ShippingMethodEditorOptions {
   textAlign: string;
   backgroundColor: string;
   spacing?: number;
+  padding?: string;
+  labelAlign?: string;
+  valueAlign?: string;
 }
 
 export interface PaymentMethodEditorOptions {
@@ -703,6 +699,9 @@ export interface PaymentMethodEditorOptions {
   textAlign: string;
   backgroundColor: string;
   spacing?: number;
+  padding?: string;
+  labelAlign?: string;
+  valueAlign?: string;
 }
 
 export interface CustomerNoteEditorOptions {
@@ -714,6 +713,9 @@ export interface CustomerNoteEditorOptions {
   textAlign: string;
   backgroundColor: string;
   spacing?: number;
+  padding?: string;
+  labelAlign?: string;
+  valueAlign?: string;
 }
 
 export interface OrderItem {
@@ -735,6 +737,7 @@ export interface OrderItemsEditorOptions {
   textColor: string;
   textAlign: string;
   backgroundColor: string;
+  padding: string;
 }
 
 export interface EmailHeaderEditorOptions {
@@ -866,7 +869,7 @@ interface WorkspaceState {
   // Extra Block
   socialFollowEditorOptions: SocialFollowEditorOptions;
   videoEditorOptions: VideoEditorOptions;
-  codeEditorOptions: CodeEditorOptions;
+
   countdownEditorOptions: CountdownEditorOptions;
   progressBarEditorOptions: ProgressBarEditorOptions;
   productEditorOptions: ProductEditorOptions;
@@ -1147,11 +1150,7 @@ const defaultVideoEditorOptions: VideoEditorOptions = {
   controls: true
 };
 
-export const defaultCodeEditorOptions: CodeEditorOptions = {
-  language: 'javascript',
-  code: 'console.log("Hello World");',
-  theme: 'default'
-};
+
 
 const defaultCountdownEditorOptions: CountdownEditorOptions = {
   targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -1349,10 +1348,7 @@ const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
   textColor: "#333333",
   textAlign: "left",
   backgroundColor: "transparent",
-  paddingTop: "8",
-  paddingRight: "8",
-  paddingBottom: "8",
-  paddingLeft: "8",
+  padding: "16px", // Standardized
 };
 
 const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
@@ -1373,10 +1369,7 @@ const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
   backgroundColor: "transparent",
   lineHeight: "1.5",
   letterSpacing: "0px",
-  paddingTop: "0px",
-  paddingRight: "0px",
-  paddingBottom: "0px",
-  paddingLeft: "0px"
+  padding: "16px", // Standardized
 };
 
 export const defaultTaxBillingEditorOptions: TaxBillingEditorOptions = {
@@ -1400,6 +1393,7 @@ export const defaultTaxBillingEditorOptions: TaxBillingEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
+  padding: '15px',
 };
 
 const defaultOrderItemsEditorOptions: OrderItemsEditorOptions = {
@@ -1415,10 +1409,12 @@ const defaultOrderItemsEditorOptions: OrderItemsEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
+  padding: "0px 0px 0px 0px",
 };
 
 export const defaultEmailHeaderEditorOptions: EmailHeaderEditorOptions = {
   storeName: '{{store_name}}',
+  showStoreName: true,
   showLogo: true,
   logoUrl: '',
   logoWidth: '150px',
@@ -1507,7 +1503,10 @@ export const defaultOrderSubtotalEditorOptions: OrderSubtotalEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12
+  spacing: 12,
+  padding: '10px 10px 10px 10px',
+  labelAlign: 'left',
+  valueAlign: 'right'
 };
 
 export const defaultOrderTotalEditorOptions: OrderTotalEditorOptions = {
@@ -1518,7 +1517,10 @@ export const defaultOrderTotalEditorOptions: OrderTotalEditorOptions = {
   textColor: '#000000',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12
+  spacing: 12,
+  padding: '10px 10px 10px 10px',
+  labelAlign: 'left',
+  valueAlign: 'right'
 };
 
 export const defaultShippingMethodEditorOptions: ShippingMethodEditorOptions = {
@@ -1529,7 +1531,10 @@ export const defaultShippingMethodEditorOptions: ShippingMethodEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12
+  spacing: 12,
+  padding: '10px 10px 10px 10px',
+  labelAlign: 'left',
+  valueAlign: 'right'
 };
 
 export const defaultPaymentMethodEditorOptions: PaymentMethodEditorOptions = {
@@ -1540,7 +1545,10 @@ export const defaultPaymentMethodEditorOptions: PaymentMethodEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12
+  spacing: 12,
+  padding: '10px 10px 10px 10px',
+  labelAlign: 'left',
+  valueAlign: 'right'
 };
 
 export const defaultCustomerNoteEditorOptions: CustomerNoteEditorOptions = {
@@ -1551,7 +1559,10 @@ export const defaultCustomerNoteEditorOptions: CustomerNoteEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12
+  spacing: 12,
+  padding: '10px 10px 10px 10px',
+  labelAlign: 'left',
+  valueAlign: 'right'
 };
 
 
@@ -1587,7 +1598,7 @@ const initialState: WorkspaceState = {
   // Extra Block
   socialFollowEditorOptions: defaultSocialFollowEditorOptions,
   videoEditorOptions: defaultVideoEditorOptions,
-  codeEditorOptions: defaultCodeEditorOptions,
+
   countdownEditorOptions: defaultCountdownEditorOptions,
   progressBarEditorOptions: defaultProgressBarEditorOptions,
   productEditorOptions: defaultProductEditorOptions,
@@ -1687,7 +1698,7 @@ const workspaceSlice = createSlice({
           // Extra Block
           socialFollowEditorOptions: { ...defaultSocialFollowEditorOptions },
           videoEditorOptions: { ...defaultVideoEditorOptions },
-          codeEditorOptions: { ...defaultCodeEditorOptions },
+
           countdownEditorOptions: { ...defaultCountdownEditorOptions },
           progressBarEditorOptions: { ...defaultProgressBarEditorOptions },
           productEditorOptions: { ...defaultProductEditorOptions },
@@ -1775,7 +1786,6 @@ const workspaceSlice = createSlice({
           // Extra Block
           socialFollowEditorOptions: { ...col.socialFollowEditorOptions },
           videoEditorOptions: { ...col.videoEditorOptions },
-          codeEditorOptions: { ...col.codeEditorOptions },
           countdownEditorOptions: { ...col.countdownEditorOptions },
           progressBarEditorOptions: { ...col.progressBarEditorOptions },
           productEditorOptions: { ...col.productEditorOptions },
@@ -2070,23 +2080,7 @@ const workspaceSlice = createSlice({
               state.orderItemsEditorOptions = defaultOrderItemsEditorOptions;
             }
           }
-          // Handle Code Component (CSS/HTML Editor)
-          else if (state.selectedContentType === 'code' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
-            if (data) {
-              try {
-                const parsed = JSON.parse(data);
-                state.codeEditorOptions = { ...defaultCodeEditorOptions, ...parsed };
-              } catch (e) {
-                state.codeEditorOptions = defaultCodeEditorOptions;
-              }
-            }
-            else if (column.codeEditorOptions) {
-              state.codeEditorOptions = { ...defaultCodeEditorOptions, ...column.codeEditorOptions };
-            } else {
-              state.codeEditorOptions = defaultCodeEditorOptions;
-            }
-          }
+
           // Handle Price Component
           else if (state.selectedContentType === 'price' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
             const data = column.widgetContents[state.selectedWidgetIndex].contentData;
@@ -3104,10 +3098,7 @@ const workspaceSlice = createSlice({
               column.videoEditorOptions = { ...defaultVideoEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.videoEditorOptions);
               break;
-            case 'code':
-              column.codeEditorOptions = { ...defaultCodeEditorOptions };
-              column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.codeEditorOptions);
-              break;
+
             case 'countdown':
               column.countdownEditorOptions = { ...defaultCountdownEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.countdownEditorOptions);
@@ -3587,18 +3578,7 @@ const workspaceSlice = createSlice({
       }
     },
 
-    updateCodeEditorOptions: (state, action: PayloadAction<Partial<CodeEditorOptions>>) => {
-      state.codeEditorOptions = { ...state.codeEditorOptions, ...action.payload };
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        const widget = column?.widgetContents[state.selectedWidgetIndex];
 
-        if (widget && widget.contentType === 'code') {
-          widget.contentData = JSON.stringify(state.codeEditorOptions);
-        }
-      }
-    },
 
     updateCountdownEditorOptions: (state, action: PayloadAction<Partial<CountdownEditorOptions>>) => {
       state.countdownEditorOptions = { ...state.countdownEditorOptions, ...action.payload };
@@ -4116,7 +4096,7 @@ export const {
   // Extra Block Editor Options
   updateSocialFollowEditorOptions,
   updateVideoEditorOptions,
-  updateCodeEditorOptions,
+
   updateCountdownEditorOptions,
   updateProgressBarEditorOptions,
   updateProductEditorOptions,

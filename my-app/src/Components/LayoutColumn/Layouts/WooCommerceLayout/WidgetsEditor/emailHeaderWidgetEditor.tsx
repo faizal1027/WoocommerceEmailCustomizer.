@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Box, TextField, Typography, Switch, FormControlLabel, Slider, Button, IconButton, Stack, Divider, InputLabel, Tooltip
+    Box, Typography, Slider, Button, IconButton, Stack, Divider, Tooltip
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from 'react-redux';
@@ -106,7 +106,7 @@ const EmailHeaderWidgetEditor: React.FC = () => {
                             Email Header
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                            Customize your email header branding and layout.
+                            Customize your email header logo and layout.
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
@@ -123,19 +123,18 @@ const EmailHeaderWidgetEditor: React.FC = () => {
                     </Box>
                 </Box>
 
-
                 <Divider />
 
-                {/* Section: Branding */}
+                {/* Section: Branding (Logo Only) */}
                 <Box>
                     <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Branding
+                        Branding (Logo Only)
                     </Typography>
                     <Stack spacing={2}>
                         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2, bgcolor: '#fafafa' }}>
                             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                                 <Typography variant="caption" fontWeight="bold">
-                                    Logo Upload
+                                    Logo
                                 </Typography>
                                 {(previewUrl || emailHeaderEditorOptions?.logoUrl) && (
                                     <IconButton onClick={handleRemoveImage} size="small">
@@ -214,7 +213,8 @@ const EmailHeaderWidgetEditor: React.FC = () => {
                     title="Appearance & Styling"
                     showTypography={false}
                     showTextColor={false}
-                    textAlignLabel="Icon Alignment"
+                    textAlignLabel="Alignment"
+                    showPadding={true}
                 />
             </Stack>
         </Box>

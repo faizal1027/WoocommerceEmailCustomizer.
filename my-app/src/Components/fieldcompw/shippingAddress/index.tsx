@@ -50,10 +50,7 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
 
       sx={{
         textAlign: shippingAddressEditorOptions.textAlign || 'left',
-        paddingTop: `${shippingAddressEditorOptions.paddingTop || '8'}px`,
-        paddingRight: `${shippingAddressEditorOptions.paddingRight || '8'}px`,
-        paddingBottom: `${shippingAddressEditorOptions.paddingBottom || '8'}px`,
-        paddingLeft: `${shippingAddressEditorOptions.paddingLeft || '8'}px`,
+        padding: shippingAddressEditorOptions.padding || '16px', // Standardized
         border: isSelected ? '2px dashed blue' : '',
         borderRadius: 1,
         backgroundColor: shippingAddressEditorOptions.backgroundColor && shippingAddressEditorOptions.backgroundColor !== 'transparent' ? shippingAddressEditorOptions.backgroundColor : '#fff',

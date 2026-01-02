@@ -16,6 +16,7 @@ import {
   Tabs,
   Tab,
   TextareaAutosize,
+  ListSubheader,
 } from "@mui/material";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,6 +35,7 @@ interface Template {
   id: string;
   email_template_name: string;
   json_data: string;
+  content_type: string;
   priority?: string;
 }
 
@@ -155,24 +157,26 @@ const ExportColumn = () => {
   // Effect to load content when currentTemplateId or templates change (ONLY in Edit mode)
   useEffect(() => {
     if (isEditMode && currentTemplateId && templates.length > 0) {
-      // Use loose equality (==) to handle string vs number ID mismatches
       const template = templates.find((t: any) => t.id == currentTemplateId);
-
 
       if (template && template.json_data) {
         try {
-          // Parse JSON if it's a string, or use directly if it's already an object (though usually string from DB)
+          // Sync with content_type from DB so dropdown matches
+          if (template.content_type) {
+            // Find by name OR slug to handle legacy data
+            const matchedType = EMAIL_TYPES.find(t =>
+              t.name === template.content_type || t.type === template.content_type
+            );
+            setSelectedTemplateId(matchedType ? matchedType.name : template.content_type);
+          }
+
           const rawBlocks = typeof template.json_data === 'string'
             ? JSON.parse(template.json_data)
             : template.json_data;
 
-          // Use shared conversion logic to ensure all styles are present
           const parsedBlocks = convertToDroppedBlocks(rawBlocks, { regenerateIds: false });
 
           dispatch(setBlocks(parsedBlocks));
-          setSelectedTemplateId(template.id);
-
-          // Also verify template description or name updates if needed
           setTemplateName(template.email_template_name);
           setPriority(template.priority ? parseInt(template.priority, 10) : 0);
         } catch (e) {
@@ -183,44 +187,33 @@ const ExportColumn = () => {
   }, [currentTemplateId, templates, dispatch, isEditMode]);
 
 
-  const handleTemplateSelect = (templateId: string) => {
-    setSelectedTemplateId(templateId);
+  const handleTemplateSelect = (templateIdOrName: string) => {
+    // Note: templateIdOrName here is now the NAME (e.g. 'New order (Admin)')
+    setSelectedTemplateId(templateIdOrName);
 
     // Verify Edit Mode to prevent accidental content replacement
     const urlParams = new URLSearchParams(window.location.search);
     const isEditModeByUrl = !!urlParams.get('id');
 
-    const selectedTemplate = templates.find((template) => template.id == templateId);
-    if (selectedTemplate) {
-      try {
-        // Update base name for future increments if starting new
-        const baseName = selectedTemplate.email_template_name.replace(/ \d+$/, '').trim();
-        setSelectedBaseTemplateName(baseName);
+    // Check if it's a base email type name
+    const typeInfo = EMAIL_TYPES.find(t => t.name === templateIdOrName);
+    if (typeInfo) {
+      if (!isEditModeByUrl) {
+        // User is picking a starting type in "Add New" mode
+        setTemplateName(typeInfo.name);
+        setSelectedBaseTemplateName(typeInfo.name);
+      } else {
+        // In edit mode, we are re-assigning the type of the current template
+        setSelectedBaseTemplateName(typeInfo.name);
+      }
+      return;
+    }
 
-        if (isEditModeByUrl) {
-          // In Edit mode (URL has ID), we load the content
-          if (selectedTemplate.json_data) {
-            const rawBlocks = typeof selectedTemplate.json_data === 'string'
-              ? JSON.parse(selectedTemplate.json_data)
-              : selectedTemplate.json_data;
-
-            // Use shared conversion logic to ensure all styles are present
-            const parsedBlocks = convertToDroppedBlocks(rawBlocks, { regenerateIds: false });
-
-            dispatch(setBlocks(parsedBlocks));
-          }
-          setCurrentTemplateId(templateId);
-          setTemplateName(selectedTemplate.email_template_name);
-          setPriority(selectedTemplate.priority ? parseInt(selectedTemplate.priority, 10) : 0);
-          showSnackbar(`Loaded template: ${selectedTemplate.email_template_name}`, 'success');
-        } else {
-          // In Add New mode (no ID in URL), we ONLY update the title/type
-          const nextName = generateIncrementedName(baseName);
-          setTemplateName(nextName);
-        }
-      } catch (parseError: any) {
-        console.error("Error updating template selection:", parseError);
-        showSnackbar(`Error updating selection: ${parseError.message}`, 'error');
+    // Default template (empty value)
+    if (templateIdOrName === "") {
+      setSelectedBaseTemplateName("");
+      if (!isEditModeByUrl) {
+        setTemplateName("");
       }
     }
   };
@@ -633,20 +626,9 @@ const ExportColumn = () => {
             try {
               // Determine effective template name & Recipient
               let finalTemplateName = templateName;
-              let recipient = window.emailTemplateAjax.admin_email || 'Admin'; // Default to actual admin email
-
-              // Try to find the email type info to set correct recipient and content_type
-              const baseNameForLookup = isEditMode ? templateName.replace(/ \d+$/, '').trim() : selectedBaseTemplateName;
-
-              let typeInfo = EMAIL_TYPES.find(t => t.name === baseNameForLookup || t.name === selectedBaseTemplateName || (isEditMode && t.name === templateName));
-
-              // Fallback: Fuzzy match logic for legacy names
-              if (!typeInfo) {
-                const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '').replace('template', '');
-                const currentNormalized = normalize(baseNameForLookup);
-                typeInfo = EMAIL_TYPES.find(t => normalize(t.name) === currentNormalized);
-              }
-
+              // Find type info using the selected NAME for mapping and recipient settings
+              const typeInfo = EMAIL_TYPES.find(t => t.name === selectedTemplateId);
+              let recipient = window.emailTemplateAjax.admin_email || 'Admin'; // Default to admin email
 
               if (typeInfo) {
                 // If category is admin, use admin email. Else use [CUSTOMER_EMAIL]
@@ -677,10 +659,8 @@ const ExportColumn = () => {
               formData.append("json_data", JSON.stringify(blocks));
               formData.append("html_content", htmlContent);
 
-              // Use the readable name OR slug for categorization
-              // If user preferred names in the table, we use typeInfo.name or the base name
-              const contentTypeToSend = typeInfo ? typeInfo.name : baseNameForLookup;
-              formData.append("content_type", contentTypeToSend);
+              // Use the SLUG (type) directly from the dropdown state
+              formData.append("content_type", selectedTemplateId);
 
               formData.append("recipient", recipient);
 
@@ -721,12 +701,17 @@ const ExportColumn = () => {
                 }
 
                 if (response.data.data && response.data.data.template_id) {
-                  setCurrentTemplateId(response.data.data.template_id);
+                  const newId = String(response.data.data.template_id);
+                  setCurrentTemplateId(newId);
                   setIsEditMode(true);
                   // Also fix the template name in state to match what was saved (with increments)
                   setTemplateName(finalTemplateName);
-                  // Set the selected ID in proper format so dropdown matches
-                  setSelectedTemplateId(String(response.data.data.template_id));
+                  // Note: selectedTemplateId stays as the NAME so the dropdown matches correctly
+
+                  // CRITICAL: Update URL so refresh/re-refetch doesn't clear blocks
+                  const newUrl = new URL(window.location.href);
+                  newUrl.searchParams.set('id', newId);
+                  window.history.pushState({ id: newId }, '', newUrl.toString());
                 }
 
                 // Stay in Add New mode to allow creating multiple copies if needed
@@ -796,24 +781,38 @@ const ExportColumn = () => {
             disablePortal: true,
             PaperProps: {
               sx: {
-                maxWidth: '500px',
+                maxHeight: '400px',
                 width: 'auto',
-                '& .MuiMenuItem-root': {
-                  whiteSpace: 'nowrap',
-                  paddingLeft: '12px',
-                  paddingRight: '12px'
-                }
+                '& .MuiListSubheader-root': {
+                  backgroundColor: '#f5f5f5',
+                  lineHeight: '32px',
+                  fontWeight: 'bold',
+                  color: 'primary.main',
+                },
               }
-            },
-            sx: { zIndex: 1300001 },
-            style: { zIndex: 1300001 }
+            }
           }}
           sx={{ fontSize: "14px" }}
         >
-          <MenuItem value="" disabled>Select Type</MenuItem>
-          {templates.map((t) => (
-            <MenuItem key={t.id} value={t.id}>{t.email_template_name}</MenuItem>
+          <MenuItem value="">
+            <em>Default template</em>
+          </MenuItem>
+
+          <ListSubheader>Admin</ListSubheader>
+          {EMAIL_TYPES.filter(t => t.category === 'admin').map((type) => (
+            <MenuItem key={type.type} value={type.name} sx={{ pl: 4 }}>
+              {type.name}
+            </MenuItem>
           ))}
+
+          <ListSubheader>Customer</ListSubheader>
+          {EMAIL_TYPES.filter(t => t.category === 'customer').map((type) => (
+            <MenuItem key={type.type} value={type.name} sx={{ pl: 4 }}>
+              {type.name}
+            </MenuItem>
+          ))}
+
+          {/* Note: Saved Templates section removed to keep dropdown focused on Categories */}
         </Select>
       </Box>
 
@@ -993,7 +992,7 @@ const ExportColumn = () => {
         content={exportContent}
         format={selectedExportFormat}
       />
-    </Box>
+    </Box >
   );
 };
 

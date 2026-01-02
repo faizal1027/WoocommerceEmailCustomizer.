@@ -6,7 +6,6 @@ import TaxBillingWidget from './Widgets/taxBillingWidget'
 import EmailHeaderWidget from './Widgets/emailHeaderWidget'
 import EmailFooterWidget from './Widgets/emailFooterWidget'
 import CtaButtonWidget from './Widgets/ctaButtonWidget'
-import RelatedProductsWidget from './Widgets/relatedProductsWidget'
 import OrderSubtotalWidget from './Widgets/orderSubtotalWidget'
 import OrderTotalWidget from './Widgets/orderTotalWidget'
 import ShippingMethodWidget from './Widgets/shippingMethodWidget'
@@ -26,7 +25,6 @@ export const wooCommerceWidgets = [
   { Component: PaymentMethodWidget, name: 'Payment Method' },
   { Component: CustomerNoteWidget, name: 'Customer Note' },
   { Component: CtaButtonWidget, name: 'CTA Button' },
-  { Component: RelatedProductsWidget, name: 'Related Products' },
   { Component: EmailFooterWidget, name: 'Email Footer' },
 ];
 

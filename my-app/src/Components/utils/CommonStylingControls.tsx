@@ -26,6 +26,9 @@ interface CommonStylingControlsProps {
     showTextAlign?: boolean;
     showTypography?: boolean;
     textAlignLabel?: string;
+    showLabelAlign?: boolean;
+    showValueAlign?: boolean;
+    showPadding?: boolean;
 }
 
 const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
@@ -36,6 +39,9 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
     showTextAlign = true,
     showTypography = true,
     textAlignLabel = 'Text Alignment',
+    showLabelAlign = false,
+    showValueAlign = false,
+    showPadding = true,
 }) => {
     const handleChange = (field: string, value: any) => {
         onUpdate({ [field]: value });
@@ -168,55 +174,111 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                         </ToggleButtonGroup>
                     </Box>
                 )}
-                <Box>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
-                        Padding (px)
-                    </Typography>
+
+                {(showLabelAlign || showValueAlign) && (
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                        {['Top', 'Right', 'Bottom', 'Left'].map((side) => {
-                            let pTop = '0';
-                            let pRight = '0';
-                            let pBottom = '0';
-                            let pLeft = '0';
-
-                            if (options.padding && typeof options.padding === 'object') {
-                                pTop = String(options.padding.top || 0);
-                                pRight = String(options.padding.right || 0);
-                                pBottom = String(options.padding.bottom || 0);
-                                pLeft = String(options.padding.left || 0);
-                            } else {
-                                const paddingValues = (options.padding || '0px 0px 0px 0px').replace(/px/g, '').split(' ');
-                                pTop = paddingValues[0] || '0';
-                                pRight = paddingValues[1] || pTop;
-                                pBottom = paddingValues[2] || pTop;
-                                pLeft = paddingValues[3] || pRight;
-                            }
-
-                            const currentValues = { Top: pTop, Right: pRight, Bottom: pBottom, Left: pLeft };
-
-                            return (
-                                <Box key={side} sx={{ minWidth: 0 }}>
-                                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '13px' }}>
-                                        {side}
-                                    </Typography>
-                                    <TextField
-                                        type="number"
-                                        size="small"
-                                        fullWidth
-                                        value={parseInt((currentValues as any)[side])}
-                                        onChange={(e) => {
-                                            const newVal = e.target.value;
-                                            const newValues = { ...currentValues, [side]: newVal };
-                                            const newPadding = `${newValues.Top}px ${newValues.Right}px ${newValues.Bottom}px ${newValues.Left}px`;
-                                            handleChange('padding', newPadding);
-                                        }}
-                                        inputProps={{ style: { fontSize: '14px' }, min: 0 }}
-                                    />
-                                </Box>
-                            );
-                        })}
+                        {showLabelAlign && (
+                            <Box>
+                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                                    Label Align
+                                </Typography>
+                                <ToggleButtonGroup
+                                    value={options.labelAlign || 'left'}
+                                    exclusive
+                                    onChange={(_, value) => value && handleChange('labelAlign', value)}
+                                    size="small"
+                                    fullWidth
+                                >
+                                    <ToggleButton value="left" sx={{ p: 0.5 }}>
+                                        <FormatAlignLeft fontSize="small" />
+                                    </ToggleButton>
+                                    <ToggleButton value="center" sx={{ p: 0.5 }}>
+                                        <FormatAlignCenter fontSize="small" />
+                                    </ToggleButton>
+                                    <ToggleButton value="right" sx={{ p: 0.5 }}>
+                                        <FormatAlignRight fontSize="small" />
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+                        )}
+                        {showValueAlign && (
+                            <Box>
+                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                                    Value Align
+                                </Typography>
+                                <ToggleButtonGroup
+                                    value={options.valueAlign || 'right'}
+                                    exclusive
+                                    onChange={(_, value) => value && handleChange('valueAlign', value)}
+                                    size="small"
+                                    fullWidth
+                                >
+                                    <ToggleButton value="left" sx={{ p: 0.5 }}>
+                                        <FormatAlignLeft fontSize="small" />
+                                    </ToggleButton>
+                                    <ToggleButton value="center" sx={{ p: 0.5 }}>
+                                        <FormatAlignCenter fontSize="small" />
+                                    </ToggleButton>
+                                    <ToggleButton value="right" sx={{ p: 0.5 }}>
+                                        <FormatAlignRight fontSize="small" />
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+                        )}
                     </Box>
-                </Box>
+                )}
+
+                {showPadding && (
+                    <Box>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                            Padding (px)
+                        </Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                            {['Top', 'Right', 'Bottom', 'Left'].map((side) => {
+                                let pTop = '0';
+                                let pRight = '0';
+                                let pBottom = '0';
+                                let pLeft = '0';
+
+                                if (options.padding && typeof options.padding === 'object') {
+                                    pTop = String(options.padding.top || 0);
+                                    pRight = String(options.padding.right || 0);
+                                    pBottom = String(options.padding.bottom || 0);
+                                    pLeft = String(options.padding.left || 0);
+                                } else {
+                                    const paddingValues = (options.padding || '0px 0px 0px 0px').replace(/px/g, '').split(' ');
+                                    pTop = paddingValues[0] || '0';
+                                    pRight = paddingValues[1] || pTop;
+                                    pBottom = paddingValues[2] || pTop;
+                                    pLeft = paddingValues[3] || pRight;
+                                }
+
+                                const currentValues = { Top: pTop, Right: pRight, Bottom: pBottom, Left: pLeft };
+
+                                return (
+                                    <Box key={side} sx={{ minWidth: 0 }}>
+                                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '13px' }}>
+                                            {side}
+                                        </Typography>
+                                        <TextField
+                                            type="number"
+                                            size="small"
+                                            fullWidth
+                                            value={parseInt((currentValues as any)[side])}
+                                            onChange={(e) => {
+                                                const newVal = e.target.value;
+                                                const newValues = { ...currentValues, [side]: newVal };
+                                                const newPadding = `${newValues.Top}px ${newValues.Right}px ${newValues.Bottom}px ${newValues.Left}px`;
+                                                handleChange('padding', newPadding);
+                                            }}
+                                            inputProps={{ style: { fontSize: '14px' }, min: 0 }}
+                                        />
+                                    </Box>
+                                );
+                            })}
+                        </Box>
+                    </Box>
+                )}
             </Box>
         </Box>
     );

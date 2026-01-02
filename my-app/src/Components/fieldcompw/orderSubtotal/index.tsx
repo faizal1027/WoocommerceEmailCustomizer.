@@ -32,7 +32,7 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
             }}
             sx={{
                 border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: '10px',
+                padding: orderSubtotalEditorOptions.padding || '10px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -53,55 +53,63 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
                     ].map((item, index) => (
                         <Box
                             key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
                             sx={{
+                                display: 'flex',
+                                alignItems: "center",
                                 paddingTop: `${orderSubtotalEditorOptions.spacing || 0}px`,
                                 paddingBottom: `${orderSubtotalEditorOptions.spacing || 0}px`,
                                 borderTop: item.border ? '1px solid #eee' : 'none',
+                                fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
+                                fontSize: orderSubtotalEditorOptions.fontSize,
+                                color: item.color || orderSubtotalEditorOptions.textColor,
                             }}
                         >
-                            <Typography sx={{
-                                fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
-                                fontSize: orderSubtotalEditorOptions.fontSize,
-                                color: item.color || orderSubtotalEditorOptions.textColor,
-                                fontWeight: item.weight || 'normal',
+                            <Box sx={{
+                                fontWeight: item.weight || 'bold',
+                                textAlign: orderSubtotalEditorOptions.labelAlign as any || 'left',
+                                flex: 1,
+                                width: '50%'
                             }}>
                                 {item.label}:
-                            </Typography>
-                            <Typography sx={{
-                                fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
-                                fontSize: orderSubtotalEditorOptions.fontSize,
-                                color: item.color || orderSubtotalEditorOptions.textColor,
+                            </Box>
+                            <Box sx={{
                                 fontWeight: item.weight || 'normal',
+                                textAlign: orderSubtotalEditorOptions.valueAlign as any || 'right',
+                                flex: 1,
+                                width: '50%'
                             }}>
                                 {item.value}
-                            </Typography>
+                            </Box>
                         </Box>
                     ))}
                 </Box>
             ) : (
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    gap={`${orderSubtotalEditorOptions.spacing}px`}
-                >
-                    <Typography sx={{
-                        fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
-                        fontSize: orderSubtotalEditorOptions.fontSize,
-                        color: orderSubtotalEditorOptions.textColor,
-                        fontWeight: 'bold'
+                <Box sx={{
+                    backgroundColor: orderSubtotalEditorOptions.backgroundColor || 'transparent',
+                    fontFamily: orderSubtotalEditorOptions.fontFamily || 'Arial, sans-serif',
+                    fontSize: orderSubtotalEditorOptions.fontSize || '14px',
+                    color: orderSubtotalEditorOptions.textColor || '#333333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    paddingTop: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                    paddingBottom: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                    width: '100%'
+                }}>
+                    <Box sx={{
+                        fontWeight: 'bold',
+                        textAlign: orderSubtotalEditorOptions.labelAlign as any || 'left',
+                        flex: 1,
+                        width: '50%'
                     }}>
                         {orderSubtotalEditorOptions.label}
-                    </Typography>
-                    <Typography sx={{
-                        fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
-                        fontSize: orderSubtotalEditorOptions.fontSize,
-                        color: orderSubtotalEditorOptions.textColor,
+                    </Box>
+                    <Box sx={{
+                        textAlign: orderSubtotalEditorOptions.valueAlign as any || 'right',
+                        flex: 1,
+                        width: '50%'
                     }}>
                         {orderSubtotalEditorOptions.value}
-                    </Typography>
+                    </Box>
                 </Box>
             )}
         </Box>

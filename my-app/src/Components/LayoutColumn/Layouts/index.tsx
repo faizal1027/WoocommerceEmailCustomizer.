@@ -54,7 +54,7 @@ import GroupWidgetEditor from './BlockLayout/WidgetsEditor/groupWidgetEditor';
 // Extra Block Editors 
 import SocialFollowWidgetEditor from './ExtraLayout/WidgetsEditor/socialFollowWidgetEditor';
 import VideoWidgetEditor from './ExtraLayout/WidgetsEditor/videoWidgetEditor';
-import CodeWidgetEditor from './ExtraLayout/WidgetsEditor/codeWidgetEditor';
+
 import CountdownWidgetEditor from './ExtraLayout/WidgetsEditor/countdownWidgetEditor';
 // import ProgressBarWidgetEditor from './ExtraLayout/WidgetsEditor/progressBarWidgetEditor';
 import ProductWidgetEditor from './ExtraLayout/WidgetsEditor/productWidgetEditor';
@@ -158,8 +158,7 @@ const OverallLayout = () => {
         return <SocialFollowWidgetEditor />;
       case 'video':
         return <VideoWidgetEditor />;
-      case 'code':
-        return <CodeWidgetEditor />;
+
       case 'countdown':
         return <CountdownWidgetEditor />;
       // case 'progressBar':

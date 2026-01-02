@@ -62,10 +62,7 @@ const BillingAddressWidgetEditor = () => {
     textAlign,
     lineHeight,
     letterSpacing,
-    paddingTop,
-    paddingRight,
-    paddingBottom,
-    paddingLeft,
+    padding, // Standardized
   } = billingAddressEditorOptions;
 
   const renderLabel = (text: string) => (
@@ -106,58 +103,11 @@ const BillingAddressWidgetEditor = () => {
         <CommonStylingControls
           options={billingAddressEditorOptions}
           onUpdate={(updatedOptions) => dispatch(updateBillingAddressEditorOptions(updatedOptions))}
+          showPadding={true} // Enable standard padding control
         />
 
         <Divider />
 
-        {/* Section: Spacing */}
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Spacing (Padding)
-          </Typography>
-          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-            <Box>
-              {renderLabel("Top")}
-              <TextField
-                type="number"
-                value={paddingTop || ''}
-                onChange={handleChange('paddingTop')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Box>
-              {renderLabel("Right")}
-              <TextField
-                type="number"
-                value={paddingRight || ''}
-                onChange={handleChange('paddingRight')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Box>
-              {renderLabel("Bottom")}
-              <TextField
-                type="number"
-                value={paddingBottom || ''}
-                onChange={handleChange('paddingBottom')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Box>
-              {renderLabel("Left")}
-              <TextField
-                type="number"
-                value={paddingLeft || ''}
-                onChange={handleChange('paddingLeft')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-          </Box>
-        </Box>
       </Stack>
     </Box>
   );

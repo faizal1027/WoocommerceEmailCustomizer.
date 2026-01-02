@@ -32,33 +32,40 @@ const ShippingMethodFieldComponent: React.FC<Props> = ({
             }}
             sx={{
                 border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: '10px',
+                padding: shippingMethodEditorOptions.padding || '10px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 textAlign: shippingMethodEditorOptions.textAlign as any,
-                paddingTop: `${shippingMethodEditorOptions.spacing || 0}px`,
-                paddingBottom: `${shippingMethodEditorOptions.spacing || 0}px`,
                 width: '100%',
                 backgroundColor: shippingMethodEditorOptions.backgroundColor && shippingMethodEditorOptions.backgroundColor !== 'transparent' ? shippingMethodEditorOptions.backgroundColor : 'transparent',
             }}
         >
-            <Typography sx={{
-                fontFamily: shippingMethodEditorOptions.fontFamily === 'inherit' || !shippingMethodEditorOptions.fontFamily ? 'inherit' : shippingMethodEditorOptions.fontFamily,
-                fontSize: shippingMethodEditorOptions.fontSize,
-                color: shippingMethodEditorOptions.textColor,
-                fontWeight: 'bold'
+            <Box sx={{
+                fontFamily: shippingMethodEditorOptions.fontFamily || 'Arial, sans-serif',
+                fontSize: shippingMethodEditorOptions.fontSize || '14px',
+                color: shippingMethodEditorOptions.textColor || '#333333',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%'
             }}>
-                {shippingMethodEditorOptions.label}
-            </Typography>
-            <Typography sx={{
-                fontFamily: shippingMethodEditorOptions.fontFamily === 'inherit' || !shippingMethodEditorOptions.fontFamily ? 'inherit' : shippingMethodEditorOptions.fontFamily,
-                fontSize: shippingMethodEditorOptions.fontSize,
-                color: shippingMethodEditorOptions.textColor,
-            }}>
-                {shippingMethodEditorOptions.value === '{{shipping_method}}' ? 'Flat rate' : shippingMethodEditorOptions.value}
-            </Typography>
+                <Box sx={{
+                    fontWeight: 'bold',
+                    textAlign: shippingMethodEditorOptions.labelAlign as any || 'left',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {shippingMethodEditorOptions.label}
+                </Box>
+                <Box sx={{
+                    textAlign: shippingMethodEditorOptions.valueAlign as any || 'right',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {shippingMethodEditorOptions.value === '{{shipping_method}}' ? 'Flat rate' : shippingMethodEditorOptions.value}
+                </Box>
+            </Box>
         </Box>
     );
 };

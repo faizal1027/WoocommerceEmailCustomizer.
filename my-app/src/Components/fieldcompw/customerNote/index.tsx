@@ -32,33 +32,40 @@ const CustomerNoteFieldComponent: React.FC<Props> = ({
             }}
             sx={{
                 border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: '10px',
+                padding: customerNoteEditorOptions.padding || '10px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 textAlign: customerNoteEditorOptions.textAlign as any,
-                paddingTop: `${customerNoteEditorOptions.spacing || 0}px`,
-                paddingBottom: `${customerNoteEditorOptions.spacing || 0}px`,
                 width: '100%',
                 backgroundColor: customerNoteEditorOptions.backgroundColor && customerNoteEditorOptions.backgroundColor !== 'transparent' ? customerNoteEditorOptions.backgroundColor : 'transparent',
             }}
         >
-            <Typography sx={{
-                fontFamily: customerNoteEditorOptions.fontFamily === 'inherit' || !customerNoteEditorOptions.fontFamily ? 'inherit' : customerNoteEditorOptions.fontFamily,
-                fontSize: customerNoteEditorOptions.fontSize,
-                color: customerNoteEditorOptions.textColor,
-                fontWeight: 'bold',
+            <Box sx={{
+                fontFamily: customerNoteEditorOptions.fontFamily || 'Arial, sans-serif',
+                fontSize: customerNoteEditorOptions.fontSize || '14px',
+                color: customerNoteEditorOptions.textColor || '#333333',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%'
             }}>
-                {customerNoteEditorOptions.label === 'Customer Note' ? 'Note' : customerNoteEditorOptions.label}
-            </Typography>
-            <Typography sx={{
-                fontFamily: customerNoteEditorOptions.fontFamily === 'inherit' || !customerNoteEditorOptions.fontFamily ? 'inherit' : customerNoteEditorOptions.fontFamily,
-                fontSize: customerNoteEditorOptions.fontSize,
-                color: customerNoteEditorOptions.textColor,
-            }}>
-                {customerNoteEditorOptions.value === '{{customer_note}}' ? 'Customer note' : customerNoteEditorOptions.value}
-            </Typography>
+                <Box sx={{
+                    fontWeight: 'bold',
+                    textAlign: customerNoteEditorOptions.labelAlign as any || 'left',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {customerNoteEditorOptions.label}
+                </Box>
+                <Box sx={{
+                    textAlign: customerNoteEditorOptions.valueAlign as any || 'right',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {customerNoteEditorOptions.value === '{{customer_note}}' ? 'Please deliver between 9 AM and 5 PM.' : customerNoteEditorOptions.value}
+                </Box>
+            </Box>
         </Box>
     );
 };

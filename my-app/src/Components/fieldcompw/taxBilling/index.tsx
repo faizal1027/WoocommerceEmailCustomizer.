@@ -67,18 +67,29 @@ const TaxBillingFieldComponent: React.FC<TaxBillingFieldComponentProps> = ({
         textAlign: taxBillingEditorOptions.textAlign || 'left',
         border: isSelected ? '2px dashed blue' : '1px solid #ddd',
         borderRadius: '8px',
-        padding: '15px',
+        padding: taxBillingEditorOptions.padding || '15px',
         backgroundColor: taxBillingEditorOptions.backgroundColor && taxBillingEditorOptions.backgroundColor !== 'transparent' ? taxBillingEditorOptions.backgroundColor : '#fff',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         position: 'relative',
       }}
     >
       {/* Tax Invoice Header */}
-      <Typography variant="h6" sx={{ marginTop: 0, color: '#333' }}>
+      <Typography variant="h6" sx={{
+        marginTop: 0,
+        color: 'inherit',
+        fontFamily: 'inherit',
+        fontSize: '1.25rem', // header size
+        fontWeight: 'bold'
+      }}>
         Tax Invoice #{fallback(taxBillingEditorOptions.orderNumber, previewMode ? '12345' : '{{order_id}}')}
       </Typography>
 
-      <Typography variant="body2" sx={{ mb: 2 }}>
+      <Typography variant="body2" sx={{
+        mb: 2,
+        color: 'inherit',
+        fontFamily: 'inherit',
+        fontSize: 'inherit'
+      }}>
         <strong>Order Date:</strong> {fallback(taxBillingEditorOptions.orderDate, previewMode ? 'December 10, 2025' : '{{order_date}}')}
       </Typography>
 
@@ -86,48 +97,113 @@ const TaxBillingFieldComponent: React.FC<TaxBillingFieldComponentProps> = ({
       <Table size="small" sx={{ width: '100%', borderCollapse: 'collapse', mt: 1 }}>
         <TableBody>
           <TableRow>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               Subtotal
             </TableCell>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              textAlign: 'right',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               {fallback(taxBillingEditorOptions.orderSubtotal, previewMode ? '$169.97' : '{{order_subtotal}}')}
             </TableCell>
           </TableRow>
 
           <TableRow>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               Shipping
             </TableCell>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              textAlign: 'right',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               {fallback(taxBillingEditorOptions.orderShipping, previewMode ? '$10.00' : '{{shipping_cost}}')}
             </TableCell>
           </TableRow>
           {/* Discount Row */}
           {(taxBillingEditorOptions.orderDiscount !== '$0.00' && taxBillingEditorOptions.orderDiscount !== '0' && taxBillingEditorOptions.orderDiscount !== '') || !previewMode ? (
             <TableRow>
-              <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+              <TableCell sx={{
+                padding: '8px',
+                borderBottom: '1px solid #eee',
+                color: 'inherit',
+                fontFamily: 'inherit',
+                fontSize: 'inherit'
+              }}>
                 Discount
               </TableCell>
-              <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right', color: '#e53e3e' }}>
+              <TableCell sx={{
+                padding: '8px',
+                borderBottom: '1px solid #eee',
+                textAlign: 'right',
+                color: '#e53e3e',
+                fontFamily: 'inherit',
+                fontSize: 'inherit'
+              }}>
                 -{fallback(taxBillingEditorOptions.orderDiscount, previewMode ? '$0.00' : '{{order_discount}}')}
               </TableCell>
             </TableRow>
           ) : null}
 
           <TableRow>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               Tax ({fallback(taxBillingEditorOptions.taxRate, previewMode ? '8.5%' : '{{tax_rate}}')})
             </TableCell>
-            <TableCell sx={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>
+            <TableCell sx={{
+              padding: '8px',
+              borderBottom: '1px solid #eee',
+              textAlign: 'right',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               {fallback(taxBillingEditorOptions.orderTax, previewMode ? '$15.30' : '{{tax_amount}}')}
             </TableCell>
           </TableRow>
 
           <TableRow>
-            <TableCell sx={{ padding: '8px', fontWeight: 'bold' }}>
+            <TableCell sx={{
+              padding: '8px',
+              fontWeight: 'bold',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               Total
             </TableCell>
-            <TableCell sx={{ padding: '8px', fontWeight: 'bold', textAlign: 'right' }}>
+            <TableCell sx={{
+              padding: '8px',
+              fontWeight: 'bold',
+              textAlign: 'right',
+              color: 'inherit',
+              fontFamily: 'inherit',
+              fontSize: 'inherit'
+            }}>
               {fallback(taxBillingEditorOptions.orderTotal, previewMode ? '$195.27' : '{{order_total}}')}
             </TableCell>
           </TableRow>
@@ -135,22 +211,50 @@ const TaxBillingFieldComponent: React.FC<TaxBillingFieldComponentProps> = ({
       </Table>
 
       {/* Billing Address */}
-      <Box sx={{ mt: 2, padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '5px' }}>
-        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+      <Box sx={{
+        mt: 2,
+        padding: '10px',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '5px',
+        color: 'inherit', // Fix: allow user color selection to apply
+      }}>
+        <Typography variant="body2" sx={{
+          fontWeight: 'bold',
+          mb: 1,
+          fontFamily: 'inherit',
+          fontSize: 'inherit'
+        }}>
           Billing Address:
         </Typography>
-        <Typography variant="body2" sx={{ margin: '2px 0' }}>
+        <Typography variant="body2" sx={{
+          margin: '2px 0',
+          fontFamily: 'inherit',
+          fontSize: 'inherit'
+        }}>
           {fallback(taxBillingEditorOptions.billingFirstName, previewMode ? 'John' : '{{billing_first_name}}')} {fallback(taxBillingEditorOptions.billingLastName, previewMode ? 'Doe' : '{{billing_last_name}}')}
         </Typography>
-        <Typography variant="body2" sx={{ margin: '2px 0' }}>
+        <Typography variant="body2" sx={{
+          margin: '2px 0',
+          fontFamily: 'inherit',
+          fontSize: 'inherit'
+        }}>
           {fallback(taxBillingEditorOptions.billingAddress1, previewMode ? '123 Main Street' : '{{billing_address_1}}')}, {fallback(taxBillingEditorOptions.billingCity, previewMode ? 'New York' : '{{billing_city}}')}
         </Typography>
-        <Typography variant="body2" sx={{ margin: '2px 0' }}>
+        <Typography variant="body2" sx={{
+          margin: '2px 0',
+          fontFamily: 'inherit',
+          fontSize: 'inherit'
+        }}>
           {fallback(taxBillingEditorOptions.billingState, previewMode ? 'NY' : '{{billing_state}}')} {fallback(taxBillingEditorOptions.billingPostcode, previewMode ? '10001' : '{{billing_postcode}}')}, {fallback(taxBillingEditorOptions.billingCountry, previewMode ? 'United States' : '{{billing_country}}')}
         </Typography>
       </Box>
 
-      <Typography variant="body2" sx={{ mt: 2 }}>
+      <Typography variant="body2" sx={{
+        mt: 2,
+        fontFamily: 'inherit',
+        fontSize: 'inherit',
+        color: 'inherit'
+      }}>
         <strong>Tax Billing</strong>
       </Typography>
     </Box>

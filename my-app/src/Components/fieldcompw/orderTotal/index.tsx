@@ -32,34 +32,41 @@ const OrderTotalFieldComponent: React.FC<Props> = ({
             }}
             sx={{
                 border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: '10px',
+                padding: orderTotalEditorOptions.padding || '10px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 textAlign: orderTotalEditorOptions.textAlign as any,
-                paddingTop: `${orderTotalEditorOptions.spacing || 0}px`,
-                paddingBottom: `${orderTotalEditorOptions.spacing || 0}px`,
                 width: '100%',
                 backgroundColor: orderTotalEditorOptions.backgroundColor && orderTotalEditorOptions.backgroundColor !== 'transparent' ? orderTotalEditorOptions.backgroundColor : 'transparent',
             }}
         >
-            <Typography sx={{
-                fontFamily: orderTotalEditorOptions.fontFamily === 'inherit' || !orderTotalEditorOptions.fontFamily ? 'inherit' : orderTotalEditorOptions.fontFamily,
-                fontSize: orderTotalEditorOptions.fontSize,
-                color: orderTotalEditorOptions.textColor,
-                fontWeight: 'bold'
+            <Box sx={{
+                fontFamily: orderTotalEditorOptions.fontFamily || 'Arial, sans-serif',
+                fontSize: orderTotalEditorOptions.fontSize || '18px',
+                color: orderTotalEditorOptions.textColor || '#000000',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%'
             }}>
-                {orderTotalEditorOptions.label}
-            </Typography>
-            <Typography sx={{
-                fontFamily: orderTotalEditorOptions.fontFamily === 'inherit' || !orderTotalEditorOptions.fontFamily ? 'inherit' : orderTotalEditorOptions.fontFamily,
-                fontSize: orderTotalEditorOptions.fontSize,
-                color: orderTotalEditorOptions.textColor,
-                fontWeight: 'bold'
-            }}>
-                {orderTotalEditorOptions.value === '{{order_total}}' ? '₹55.00' : orderTotalEditorOptions.value}
-            </Typography>
+                <Box sx={{
+                    fontWeight: 'bold',
+                    textAlign: orderTotalEditorOptions.labelAlign as any || 'left',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {orderTotalEditorOptions.label}
+                </Box>
+                <Box sx={{
+                    fontWeight: 'bold',
+                    textAlign: orderTotalEditorOptions.valueAlign as any || 'right',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {orderTotalEditorOptions.value === '{{order_total}}' ? '₹55.00' : orderTotalEditorOptions.value}
+                </Box>
+            </Box>
         </Box>
     );
 };

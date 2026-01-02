@@ -11,15 +11,11 @@ class WETC_Email_Handler {
     private static $instance = null;
 
     public static function log($message) {
-        // $log_file = SMACK_WETC_PLUGIN_PATH . 'wetc_debug.log';
-        // $timestamp = date('Y-m-d H:i:s');
-        // @file_put_contents($log_file, "[$timestamp] $message\n", FILE_APPEND);
+        // Logging disabled for production
     }
 
     private function __construct() {
-        self::log("WETC_Email_Handler constructor called. URI: " . $_SERVER['REQUEST_URI']);
-        // Disable emails
-        // Disable default WooCommerce emails with high priority to prevent duplicates
+        // Disable default WooCommerce emails ONLY if we have a replacement template
         $emails_to_disable = [
             'new_order',
             'cancelled_order',
@@ -36,12 +32,11 @@ class WETC_Email_Handler {
         ];
 
         foreach ($emails_to_disable as $email_id) {
-            add_filter("woocommerce_email_enabled_{$email_id}", '__return_false', 9999);
-            add_filter("woocommerce_email_recipient_{$email_id}", '__return_empty_string', 9999);
+            add_filter("woocommerce_email_enabled_{$email_id}", [$this, 'should_disable_default_email'], 9999, 2);
         }
 
         // Additional abandonment cart disable if applicable
-        add_filter('woocommerce_email_enabled_abandoned_cart', '__return_false', 9999);
+        add_filter('woocommerce_email_enabled_abandoned_cart', [$this, 'should_disable_default_email'], 9999, 2);
 
         // Hook 
         add_action('woocommerce_order_status_processing', [$this,'processing_order_email'], 10, 1);
@@ -61,6 +56,10 @@ class WETC_Email_Handler {
         add_action('woocommerce_order_status_cancelled', [$this, 'cancelled_order_email_admin'], 10, 1);
         add_action('woocommerce_order_status_completed', [$this,'completed_order_email'], 10, 1);
         add_action('woocommerce_order_status_completed', [$this,'new_order_admin_email'], 10, 1);
+        
+        // --- Explicit On-Hold Hooks (for better fallback/custom triggering) ---
+        add_action('woocommerce_order_status_pending_to_on-hold_notification', [$this,'on_hold_order_email'], 10, 1);
+        add_action('woocommerce_order_status_processing_to_on-hold_notification', [$this,'on_hold_order_email'], 10, 1);
         
         // Admin Cancellation Hooks
         add_action('woocommerce_order_status_pending_to_cancelled_notification', [$this, 'cancelled_order_email_admin'], 10, 1);
@@ -105,34 +104,127 @@ class WETC_Email_Handler {
     }
 
 public static function get_instance() {
-
     if (self::$instance === null) {
         self::$instance = new self();
     }
     return self::$instance;
 }
 
+private function get_order_id_from_object($email) {
+    if (isset($email->object) && is_a($email->object, 'WC_Order')) {
+        return $email->object->get_id();
+    }
+    return null;
+}
+
+    public function should_disable_default_email($enabled, $email = null) {
+        $filter = current_filter();
+        $email_id = str_replace('woocommerce_email_enabled_', '', $filter);
+        
+        if (empty($email_id) || $email_id === $filter) {
+            if (is_object($email) && isset($email->id)) {
+                $email_id = $email->id;
+            } elseif (is_string($email)) {
+                $email_id = $email;
+            }
+        }
+
+        if (empty($email_id)) {
+            return $enabled;
+        }
+
+        $content_types = $this->map_wc_email_id_to_wetc_type($email_id);
+
+        if ($content_types) {
+            $types = is_array($content_types) ? $content_types : [$content_types];
+            foreach ($types as $type) {
+                if (empty($type)) continue;
+                $template = $this->get_active_template_for_type($type);
+                if ($template && !empty($template->content_type)) {
+                    if (!empty($template->html_content)) {
+                        return false; 
+                    }
+                }
+            }
+        }
+
+        return $enabled;
+    }
+
+    private function map_wc_email_id_to_wetc_type($email_id) {
+        $map = [
+            'new_order'                 => 'new_order_admin',
+            'cancelled_order'           => 'cancelled_order_admin',
+            'failed_order'              => 'failed_order_admin',
+            'customer_on_hold_order'    => 'on_hold_order',
+            'customer_processing_order' => 'processing_order_customer',
+            'customer_completed_order'  => 'completed_order_customer',
+            'customer_refunded_order'   => ['refunded_order_customer', 'refunded_order_customer_full', 'refunded_order_customer_partial'],
+            'customer_invoice'          => ['customer_invoice', 'customer_invoice_paid', 'customer_invoice_pending'],
+            'customer_note'             => 'customer_note',
+            'customer_reset_password'   => 'reset_password',
+            'customer_new_account'      => 'new_user_registration',
+            'new_account'               => 'new_user_registration_admin',
+            'abandoned_cart'            => 'abandoned_cart'
+        ];
+
+        return isset($map[$email_id]) ? $map[$email_id] : null;
+    }
+
 
     private function get_active_template_for_type($content_type) {
+        $content_type = trim((string)$content_type);
+        if (empty($content_type) || $content_type === 'JSON') {
+            return null;
+        }
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'wetc_email_templates';
         
-        // --- Robust Slug Matching ---
-        // 1. Try exact match with highest priority
-        $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE content_type = %s ORDER BY priority DESC, id DESC LIMIT 1",
-            $content_type
-        ));
+        // Mapping from internal slugs to Descriptive Names (to support new user-friendly DB values)
+        $slug_to_name_map = [
+            'cancelled_order_admin' => 'Cancelled order (Admin)',
+            'failed_order_admin' => 'Failed order (Admin)',
+            'new_order_admin' => 'New order (Admin)',
+            'cancelled_order_customer' => 'Cancelled order (Customer)',
+            'completed_order_customer' => 'Completed order (Customer)',
+            'customer_note' => 'Customer note',
+            'failed_order_customer' => 'Failed order (Customer)',
+            'new_user_registration' => 'New account (Customer)',
+            'customer_invoice_paid' => 'Order details (Paid)',
+            'customer_invoice_pending' => 'Order details (Pending)',
+            'on_hold_order' => 'Order on-hold (Customer)',
+            'processing_order_customer' => 'Processing order (Customer)',
+            'refunded_order_customer_full' => 'Refunded order (Full)',
+            'refunded_order_customer_partial' => 'Refunded order (Partial)',
+            'reset_password' => 'Reset password (Customer)'
+        ];
 
-        if ($row) return $row;
+        $search_types = [$content_type];
+        if (isset($slug_to_name_map[$content_type])) {
+            $search_types[] = $slug_to_name_map[$content_type];
+        }
 
-        // 2. Try case-insensitive and normalized (spaces to underscores)
-        $normalized_slug = str_replace(' ', '_', strtolower($content_type));
-        $all_templates = $wpdb->get_results("SELECT * FROM $table_name ORDER BY priority DESC, id DESC");
+        // --- Robust Searching ---
+        foreach ($search_types as $type_to_find) {
+            // 1. Try exact match with highest priority
+            $row = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $table_name WHERE content_type = %s ORDER BY priority DESC, id DESC LIMIT 1",
+                $type_to_find
+            ));
+
+            if ($row) return $row;
+        }
+
+        // 2. Try normalized fallback (if exact match fails for all variants)
+        $normalized_input = str_replace(' ', '_', strtolower($content_type));
+        if (empty($normalized_input)) return null;
+
+        $all_templates = $wpdb->get_results("SELECT * FROM $table_name WHERE content_type != '' AND content_type IS NOT NULL ORDER BY priority DESC, id DESC");
         
         foreach ($all_templates as $template) {
-            $t_slug = str_replace(' ', '_', strtolower($template->content_type));
-            if ($t_slug === $normalized_slug) {
+            $t_slug = str_replace(' ', '_', strtolower(trim((string)$template->content_type)));
+            if (!empty($t_slug) && $t_slug === $normalized_input) {
                 return $template;
             }
         }
@@ -156,11 +248,9 @@ public static function get_instance() {
         }
         
         $template = $this->get_active_template_for_type($content_type);
-
         if (!$template || empty($content_type)) {
-            return;
+            return; // Exit if no valid template found
         }
-
         $sent_key = '_wetc_sent_' . $content_type;
 
         // Only mark as sent if template found and we have a valid key
@@ -176,7 +266,6 @@ public static function get_instance() {
         $html_content = !empty($template->html_content) ? stripslashes($template->html_content) : '';
 
         if (empty($html_content)) {
-            self::log("WETC: Template $template_id has no content (content_type: $content_type).");
             error_log("WETC: Template $template_id has no content.");
             return;
         }
@@ -512,6 +601,14 @@ public static function get_instance() {
             '{{customer_note}}' => $customer_note,
             '{{order_tracking_url}}' => $order_url, // Standard fallback
             '{{order_totals_table}}' => $order_totals_table,
+            '{{tax_rate}}' => ($order instanceof \WC_Order) ? (function($order) {
+                $taxes = $order->get_taxes();
+                foreach ($taxes as $tax) {
+                    $rate_id = $tax->get_rate_id();
+                    return \WC_Tax::get_rate_percent_value($rate_id) . '%';
+                }
+                return '0%';
+            })($order) : '{{tax_rate}}',
         ];
         
         // Add shipping email if available (custom field?) or reuse billing
@@ -552,6 +649,10 @@ public static function get_instance() {
   
 //processing order to admin
 public function processing_order_admin($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
     $this->send_email_for_type($order_id, 'processing_order_admin', 'New Customer Order - Processing', true, [], $force);
 }
 
@@ -560,6 +661,10 @@ public function processing_order_admin($order_id, $force = false) {
 
 //processing order to customer
 public function processing_order_email($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
     $this->send_email_for_type($order_id, 'processing_order_customer', 'Your Order is Processing', false, [], $force);
 }
 
@@ -567,19 +672,32 @@ public function processing_order_email($order_id, $force = false) {
 
 
 //Failed Order customer
-public function failed_order_email($order_id) {
-    $this->send_email_for_type($order_id, 'failed_order_customer', 'Order Failed', false);
+public function failed_order_email($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
+    $this->send_email_for_type($order_id, 'failed_order_customer', 'Order Failed', false, [], $force);
 }
 
-//Failed Order admin
-public function failed_order_email_admin($order_id) {
-     $this->send_email_for_type($order_id, 'failed_order_admin', 'Order Failed (Admin)', true);
+public function failed_order_email_admin($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
+    $this->send_email_for_type($order_id, 'failed_order_admin', 'Order Failed (Admin)', true, [], $force);
 }
 
 
 //refunded customer
 public function refunded_order_email($order_id, $refund_id = null, $force = false) {
+    static $already_sent = [];
+    $cache_key = $order_id . '_' . $refund_id;
+    if (isset($already_sent[$cache_key]) && !$force) return;
+    $already_sent[$cache_key] = true;
+
     $extra = [];
+    // ... rest of logic
     if ($refund_id) {
         $refund = wc_get_refund($refund_id);
         if ($refund) {
@@ -589,7 +707,20 @@ public function refunded_order_email($order_id, $refund_id = null, $force = fals
             ];
         }
     }
-    $this->send_email_for_type($order_id, 'refunded_order_customer', 'Order Refunded', false, $extra, $force);
+
+    $order = wc_get_order($order_id);
+    $type = 'refunded_order_customer';
+    if ($order) {
+        // Full refund logic: total refunded is equal to order total
+        $is_full = (float)$order->get_total() <= (float)$order->get_total_refunded();
+        $specific_type = $is_full ? 'refunded_order_customer_full' : 'refunded_order_customer_partial';
+        
+        if ($this->get_active_template_for_type($specific_type)) {
+            $type = $specific_type;
+        }
+    }
+
+    $this->send_email_for_type($order_id, $type, 'Order Refunded', false, $extra, $force);
     
     // Also trigger admin email from here to ensure it uses the same data
     $this->refunded_order_email_admin($order_id, $refund_id, $force);
@@ -615,37 +746,68 @@ public function refunded_order_email_admin($order_id, $refund_id = null, $force 
 }
 
 //cancelled_order
-public function cancelled_order_email($order_id) {
-    $this->send_email_for_type($order_id, 'cancelled_order_customer', 'Order Cancelled', false);
+public function cancelled_order_email($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
+    $this->send_email_for_type($order_id, 'cancelled_order_customer', 'Order Cancelled', false, [], $force);
 }
-//cancelled_order_admin
-public function cancelled_order_email_admin($order_id) {
-    $this->send_email_for_type($order_id, 'cancelled_order_admin', 'Order Cancelled (Admin)', true);
+
+public function cancelled_order_email_admin($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
+    $this->send_email_for_type($order_id, 'cancelled_order_admin', 'Order Cancelled (Admin)', true, [], $force);
 }
 
 
 // Cancelled Order Admin Email
 //On Hold
-public function on_hold_order_email($order_id) {
-    $this->send_email_for_type($order_id, 'on_hold_order', 'Order On Hold', false);
+//On hold Order customer
+public function on_hold_order_email($order_id, $force = false) {
+    // PREVENT DOUBLE EMAILS
+    static $already_sent_onhold = [];
+    if (isset($already_sent_onhold[$order_id]) && !$force) {
+        return;
+    }
+    $already_sent_onhold[$order_id] = true;
+
+    $this->send_email_for_type($order_id, 'on_hold_order', 'Order On Hold', false, [], $force);
 }
 
 //Completed Order Template
 
 public function completed_order_email($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
     $this->send_email_for_type($order_id, 'completed_order_customer', 'Your Order is Complete', false, [], $force);
 }
 
 //new order admin email
 
 public function new_order_admin_email($order_id, $force = false) {
+    // PREVENT DOUBLE ADMIN EMAILS in same request/order
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) {
+        return;
+    }
+    $already_sent[$order_id] = true;
+
     $this->send_email_for_type($order_id, 'new_order_admin', 'New Customer Order', true, [], $force);
 }
 
 
 //abandoned_cart_email 
 
-public function abandoned_cart_email($order_id) {
+public function abandoned_cart_email($order_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
     $order = wc_get_order($order_id);
     if (!$order) {
         error_log("Invalid order ID: $order_id");
@@ -662,29 +824,57 @@ public function abandoned_cart_email($order_id) {
 //new_user_registration_email customer
 
 //new_user_registration_email customer
-public function new_user_registration_email($order_id) {
-    $this->send_email_for_type($order_id, 'new_user_registration', 'Welcome to the store!', false);
+public function new_user_registration_email($user_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$user_id]) && !$force) return;
+    $already_sent[$user_id] = true;
+
+    $this->send_email_for_type($user_id, 'new_user_registration', 'Welcome to the store!', false, [], $force);
 }
 
 //new user reg admin
 
 //new user reg admin
-public function new_user_registration_email_admin($order_id) {
-    $this->send_email_for_type($order_id, 'new_user_registration_admin', 'New User Registered', true);
+public function new_user_registration_email_admin($user_id, $force = false) {
+    static $already_sent = [];
+    if (isset($already_sent[$user_id]) && !$force) return;
+    $already_sent[$user_id] = true;
+
+    $this->send_email_for_type($user_id, 'new_user_registration_admin', 'New User Registered', true, [], $force);
 }
 
 
 //change
-public function customer_note_email($args) {
+public function customer_note_email($args, $force = false) {
     if (isset($args['order_id']) && isset($args['customer_note'])) {
+        $order_id = $args['order_id'];
+        static $already_sent = [];
+        if (isset($already_sent[$order_id]) && !$force) return;
+        $already_sent[$order_id] = true;
+
         $extra = ['{{customer_note}}' => $args['customer_note']];
-        $this->send_email_for_type($args['order_id'], 'customer_note', 'Note Added to Your Order', false, $extra);
+        $this->send_email_for_type($order_id, 'customer_note', 'Note Added to Your Order', false, $extra, $force);
     }
 }
 
 public function customer_invoice_email($order, $force = false) {
     $order_id = ($order instanceof \WC_Order) ? $order->get_id() : $order;
-    $this->send_email_for_type($order_id, 'customer_invoice', 'Invoice for Your Order', false, [], $force);
+    
+    static $already_sent = [];
+    if (isset($already_sent[$order_id]) && !$force) return;
+    $already_sent[$order_id] = true;
+
+    $order_obj = ($order instanceof \WC_Order) ? $order : wc_get_order($order_id);
+    
+    $type = 'customer_invoice';
+    if ($order_obj) {
+        $specific_type = $order_obj->is_paid() ? 'customer_invoice_paid' : 'customer_invoice_pending';
+        if ($this->get_active_template_for_type($specific_type)) {
+            $type = $specific_type;
+        }
+    }
+
+    $this->send_email_for_type($order_id, $type, 'Invoice for Your Order', false, [], $force);
 }
 
 

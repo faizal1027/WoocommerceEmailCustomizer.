@@ -120,53 +120,67 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
       data.textAlign && `text-align: ${data.textAlign}`,
-      data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
+      data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : 'background-color: #ffffff',
+      data.padding && `padding: ${data.padding}`,
       `border: 1px solid #dddddd`,
       `border-collapse: collapse`
     ].filter(Boolean).join('; ');
 
+    const innerTableStyles = [
+      data.fontFamily && `font-family: ${data.fontFamily}`,
+      data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
+      data.textColor && `color: ${data.textColor}`,
+    ].filter(Boolean).join('; ');
+
     return `
-    <table width="100%" cellpadding="12" cellspacing="0" style="${styles}">
-      <tr style="background-color: #f8f9fa;">
-        <td colspan="2" style="padding: 12px; font-weight: bold; font-size: 16px; border-bottom: 2px solid #dee2e6;">Tax Invoice #${orderNumber}</td>
-      </tr>
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
       <tr>
-        <td colspan="2" style="padding: 10px 12px; border-bottom: 1px solid #eeeeee;">
-          <strong>Order Date:</strong> ${orderDate}
+        <td style="padding: ${data.padding || '15px'};">
+          <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse: collapse; ${innerTableStyles}">
+            <tr style="background-color: #f8f9fa;">
+              <td colspan="2" style="padding: 12px; font-weight: bold; font-size: 1.2em; border-bottom: 2px solid #dee2e6;">Tax Invoice #${orderNumber}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding: 10px 12px; border-bottom: 1px solid #eeeeee;">
+                <strong>Order Date:</strong> ${orderDate}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">Subtotal</td>
+              <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${subtotal}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">Shipping</td>
+              <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${shipping}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; color: #e53e3e;">Discount</td>
+              <td align="right" style="padding: 8px; border-bottom: 1px solid #eee; color: #e53e3e;">-{{order_discount}}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">Tax</td>
+              <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${tax}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 8px; border-bottom: 1px solid #eee;">Tax Rate</td>
+              <td align="right" style="padding: 10px 8px; border-bottom: 1px solid #eee;">{{tax_rate}}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Total</td>
+              <td align="right" style="padding: 8px; font-weight: bold;">${total}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding: 15px; background-color: #f9f9f9; border-top: 1px solid #ddd; ${innerTableStyles}">
+                <div style="font-weight: bold; margin-bottom: 8px;">Billing Address:</div>
+                <div style="color: inherit;">{{billing_first_name}} {{billing_last_name}}</div>
+                <div style="color: inherit;">{{billing_address_1}}</div>
+                <div style="color: inherit;">{{billing_address_2}}</div>
+                <div style="color: inherit;">{{billing_city}}, {{billing_state}} {{billing_postcode}}</div>
+                <div style="color: inherit;">{{billing_country}}</div>
+              </td>
+            </tr>
+          </table>
         </td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee;">Subtotal</td>
-        <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${subtotal}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee;">Shipping</td>
-        <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${shipping}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; color: #e53e3e;">Discount</td>
-        <td align="right" style="padding: 8px; border-bottom: 1px solid #eee; color: #e53e3e;">-{{order_discount}}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee;">Tax</td>
-        <td align="right" style="padding: 8px; border-bottom: 1px solid #eee;">${tax}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px; font-weight: bold;">Total</td>
-        <td align="right" style="padding: 8px; font-weight: bold;">${total}</td>
-      </tr>
-      <tr>
-        <td colspan="2" style="padding: 15px; background-color: #f9f9f9; border-top: 1px solid #ddd;">
-          <div style="font-weight: bold; margin-bottom: 8px;">Billing Address:</div>
-          <div>{{billing_first_name}} {{billing_last_name}}</div>
-          <div>{{billing_address_1}}</div>
-          <div>{{billing_address_2}}</div>
-          <div>{{billing_city}}, {{billing_state}} {{billing_postcode}}</div>
-          <div>{{billing_country}}</div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" style="padding: 10px 12px; font-weight: bold;">Tax Billing</td>
       </tr>
     </table>`;
   },
@@ -184,33 +198,33 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     return `
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
       <tr>
-        <td style="padding: 16px; border: 1px solid #dee2e6; vertical-align: top;">
-          <div style="font-weight: bold; font-size: 16px; margin-bottom: 12px; color: #2d3748; border-bottom: 3px solid #007bff; padding-bottom: 8px;">BILL TO:</div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+        <td style="padding: ${data.padding || '16px'}; vertical-align: top;">
+          <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 12px; text-align: ${data.textAlign || 'left'};">BILL TO:</div>
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Name:</strong> {{billing_first_name}} {{billing_last_name}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Phone:</strong> {{billing_phone}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Email:</strong> {{billing_email}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Address Line 1:</strong> {{billing_address_1}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Address Line 2:</strong> {{billing_address_2}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>City:</strong> {{billing_city}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>State:</strong> {{billing_state}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Postal Code:</strong> {{billing_postcode}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Country:</strong> {{billing_country}}
           </div>
         </td>
@@ -231,33 +245,33 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     return `
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
       <tr>
-        <td style="padding: 16px; border: 1px solid #dee2e6; vertical-align: top;">
-          <div style="font-weight: bold; font-size: 16px; margin-bottom: 12px; color: #2d3748; border-bottom: 3px solid #28a745; padding-bottom: 8px;">SHIP TO:</div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+        <td style="padding: ${data.padding || '16px'}; vertical-align: top;">
+          <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 12px; text-align: ${data.textAlign || 'left'};">SHIP TO:</div>
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Name:</strong> {{shipping_first_name}} {{shipping_last_name}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Phone:</strong> {{shipping_phone}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Email:</strong> {{shipping_email}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Address Line 1:</strong> {{shipping_address_1}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Address Line 2:</strong> {{shipping_address_2}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>City:</strong> {{shipping_city}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>State:</strong> {{shipping_state}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Postal Code:</strong> {{shipping_postcode}}
           </div>
-          <div style="margin-bottom: 4px; line-height: 1.6;">
+          <div style="margin-bottom: 4px; line-height: 1.6; color: inherit;">
             <strong>Country:</strong> {{shipping_country}}
           </div>
         </td>
@@ -271,48 +285,48 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const orderNumber = '{{order_id}}';
     const orderDate = '{{order_date}}';
 
-    const styles = [
+    const textStyle = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
-      data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
     ].filter(Boolean).join('; ');
 
+    const alignmentStyle = `text-align: ${data.textAlign || 'left'}`;
+    const backgroundStyle = data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '';
+
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 20px; ${styles}">
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 20px; ${textStyle}; ${backgroundStyle}">
       <tr>
-        <td style="padding: 0;">
-          <div style="font-weight: bold; font-size: 18px; margin-bottom: 16px; color: #2d3748;">[Order #${escapeHtml(orderNumber)}] (${escapeHtml(orderDate)})</div>
-          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #dee2e6; border-collapse: collapse; background-color: #ffffff;">
+        <td style="padding: ${data.padding || '0px'};">
+          <div style="font-weight: bold; font-size: 18px; margin-bottom: 16px; ${alignmentStyle}; ${textStyle}">${data.orderNumberTitle || '[Order'} #${escapeHtml(orderNumber)}] (${escapeHtml(orderDate)})</div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #dee2e6; border-collapse: collapse; background-color: #ffffff; ${textStyle}">
             <thead>
               <tr style="background-color: #f8f9fa;">
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold; color: #2d3748;">Product</th>
-                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold; color: #2d3748;">Quantity</th>
-                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: bold; color: #2d3748;">Price</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: bold;">Product</th>
+                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: bold;">Quantity</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: bold;">Price</th>
               </tr>
             </thead>
             <tbody>
               {{order_items_rows}}
               <tr>
-                <td colspan="2" style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #2d3748;">Subtotal:</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right; color: #2d3748;">{{order_subtotal}}</td>
+                <td colspan="2" style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: bold;">Subtotal:</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right;">{{order_subtotal}}</td>
               </tr>
               <tr>
                 <td colspan="2" style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #e53e3e;">Discount:</td>
                 <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right; color: #e53e3e;">-{{order_discount}}</td>
               </tr>
               <tr>
-                <td colspan="2" style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #2d3748;">Payment method:</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right; color: #2d3748;">{{payment_method}}</td>
+                <td colspan="2" style="padding: 12px; border-bottom: 1px solid #e9ecef; font-weight: bold;">Payment method:</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e9ecef; text-align: right;">{{payment_method}}</td>
               </tr>
               <tr style="background-color: #f8f9fa;">
-                <td colspan="2" style="padding: 12px; font-weight: bold; border-top: 2px solid #dee2e6; color: #2d3748;">Total:</td>
-                <td style="padding: 12px; text-align: right; font-weight: bold; border-top: 2px solid #dee2e6; color: #2d3748;">{{order_total}}</td>
+                <td colspan="2" style="padding: 12px; font-weight: bold; border-top: 2px solid #dee2e6;">Total:</td>
+                <td style="padding: 12px; text-align: right; font-weight: bold; border-top: 2px solid #dee2e6;">{{order_total}}</td>
               </tr>
             </tbody>
           </table>
-          <div style="margin-top: 16px; font-weight: bold; color: #2d3748;">Order Item</div>
         </td>
       </tr>
     </table>`;
@@ -639,24 +653,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     </div>`;
   },
 
-  // ========== 23. CODE WIDGET ==========
-  'code': (d) => {
-    const data = d || {};
-    const styles = [
-      'background-color: #f8f9fa',
-      'border: 1px solid #dee2e6',
-      'border-radius: 4px',
-      'padding: 16px',
-      'font-family: "Courier New", monospace',
-      'font-size: 14px',
-      'overflow-x: auto',
-      'white-space: pre-wrap',
-      'word-break: break-all'
-    ].filter(Boolean).join('; ');
-
-    return `<pre style="${styles}"><code>${escapeHtml(data.code || '// No code provided')}</code></pre>`;
-  },
-
   // ========== 24. COUNTDOWN WIDGET ==========
   'countdown': (d) => {
     const data = d || {};
@@ -839,33 +835,18 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const styles = [
       `background-color: ${data.backgroundColor || '#4CAF50'}`,
       `color: ${data.textColor || '#ffffff'}`,
-      `padding: ${data.padding || '20px'}`,
       `text-align: ${data.textAlign || 'center'}`,
       data.fontFamily && `font-family: ${data.fontFamily}`
     ].filter(Boolean).join('; ');
 
-    const logoHtml = data.showLogo ? `
-      <div style="margin-bottom: 10px;">
-        <img src="${escapeHtml(data.logoUrl || 'https://via.placeholder.com/150x50?text=Logo')}" alt="Store Logo" style="max-width: ${data.logoWidth || '150px'}; height: auto; display: block; margin: 0 auto;" />
-      </div>
-    ` : '';
-
-    const storeName = data.storeName || '{{site_title}}';
-    const tagline = data.tagline || 'Quality products, delivered to your door';
-
     return `
-      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
-        <tr>
-          <td style="padding: 0;">
-            ${logoHtml}
-            <div style="font-size: ${data.fontSize || '28px'}; font-weight: ${data.fontWeight || 'bold'}; margin-bottom: 5px; color: ${data.textColor || '#ffffff'};">
-              ${escapeHtml(storeName)}
-            </div>
-            ${data.showTagline ? `<div style="font-size: ${data.taglineFontSize || '14px'}; opacity: 0.9; color: ${data.textColor || '#ffffff'};">${escapeHtml(tagline)}</div>` : ''}
-          </td>
-        </tr>
-      </table>
-    `;
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
+      <tr>
+        <td style="padding: ${data.padding || '20px'};">
+          ${data.showLogo && data.logoUrl ? `<img src="${escapeHtml(data.logoUrl)}" width="${escapeHtml(data.logoWidth || '150')}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">` : ''}
+        </td>
+      </tr>
+    </table>`;
   },
 
   // ========== 43. EMAIL FOOTER WIDGET ==========
@@ -876,7 +857,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const styles = [
       `background-color: ${data.backgroundColor || '#333333'}`,
       `color: ${data.textColor || '#ffffff'}`,
-      `padding: ${data.padding || '30px 20px'}`,
       `text-align: ${textAlign}`,
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`
@@ -889,7 +869,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const urls = data.socialIcons?.urls || [];
 
     // Determine alignment for flex-like behavior in tables
-    const socialAlign = textAlign === 'left' ? 'left' : textAlign === 'right' ? 'right' : 'center';
     const socialMargin = textAlign === 'left' ? '0 auto 15px 0' : textAlign === 'right' ? '0 0 15px auto' : '0 auto 15px';
 
     const socialIconsHtml = (data.showSocialMedia !== false && icons.length > 0) ? `
@@ -928,14 +907,15 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       </div>
     ` : '';
 
+    const currentYear = String(new Date().getFullYear());
     const copyrightText = data.copyrightText
-      ? data.copyrightText.replace('{{year}}', new Date().getFullYear()).replace('{{current_year}}', new Date().getFullYear())
-      : `&copy; ${new Date().getFullYear()} ${escapeHtml(data.storeName || '{{site_title}}')}. All rights reserved.`;
+      ? data.copyrightText.replace('{{year}}', currentYear).replace('{{current_year}}', currentYear)
+      : `&copy; ${currentYear} ${escapeHtml(data.storeName || '{{site_title}}')}. All rights reserved.`;
 
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
         <tr>
-          <td style="padding: 0;">
+          <td style="padding: ${data.padding || '30px 20px'};">
             ${socialIconsHtml}
             ${addressHtml}
             ${contactHtml}
@@ -954,7 +934,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const data = d || {};
 
     const containerStyles = [
-      `padding: ${data.padding || '20px'}`,
       `text-align: ${data.alignment || 'center'}`
     ].filter(Boolean).join('; ');
 
@@ -962,23 +941,24 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       `background-color: ${data.backgroundColor || '#4CAF50'}`,
       `color: ${data.textColor || '#ffffff'}`,
       data.fontFamily && `font-family: ${data.fontFamily}`,
-      `font-size: ${data.fontSize || '16px'}`,
-      `font-weight: ${data.fontWeight || 'bold'}`,
-      `padding: ${data.buttonPadding || '12px 30px'}`,
-      `border-radius: ${data.borderRadius || '5px'}`,
-      `text-transform: none`,
-      `min-width: ${data.minWidth || '200px'}`,
+      `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize || '16px'}`,
+      `padding: 12px 24px`,
+      `text-decoration: none`,
+      `border-radius: 4px`,
       `display: inline-block`,
-      `text-decoration: none`
+      `font-weight: bold`
     ].filter(Boolean).join('; ');
 
     return `
-      <div style="${containerStyles}">
-        <a href="${escapeHtml(data.buttonUrl || '#')}" style="${buttonStyles}">
-          ${escapeHtml(data.buttonText || '{{button_text}}')}
-        </a>
-      </div>
-    `;
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${containerStyles}">
+        <tr>
+          <td style="padding: ${data.padding || '20px'};">
+            <a href="${escapeHtml(data.buttonUrl || '#')}" style="${buttonStyles}" target="_blank" rel="noopener">
+              ${escapeHtml(data.buttonText || 'Click Here')}
+            </a>
+          </td>
+        </tr>
+      </table>`;
   },
 
   // ========== 45. RELATED PRODUCTS WIDGET ==========
@@ -1062,48 +1042,53 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   'orderSubtotal': (d) => {
     const data = d || {};
     const spacing = data.spacing || 0;
+    const padding = data.padding || '10px';
+    const labelAlign = data.labelAlign || 'left';
+    const valueAlign = data.valueAlign || 'right';
 
     const styles = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
       data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
-      'padding: 10px',
+      `padding: ${padding}`,
     ].filter(Boolean).join('; ');
 
-    // If using the placeholder {{order_totals_table}} or {{order_subtotal}}, render full table
-    if (data.value === '{{order_totals_table}}' || data.value === '{{order_subtotal}}' || !data.value) {
-      const rows = [
+    const tableStyles = `width: 100%; border-collapse: collapse; ${styles}`;
+    const cellPadding = `${spacing}px 0`;
+
+    const innerContent = (data.value === '{{order_totals_table}}' || data.value === '{{order_subtotal}}' || !data.value) ? `
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; font-family: inherit; font-size: inherit; color: inherit;">
+          ${[
         { label: 'Subtotal', value: '{{order_subtotal}}' },
         { label: 'Discount', value: '-{{order_discount}}', color: '#e53e3e' },
         { label: 'Shipping', value: '{{order_shipping}}' },
         { label: 'Order fully refunded', value: '-{{order_total}}', weight: 'bold', border: true },
         { label: 'Refund', value: '-{{refund_amount}}' },
-      ];
-
-      return `
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
-          ${rows.map((row, index) => `
-            <tr${index < rows.length - 1 ? ` style="margin-bottom: ${spacing}px;"` : ''}>
-              <td style="padding: ${spacing}px 0; ${row.weight ? `font-weight: ${row.weight};` : ''} ${row.border ? 'border-top: 1px solid #eee;' : ''} ${row.color ? `color: ${row.color};` : ''}">
+      ].map((row) => `
+            <tr>
+              <td align="${labelAlign}" width="50%" style="padding: ${cellPadding}; ${row.weight ? `font-weight: ${row.weight};` : ''} ${row.border ? 'border-top: 1px solid #eee;' : ''} ${row.color ? `color: ${row.color};` : ''}">
                 ${row.label}:
               </td>
-              <td align="right" style="padding: ${spacing}px 0; ${row.weight ? `font-weight: ${row.weight};` : ''} ${row.border ? 'border-top: 1px solid #eee;' : ''} ${row.color ? `color: ${row.color};` : ''}">
+              <td align="${valueAlign}" width="50%" style="padding: ${cellPadding}; ${row.weight ? `font-weight: ${row.weight};` : ''} ${row.border ? 'border-top: 1px solid #eee;' : ''} ${row.color ? `color: ${row.color};` : ''}">
                 ${row.value}
               </td>
             </tr>
           `).join('')}
-        </table>
-      `;
-    }
+        </table>` : `
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; font-family: inherit; font-size: inherit; color: inherit;">
+        <tr>
+          <td align="${labelAlign}" width="50%" style="font-weight: bold; padding: ${cellPadding};">${escapeHtml(data.label || 'Subtotal')}:</td>
+          <td align="${valueAlign}" width="50%" style="padding: ${cellPadding};">${escapeHtml(data.value)}</td>
+        </tr>
+      </table>`;
 
-    // Manual mode - render just the label and value
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
         <tr>
-          <td style="font-weight: bold; padding: ${spacing}px 0;">${escapeHtml(data.label || 'Subtotal')}:</td>
-          <td align="right" style="padding: ${spacing}px 0;">${escapeHtml(data.value)}</td>
+          <td style="padding: ${padding};">
+            ${innerContent}
+          </td>
         </tr>
       </table>
     `;
@@ -1112,20 +1097,31 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 47. ORDER TOTAL WIDGET ==========
   'orderTotal': (d) => {
     const data = d || {};
+    const padding = data.padding || '10px';
+    const labelAlign = data.labelAlign || 'left';
+    const valueAlign = data.valueAlign || 'right';
+
     const styles = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
       data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
-      'padding: 10px',
+      `padding: ${padding}`,
     ].filter(Boolean).join('; ');
+
+    const tableStyles = `width: 100%; border-collapse: collapse; ${styles}`;
 
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
         <tr>
-          <td style="font-weight: bold; font-size: 1.2em;">${escapeHtml(data.label || 'Total')}:</td>
-          <td align="right" style="font-weight: bold; font-size: 1.2em;">${escapeHtml(data.value || '{{order_total}}')}</td>
+          <td style="padding: ${padding};">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; color: inherit; font-family: inherit; font-size: inherit;">
+              <tr>
+                <td align="${labelAlign}" width="50%" style="font-weight: bold; font-size: 1.2em; padding: 5px 0;">${escapeHtml(data.label || 'Total')}:</td>
+                <td align="${valueAlign}" width="50%" style="font-weight: bold; font-size: 1.2em; padding: 5px 0;">${escapeHtml(data.value || '{{order_total}}')}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     `;
@@ -1134,20 +1130,31 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 48. SHIPPING METHOD WIDGET ==========
   'shippingMethod': (d) => {
     const data = d || {};
+    const padding = data.padding || '10px';
+    const labelAlign = data.labelAlign || 'left';
+    const valueAlign = data.valueAlign || 'right';
+
     const styles = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
       data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
-      'padding: 10px',
+      `padding: ${padding}`,
     ].filter(Boolean).join('; ');
+
+    const tableStyles = `width: 100%; border-collapse: collapse; ${styles}`;
 
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
         <tr>
-          <td style="font-weight: bold;">${escapeHtml(data.label || 'Shipping Method')}:</td>
-          <td align="right">${escapeHtml(data.value || '{{shipping_method}}')}</td>
+          <td style="padding: ${padding};">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; color: inherit; font-family: inherit; font-size: inherit;">
+              <tr>
+                <td align="${labelAlign}" width="50%" style="font-weight: bold; padding: 5px 0;">${escapeHtml(data.label || 'Shipping Method')}:</td>
+                <td align="${valueAlign}" width="50%" style="padding: 5px 0;">${escapeHtml(data.value || '{{shipping_method}}')}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     `;
@@ -1156,20 +1163,31 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 49. PAYMENT METHOD WIDGET ==========
   'paymentMethod': (d) => {
     const data = d || {};
+    const padding = data.padding || '10px';
+    const labelAlign = data.labelAlign || 'left';
+    const valueAlign = data.valueAlign || 'right';
+
     const styles = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
       data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
-      'padding: 10px',
+      `padding: ${padding}`,
     ].filter(Boolean).join('; ');
+
+    const tableStyles = `width: 100%; border-collapse: collapse; ${styles}`;
 
     return `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
         <tr>
-          <td style="font-weight: bold;">${escapeHtml(data.label || 'Payment Method')}:</td>
-          <td align="right">${escapeHtml(data.value || '{{payment_method}}')}</td>
+          <td style="padding: ${padding};">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; color: inherit; font-family: inherit; font-size: inherit;">
+              <tr>
+                <td align="${labelAlign}" width="50%" style="font-weight: bold; padding: 5px 0;">${escapeHtml(data.label || 'Payment Method')}:</td>
+                <td align="${valueAlign}" width="50%" style="padding: 5px 0;">${escapeHtml(data.value || '{{payment_method}}')}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     `;
@@ -1178,24 +1196,34 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 50. CUSTOMER NOTE WIDGET ==========
   'customerNote': (d) => {
     const data = d || {};
+    const padding = data.padding || '10px';
+    const labelAlign = data.labelAlign || 'left';
+    const valueAlign = data.valueAlign || 'right';
+
     const styles = [
       data.fontFamily && `font-family: ${data.fontFamily}`,
       data.fontSize && `font-size: ${typeof data.fontSize === 'number' ? data.fontSize + 'px' : data.fontSize}`,
       data.textColor && `color: ${data.textColor}`,
-      data.textAlign && `text-align: ${data.textAlign}`,
       data.backgroundColor && data.backgroundColor !== 'transparent' ? `background-color: ${data.backgroundColor}` : '',
-      'padding: 10px',
+      `padding: ${padding}`,
     ].filter(Boolean).join('; ');
 
+    const tableStyles = `width: 100%; border-collapse: collapse; ${styles}`;
     const label = data.label === 'Customer Note' || !data.label ? 'Note' : data.label;
 
     return `
-      <div style="${styles}">
-        <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(label)}:</div>
-        <div style="padding: 10px; background-color: #f9f9f9; border: 1px solid #eeeeee; border-radius: 4px; font-style: italic;">
-          ${escapeHtml(data.value || '{{customer_note}}')}
-        </div>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="${styles}">
+        <tr>
+          <td style="padding: ${padding};">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; color: inherit; font-family: inherit; font-size: inherit;">
+              <tr>
+                <td align="${labelAlign}" width="50%" style="font-weight: bold; padding: 5px 0;">${escapeHtml(label)}:</td>
+                <td align="${valueAlign}" width="50%" style="padding: 5px 0;">${escapeHtml(data.value || '{{customer_note}}')}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     `;
   },
 

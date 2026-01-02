@@ -92,19 +92,11 @@ const ShippingMethodWidgetEditor = () => {
                 <CommonStylingControls
                     options={shippingMethodEditorOptions}
                     onUpdate={(updatedOptions) => dispatch(updateShippingMethodEditorOptions(updatedOptions))}
+                    showLabelAlign={true}
+                    showValueAlign={true}
+                    showTextAlign={false}
                 />
 
-                <Box>
-                    {renderLabel("Spacing (px)")}
-                    <TextField
-                        type="number"
-                        value={shippingMethodEditorOptions.spacing || 0}
-                        onChange={handleChange('spacing' as any)}
-                        size="small"
-                        fullWidth
-                        InputProps={{ inputProps: { min: 0 } }}
-                    />
-                </Box>
             </Stack>
         </Box>
     );

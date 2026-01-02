@@ -92,19 +92,11 @@ const OrderTotalWidgetEditor = () => {
                 <CommonStylingControls
                     options={orderTotalEditorOptions}
                     onUpdate={(updatedOptions) => dispatch(updateOrderTotalEditorOptions(updatedOptions))}
+                    showLabelAlign={true}
+                    showValueAlign={true}
+                    showTextAlign={false}
                 />
 
-                <Box>
-                    {renderLabel("Spacing (px)")}
-                    <TextField
-                        type="number"
-                        value={orderTotalEditorOptions.spacing || 0}
-                        onChange={handleChange('spacing' as any)}
-                        size="small"
-                        fullWidth
-                        InputProps={{ inputProps: { min: 0 } }}
-                    />
-                </Box>
             </Stack>
         </Box>
     );

@@ -188,9 +188,11 @@ export function convertToDroppedBlocks(importedBlocks: any[], options: ImportOpt
       style: convertStyleToColumnStyle(column.style),
       contentType: null,
       contentData: null,
-      widgetContents: column.widgetContents.map((widget: any) => ({
-        contentType: widget.type || 'unknown',
-        contentData: typeof widget.data === 'string' ? widget.data : JSON.stringify(widget.data)
+      widgetContents: (column.widgetContents || []).map((widget: any) => ({
+        contentType: widget.contentType || widget.type || 'unknown',
+        contentData: widget.contentData !== undefined
+          ? (typeof widget.contentData === 'string' ? widget.contentData : JSON.stringify(widget.contentData))
+          : (typeof widget.data === 'string' ? widget.data : JSON.stringify(widget.data))
       })),
       // Initialize all editor options with defaults
       textEditorOptions: { content: '' } as any,

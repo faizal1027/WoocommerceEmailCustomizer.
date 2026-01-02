@@ -59,23 +59,27 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
       }}
       sx={{
         textAlign: billingAddressEditorOptions.textAlign || 'left',
-        paddingTop: `${billingAddressEditorOptions.paddingTop || '16'}px`,
-        paddingRight: `${billingAddressEditorOptions.paddingRight || '16'}px`,
-        paddingBottom: `${billingAddressEditorOptions.paddingBottom || '16'}px`,
-        paddingLeft: `${billingAddressEditorOptions.paddingLeft || '16'}px`,
+        padding: billingAddressEditorOptions.padding || '16px', // Standardized
         border: isSelected ? '2px dashed blue' : '',
         borderRadius: 1,
         backgroundColor: billingAddressEditorOptions.backgroundColor && billingAddressEditorOptions.backgroundColor !== 'transparent' ? billingAddressEditorOptions.backgroundColor : '#fff',
         position: 'relative',
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent:
+          billingAddressEditorOptions.textAlign === 'center' ? 'center' :
+            billingAddressEditorOptions.textAlign === 'right' ? 'flex-end' :
+              'flex-start',
+        alignItems: 'center'
+      }}>
         <Typography variant="h6" sx={{
           fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
           fontSize: billingAddressEditorOptions.fontSize,
           color: billingAddressEditorOptions.textColor,
+          fontWeight: 'bold',
         }}>BILL TO:</Typography>
-
       </Box>
 
       {isEditing ? (

@@ -117,10 +117,14 @@ const CtaButtonWidgetEditor: React.FC = () => {
                                 {renderLabel("Border Radius")}
                                 <TextField
                                     fullWidth
+                                    type="number"
                                     size="small"
-                                    value={ctaButtonEditorOptions?.borderRadius || '5px'}
-                                    onChange={(e) => handleChange('borderRadius', e.target.value)}
-                                    placeholder="e.g. 4px"
+                                    value={parseInt(ctaButtonEditorOptions?.borderRadius) || 0}
+                                    onChange={(e) => handleChange('borderRadius', e.target.value + 'px')}
+                                    placeholder="e.g. 4"
+                                    InputProps={{
+                                        inputProps: { min: 0 }
+                                    }}
                                 />
                             </Box>
                             <Box>

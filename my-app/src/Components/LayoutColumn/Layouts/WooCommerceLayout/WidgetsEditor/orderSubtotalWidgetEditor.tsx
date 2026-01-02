@@ -92,6 +92,9 @@ const OrderSubtotalWidgetEditor = () => {
                 <CommonStylingControls
                     options={orderSubtotalEditorOptions}
                     onUpdate={(updatedOptions) => dispatch(updateOrderSubtotalEditorOptions(updatedOptions))}
+                    showLabelAlign={true}
+                    showValueAlign={true}
+                    showTextAlign={false}
                 />
 
                 <Box>
@@ -105,6 +108,7 @@ const OrderSubtotalWidgetEditor = () => {
                         InputProps={{ inputProps: { min: 0 } }}
                     />
                 </Box>
+
             </Stack>
         </Box>
     );

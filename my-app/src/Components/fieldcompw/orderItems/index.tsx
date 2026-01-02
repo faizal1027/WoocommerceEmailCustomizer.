@@ -65,7 +65,7 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
       }}
       sx={{
         width: getResponsiveWidth(),
-        padding: 1,
+        padding: orderItemsEditorOptions.padding || '0px 0px 0px 0px',
         border: isSelected ? '2px dashed blue' : '',
         borderRadius: 1,
         backgroundColor: orderItemsEditorOptions.backgroundColor && orderItemsEditorOptions.backgroundColor !== 'transparent' ? orderItemsEditorOptions.backgroundColor : '#fff',
@@ -73,10 +73,19 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
         fontFamily: orderItemsEditorOptions.fontFamily === 'inherit' || !orderItemsEditorOptions.fontFamily ? 'inherit' : orderItemsEditorOptions.fontFamily,
         fontSize: orderItemsEditorOptions.fontSize || '14px',
         color: orderItemsEditorOptions.textColor || '#333333',
-        textAlign: orderItemsEditorOptions.textAlign || 'left',
       }}
     >
-      <Typography variant="h6" gutterBottom noWrap>
+      <Typography
+        variant="h6"
+        gutterBottom
+        noWrap
+        sx={{
+          textAlign: orderItemsEditorOptions.textAlign || 'left',
+          fontFamily: orderItemsEditorOptions.fontFamily === 'inherit' || !orderItemsEditorOptions.fontFamily ? 'inherit' : orderItemsEditorOptions.fontFamily,
+          fontSize: orderItemsEditorOptions.fontSize || '18px',
+          color: orderItemsEditorOptions.textColor || '#333333',
+        }}
+      >
         [Order #{fallback(orderItemsEditorOptions.orderNumber, previewMode ? '12345' : '{{order_id}}')}] (
         {fallback(orderItemsEditorOptions.orderDate, previewMode ? 'December 10, 2025' : '{{order_date}}')})
       </Typography>
@@ -85,74 +94,74 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
         <Table size="small" sx={{ minWidth: 300 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
-              <TableCell align="right">Quantity</TableCell>
-              <TableCell align="right">Price</TableCell>
+              <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit', fontWeight: 'bold' }}>Product</TableCell>
+              <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit', fontWeight: 'bold' }}>Quantity</TableCell>
+              <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit', fontWeight: 'bold' }}>Price</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {orderItemsEditorOptions.items.length > 0 ? (
               orderItemsEditorOptions.items.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{fallback(item.product, previewMode ? 'Sample Product' : '{{product_name}}')}</TableCell>
-                  <TableCell align="right">{fallback(item.quantity, previewMode ? '2' : '{{qty}}')}</TableCell>
-                  <TableCell align="right">{fallback(item.price, previewMode ? '$49.99' : '{{price}}')}</TableCell>
+                  <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>{fallback(item.product, previewMode ? 'Sample Product' : '{{product_name}}')}</TableCell>
+                  <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>{fallback(item.quantity, previewMode ? '2' : '{{qty}}')}</TableCell>
+                  <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>{fallback(item.price, previewMode ? '$49.99' : '{{price}}')}</TableCell>
                 </TableRow>
               ))
             ) : (
               previewMode ? (
                 <>
                   <TableRow>
-                    <TableCell>Premium Wireless Headphones</TableCell>
-                    <TableCell align="right">1</TableCell>
-                    <TableCell align="right">$129.99</TableCell>
+                    <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>Premium Wireless Headphones</TableCell>
+                    <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>1</TableCell>
+                    <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>$129.99</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>USB-C Charging Cable</TableCell>
-                    <TableCell align="right">2</TableCell>
-                    <TableCell align="right">$19.99</TableCell>
+                    <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>USB-C Charging Cable</TableCell>
+                    <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>2</TableCell>
+                    <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>$19.99</TableCell>
                   </TableRow>
                 </>
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ color: '#999', fontStyle: 'italic' }}>
+                  <TableCell colSpan={3} align="center" sx={{ color: '#999', fontStyle: 'italic', fontFamily: 'inherit', fontSize: 'inherit' }}>
                     {'{{order_items_rows}}'} - Items will appear here
                   </TableCell>
                 </TableRow>
               )
             )}
             <TableRow>
-              <TableCell colSpan={2}>
+              <TableCell colSpan={2} sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 <strong>Subtotal:</strong>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 <strong>{fallback(orderItemsEditorOptions.subtotal, previewMode ? '$169.97' : '{{order_subtotal}}')}</strong>
               </TableCell>
             </TableRow>
             {/* Discount Row */}
             {(orderItemsEditorOptions.discount !== '£0.00' && orderItemsEditorOptions.discount !== '$0.00' && orderItemsEditorOptions.discount !== '0' && orderItemsEditorOptions.discount !== '') || !previewMode ? (
               <TableRow>
-                <TableCell colSpan={2}>
+                <TableCell colSpan={2} sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                   <strong>Discount:</strong>
                 </TableCell>
-                <TableCell align="right" sx={{ color: '#e53e3e' }}>
+                <TableCell align="right" sx={{ color: '#e53e3e', fontFamily: 'inherit', fontSize: 'inherit' }}>
                   -{fallback(orderItemsEditorOptions.discount, previewMode ? '$0.00' : '{{order_discount}}')}
                 </TableCell>
               </TableRow>
             ) : null}
             <TableRow>
-              <TableCell colSpan={2}>
+              <TableCell colSpan={2} sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 <strong>Payment method:</strong>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 {fallback(orderItemsEditorOptions.paymentMethod, previewMode ? 'Credit Card' : '{{payment_method}}')}
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={2}>
+              <TableCell colSpan={2} sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 <strong>Total:</strong>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                 <strong>{fallback(orderItemsEditorOptions.total, previewMode ? '$169.97' : '{{order_total}}')}</strong>
               </TableCell>
             </TableRow>
@@ -160,10 +169,7 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
         </Table>
       </Box>
 
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        <strong>Order Item</strong>
-      </Typography>
-    </Box>
+    </Box >
   );
 };
 

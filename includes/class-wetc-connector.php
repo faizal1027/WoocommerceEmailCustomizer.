@@ -553,7 +553,7 @@ class WETC_Connector {
         }
 
         // Try to get cached template list
-        $cache_key = 'wetc_template_names_list_v2';
+        $cache_key = 'wetc_template_names_list_v3';
         $cached_templates = get_transient($cache_key);
 
         if (false !== $cached_templates) {
@@ -570,7 +570,7 @@ class WETC_Connector {
 
         // Include json_data - frontend needs it for template loading
         // Performance is still optimized via caching
-        $fields = "id, email_template_name, json_data" . ($has_priority ? ", priority" : "");
+        $fields = "id, email_template_name, json_data, content_type" . ($has_priority ? ", priority" : "");
         $results = $wpdb->get_results(
             "SELECT {$fields} FROM {$table_name}",
             ARRAY_A
@@ -629,46 +629,6 @@ class WETC_Connector {
             wp_die();
         }
 
-        // --- BACKEND FAILSAFE: Map Template Name to Content Type if it's generic 'JSON' ---
-        if ($content_type === 'JSON' || empty($content_type)) {
-            $lower_name = strtolower($template_name);
-            if (strpos($lower_name, 'new order') !== false && strpos($lower_name, 'admin') !== false) {
-                $content_type = 'new_order_admin';
-            } elseif (strpos($lower_name, 'cancelled') !== false && strpos($lower_name, 'admin') !== false) {
-                $content_type = 'cancelled_order_admin';
-            } elseif (strpos($lower_name, 'cancelled') !== false && strpos($lower_name, 'customer') !== false) {
-                $content_type = 'cancelled_order_customer';
-            } elseif (strpos($lower_name, 'failed') !== false && strpos($lower_name, 'admin') !== false) {
-                $content_type = 'failed_order_admin';
-            } elseif (strpos($lower_name, 'failed') !== false && strpos($lower_name, 'customer') !== false) {
-                $content_type = 'failed_order_customer';
-            } elseif (strpos($lower_name, 'processing') !== false && strpos($lower_name, 'admin') !== false) {
-                $content_type = 'processing_order_admin';
-            } elseif (strpos($lower_name, 'processing') !== false && strpos($lower_name, 'customer') !== false) {
-                $content_type = 'processing_order_customer';
-            } elseif (strpos($lower_name, 'completed') !== false) {
-                $content_type = 'completed_order_customer';
-            } elseif (strpos($lower_name, 'refunded') !== false && strpos($lower_name, 'admin') !== false) {
-                $content_type = 'refunded_order_admin';
-            } elseif (strpos($lower_name, 'refunded') !== false && strpos($lower_name, 'customer') !== false) {
-                $content_type = 'refunded_order_customer';
-            } elseif (strpos($lower_name, 'on-hold') !== false || strpos($lower_name, 'on hold') !== false) {
-                $content_type = 'on_hold_order';
-            } elseif (strpos($lower_name, 'note') !== false) {
-                $content_type = 'customer_note';
-            } elseif (strpos($lower_name, 'invoice') !== false || strpos($lower_name, 'order details') !== false) {
-                $content_type = 'customer_invoice';
-            } elseif (strpos($lower_name, 'abandoned') !== false) {
-                $content_type = 'abandoned_cart';
-            } elseif (strpos($lower_name, 'registration') !== false || strpos($lower_name, 'new account') !== false) {
-                if (strpos($lower_name, 'admin') !== false) {
-                    $content_type = 'new_user_registration_admin';
-                } else {
-                    $content_type = 'new_user_registration';
-                }
-            }
-        }
-
 
 
         // Check if priority column exists, if not try to add it
@@ -717,7 +677,7 @@ class WETC_Connector {
 
             if ($result !== false) {
                 // Clear template list cache after update
-                delete_transient('wetc_template_names_list_v2');
+                delete_transient('wetc_template_names_list_v3');
                 wp_send_json_success([
                     'message' => 'Template updated successfully',
                     'template_id' => $template_id
@@ -735,7 +695,7 @@ class WETC_Connector {
 
             if ($result !== false) {
                 // Clear template list cache after insert
-                delete_transient('wetc_template_names_list_v2');
+                delete_transient('wetc_template_names_list_v3');
                 wp_send_json_success([
                     'message' => 'Template saved successfully',
                     'template_id' => $wpdb->insert_id

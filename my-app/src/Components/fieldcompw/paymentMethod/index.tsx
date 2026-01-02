@@ -32,33 +32,40 @@ const PaymentMethodFieldComponent: React.FC<Props> = ({
             }}
             sx={{
                 border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: '10px',
+                padding: paymentMethodEditorOptions.padding || '10px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 textAlign: paymentMethodEditorOptions.textAlign as any,
-                paddingTop: `${paymentMethodEditorOptions.spacing || 0}px`,
-                paddingBottom: `${paymentMethodEditorOptions.spacing || 0}px`,
                 width: '100%',
                 backgroundColor: paymentMethodEditorOptions.backgroundColor && paymentMethodEditorOptions.backgroundColor !== 'transparent' ? paymentMethodEditorOptions.backgroundColor : 'transparent',
             }}
         >
-            <Typography sx={{
-                fontFamily: paymentMethodEditorOptions.fontFamily === 'inherit' || !paymentMethodEditorOptions.fontFamily ? 'inherit' : paymentMethodEditorOptions.fontFamily,
-                fontSize: paymentMethodEditorOptions.fontSize,
-                color: paymentMethodEditorOptions.textColor,
-                fontWeight: 'bold'
+            <Box sx={{
+                fontFamily: paymentMethodEditorOptions.fontFamily || 'Arial, sans-serif',
+                fontSize: paymentMethodEditorOptions.fontSize || '14px',
+                color: paymentMethodEditorOptions.textColor || '#333333',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%'
             }}>
-                {paymentMethodEditorOptions.label}
-            </Typography>
-            <Typography sx={{
-                fontFamily: paymentMethodEditorOptions.fontFamily === 'inherit' || !paymentMethodEditorOptions.fontFamily ? 'inherit' : paymentMethodEditorOptions.fontFamily,
-                fontSize: paymentMethodEditorOptions.fontSize,
-                color: paymentMethodEditorOptions.textColor,
-            }}>
-                {paymentMethodEditorOptions.value === '{{payment_method}}' ? 'Paypal' : paymentMethodEditorOptions.value}
-            </Typography>
+                <Box sx={{
+                    fontWeight: 'bold',
+                    textAlign: paymentMethodEditorOptions.labelAlign as any || 'left',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {paymentMethodEditorOptions.label}
+                </Box>
+                <Box sx={{
+                    textAlign: paymentMethodEditorOptions.valueAlign as any || 'right',
+                    flex: 1,
+                    width: '50%'
+                }}>
+                    {paymentMethodEditorOptions.value === '{{payment_method}}' ? 'Direct Bank Transfer' : paymentMethodEditorOptions.value}
+                </Box>
+            </Box>
         </Box>
     );
 };
