@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider } from '@mui/material';
+import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider, Select, MenuItem } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateVideoEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -129,25 +129,97 @@ const VideoWidgetEditor = () => {
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Width
                 </Typography>
-                <TextField
-                  value={videoEditorOptions.width || '100%'}
-                  onChange={handleChange('width')}
-                  size="small"
-                  placeholder="100%"
-                  fullWidth
-                />
+                <Box display="flex">
+                  <TextField
+                    value={parseInt(videoEditorOptions.width) || 0}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const unit = videoEditorOptions.width.includes('%') ? '%' : 'px';
+                      handleChange('width')({ target: { value: `${val}${unit}` } });
+                    }}
+                    type="number"
+                    size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                      }
+                    }}
+                    fullWidth
+                  />
+                  <Select
+                    value={videoEditorOptions.width.includes('%') ? '%' : 'px'}
+                    onChange={(e) => {
+                      const val = parseInt(videoEditorOptions.width) || 0;
+                      const unit = e.target.value;
+                      handleChange('width')({ target: { value: `${val}${unit}` } });
+                    }}
+                    size="small"
+                    sx={{
+                      width: '70px',
+                      '& .MuiOutlinedInput-root': {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        marginLeft: '-1px'
+                      },
+                      '& fieldset': {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                      }
+                    }}
+                  >
+                    <MenuItem value="px">px</MenuItem>
+                    <MenuItem value="%">%</MenuItem>
+                  </Select>
+                </Box>
               </Box>
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Height
                 </Typography>
-                <TextField
-                  value={videoEditorOptions.height || '315px'}
-                  onChange={handleChange('height')}
-                  size="small"
-                  placeholder="315px"
-                  fullWidth
-                />
+                <Box display="flex">
+                  <TextField
+                    value={parseInt(videoEditorOptions.height) || 0}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const unit = videoEditorOptions.height.includes('%') ? '%' : 'px';
+                      handleChange('height')({ target: { value: `${val}${unit}` } });
+                    }}
+                    type="number"
+                    size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                      }
+                    }}
+                    fullWidth
+                  />
+                  <Select
+                    value={videoEditorOptions.height.includes('%') ? '%' : 'px'}
+                    onChange={(e) => {
+                      const val = parseInt(videoEditorOptions.height) || 0;
+                      const unit = e.target.value;
+                      handleChange('height')({ target: { value: `${val}${unit}` } });
+                    }}
+                    size="small"
+                    sx={{
+                      width: '70px',
+                      '& .MuiOutlinedInput-root': {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        marginLeft: '-1px'
+                      },
+                      '& fieldset': {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                      }
+                    }}
+                  >
+                    <MenuItem value="px">px</MenuItem>
+                    <MenuItem value="%">%</MenuItem>
+                  </Select>
+                </Box>
               </Box>
             </Box>
           </Stack>
