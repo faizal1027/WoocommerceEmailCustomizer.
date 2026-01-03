@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider } from '@mui/material';
+import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateLinkEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
+import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
+import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 import ColorPicker from "../../../../utils/ColorPicker";
 
 const LinkWidgetEditor = () => {
@@ -143,6 +147,24 @@ const LinkWidgetEditor = () => {
             Appearance
           </Typography>
           <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Alignment
+              </Typography>
+              <ToggleButtonGroup
+                value={linkEditorOptions.textAlign || 'left'}
+                exclusive
+                onChange={(e, newAlign) => newAlign && dispatch(updateLinkEditorOptions({ textAlign: newAlign }))}
+                fullWidth
+                size="small"
+              >
+                <ToggleButton value="left"><FormatAlignLeftIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="center"><FormatAlignCenterIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="right"><FormatAlignRightIcon fontSize="small" /></ToggleButton>
+                <ToggleButton value="justify"><FormatAlignJustifyIcon fontSize="small" /></ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
             <ColorPicker
               label="Color"
               value={linkEditorOptions.color || '#007bff'}
@@ -161,6 +183,30 @@ const LinkWidgetEditor = () => {
                 fullWidth
                 InputProps={{ inputProps: { min: 0 } }}
               />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Padding (px)
+              </Typography>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#888' }}>Top</Typography>
+                  <TextField size="small" type="number" fullWidth value={linkEditorOptions.padding?.top || 0} onChange={(e) => dispatch(updateLinkEditorOptions({ padding: { ...linkEditorOptions.padding, top: Number(e.target.value) } }))} />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#888' }}>Right</Typography>
+                  <TextField size="small" type="number" fullWidth value={linkEditorOptions.padding?.right || 0} onChange={(e) => dispatch(updateLinkEditorOptions({ padding: { ...linkEditorOptions.padding, right: Number(e.target.value) } }))} />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#888' }}>Bottom</Typography>
+                  <TextField size="small" type="number" fullWidth value={linkEditorOptions.padding?.bottom || 0} onChange={(e) => dispatch(updateLinkEditorOptions({ padding: { ...linkEditorOptions.padding, bottom: Number(e.target.value) } }))} />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#888' }}>Left</Typography>
+                  <TextField size="small" type="number" fullWidth value={linkEditorOptions.padding?.left || 0} onChange={(e) => dispatch(updateLinkEditorOptions({ padding: { ...linkEditorOptions.padding, left: Number(e.target.value) } }))} />
+                </Box>
+              </Box>
             </Box>
 
             <FormControlLabel

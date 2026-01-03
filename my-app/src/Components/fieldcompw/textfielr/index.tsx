@@ -9,6 +9,7 @@ interface TextFieldComponentProps {
     widgetIndex: number;
     onClick?: (e: React.MouseEvent) => void;
     isSelected?: boolean;
+    widgetData?: any;
 }
 
 const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
@@ -17,11 +18,14 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
     widgetIndex,
     onClick,
     isSelected,
+    widgetData
 }) => {
     const { blocks } = useSelector((state: RootState) => state.workspace);
-    const block = blocks.find((b) => b.id === blockId);
-    const column = block?.columns[columnIndex];
-    const widget = column?.widgetContents[widgetIndex];
+    const storeBlock = blocks.find((b) => b.id === blockId);
+    const storeColumn = storeBlock?.columns[columnIndex];
+    const storeWidget = storeColumn?.widgetContents[widgetIndex];
+
+    const widget = widgetData || storeWidget;
 
     if (!widget || widget.contentType !== "text") return null;
 

@@ -604,11 +604,18 @@ class WETC_Connector {
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
         $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 0;
 
+        // Ensure creation column exists (failsafe for direct access to editor)
+        $column_date = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'created_at'");
+        if (empty($column_date)) {
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
+        }
+
         // FIX: If content_type appears to be a label (e.g. "New Order (Admin)"), clear it
         // so the logic below can correctly deduce the slug (e.g. "new_order_admin").
-        if (!empty($content_type) && strpos($content_type, ' ') !== false) {
-             $content_type = ''; 
-        }
+        // Removed this block to allow saving whatever the frontend sends (now fixed to send slug).
+        // if (!empty($content_type) && strpos($content_type, ' ') !== false) {
+        //      $content_type = ''; 
+        // }
 
         if (empty($template_name)) {
             wp_send_json_error(['message' => 'Template name is required']);
@@ -643,15 +650,17 @@ class WETC_Connector {
         }
 
         // Prepare data array - include html_content if it exists
+        $current_time = current_time('mysql');
         $data = [
             'email_template_name' => $template_name,
             'subject' => $subject,
             'json_data' => $json_data,
             'content_type' => $content_type,
-            'recipient' => $recipient
+            'recipient' => $recipient,
+            'created_at' => $current_time // Update timestamp
         ];
         
-        $formats = ['%s', '%s', '%s', '%s', '%s'];
+        $formats = ['%s', '%s', '%s', '%s', '%s', '%s'];
 
         if ($has_priority) {
             $data['priority'] = $priority;

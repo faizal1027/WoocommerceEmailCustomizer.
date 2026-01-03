@@ -121,12 +121,18 @@ const IconFieldComponent: React.FC<IconFieldComponentProps> = ({
         handleClick(e);
       }}
       sx={{
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: iconEditorOptions.alignment === 'left' ? 'flex-start' :
+          iconEditorOptions.alignment === 'center' ? 'center' :
+            iconEditorOptions.alignment === 'right' ? 'flex-end' :
+              iconEditorOptions.alignment === 'justify' ? 'space-between' : 'flex-start',
         border: isSelected ? '2px dashed blue' : 'none',
         borderRadius: '4px',
-        padding: '4px',
+        paddingTop: `${iconEditorOptions.paddingTop || 0}px`,
+        paddingRight: `${iconEditorOptions.paddingRight || 0}px`,
+        paddingBottom: `${iconEditorOptions.paddingBottom || 0}px`,
+        paddingLeft: `${iconEditorOptions.paddingLeft || 0}px`,
         backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
         cursor: iconEditorOptions.link ? 'pointer' : 'default',
         '&:hover': {

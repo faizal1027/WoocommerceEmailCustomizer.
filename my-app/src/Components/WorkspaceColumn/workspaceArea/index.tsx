@@ -47,71 +47,11 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 import DeleteOutlineTwoToneIcon from "@mui/icons-material/DeleteOutlineTwoTone";
 
-// Basics Field Components
-// Basics Field Components
-import TextFieldComponent from "../../fieldcompw/textfielr/index";
-import ButtonFieldComponent from "../../fieldcompw/button";
-import HeadingFieldComponent from "../../fieldcompw/heading";
-import SocialIconsFieldComponent from "../../fieldcompw/socialIcons";
-import DividerFieldComponent from "../../fieldcompw/divider";
-import ImageFieldComponent from "../../fieldcompw/Image";
-import IconFieldComponent from "../../fieldcompw/icon";
-// import ImageBoxFieldComponent from "../../fieldcompw/imageBox";
-import LinkFieldComponent from "../../fieldcompw/link";
-// import LinkBoxFieldComponent from "../../fieldcompw/linkBox";
-// import MapFieldComponent from "../../fieldcompw/map";
-import SectionFieldComponent from "../../fieldcompw/section";
-import SpacerFieldComponent from "../../fieldcompw/spacer";
-
-// Layout Block Field Components 
-import RowFieldComponent from "../../fieldcompw/row";
-import ContainerFieldComponent from "../../fieldcompw/container";
-import GroupFieldComponent from "../../fieldcompw/group";
-
-// Forms Field Components
-// Forms Field Components
-// import FormFieldComponent from "../../fieldcompw/form";
-// import SurveyFieldComponent from "../../fieldcompw/survey";
-// import InputFieldComponent from "../../fieldcompw/input";
-// import TextareaFieldComponent from "../../fieldcompw/textarea";
-// import SelectFieldComponent from "../../fieldcompw/select";
-// import CheckboxFieldComponent from "../../fieldcompw/checkbox";
-// import RadioFieldComponent from "../../fieldcompw/radio";
-// import LabelFieldComponent from "../../fieldcompw/label";
-
-// Extra Block Field Components 
-// Extra Block Field Components 
-import SocialFollowFieldComponent from "../../fieldcompw/socialFollow";
-import VideoFieldComponent from "../../fieldcompw/video";
-
-import CountdownFieldComponent from "../../fieldcompw/countdown";
-// import ProgressBarFieldComponent from "../../fieldcompw/progressBar";
-import ProductFieldComponent from "../../fieldcompw/product";
-import PromoCodeFieldComponent from "../../fieldcompw/promoCode";
-import PriceFieldComponent from "../../fieldcompw/price";
-// import TestimonialFieldComponent from "../../fieldcompw/testimonial";
-// import NavbarFieldComponent from "../../fieldcompw/navbar";
-// import CardFieldComponent from "../../fieldcompw/card";
-// import AlertFieldComponent from "../../fieldcompw/alert";
-// import ProgressFieldComponent from "../../fieldcompw/progress";
-
-// Woocommerce Field Components
-import ShippingAddressFieldComponent from "../../fieldcompw/shippingAddress/index";
-import BillingAddressFieldComponent from "../../fieldcompw/billingAddress";
-import OrderItemsFieldComponent from "../../fieldcompw/orderItems";
-import TaxBillingFieldComponent from "../../fieldcompw/taxBilling";
-import EmailHeaderFieldComponent from "../../fieldcompw/emailHeader";
-import EmailFooterFieldComponent from "../../fieldcompw/emailFooter";
-import CtaButtonFieldComponent from "../../fieldcompw/ctaButton";
-import RelatedProductsFieldComponent from "../../fieldcompw/relatedProducts";
-import OrderSubtotalFieldComponent from "../../fieldcompw/orderSubtotal";
-import OrderTotalFieldComponent from "../../fieldcompw/orderTotal";
-import ShippingMethodFieldComponent from "../../fieldcompw/shippingMethod";
-import PaymentMethodFieldComponent from "../../fieldcompw/paymentMethod";
-import CustomerNoteFieldComponent from "../../fieldcompw/customerNote";
+import { getWidgetComponent } from "../../utils/getWidgetComponent";
 import { useDrag } from "react-dnd";
 import axios from "axios";
 import { ajaxUrl } from "../../../Constants/Constants";
+
 
 interface BlockItem {
   id: string;
@@ -661,53 +601,7 @@ const ColumnDropTarget = ({
         selectedContentType === widget.contentType &&
         selectedWidgetIndex === index;
 
-      let WidgetComponent = null;
-
-      // Main switch statement to assign WidgetComponent
-      switch (widget.contentType) {
-        // Basics Layout Widgets
-        case "text": WidgetComponent = TextFieldComponent; break;
-        case "heading": WidgetComponent = HeadingFieldComponent; break;
-        case "socialIcons": WidgetComponent = SocialIconsFieldComponent; break;
-        case "divider": WidgetComponent = DividerFieldComponent; break;
-        case "image": WidgetComponent = ImageFieldComponent; break;
-        case "button": WidgetComponent = ButtonFieldComponent; break;
-        case "section": WidgetComponent = SectionFieldComponent; break;
-        case "spacer": WidgetComponent = SpacerFieldComponent; break;
-        case 'link': WidgetComponent = LinkFieldComponent; break;
-        case 'icon': WidgetComponent = IconFieldComponent; break;
-
-        // Layout Block Widgets 
-        case "row": WidgetComponent = RowFieldComponent; break;
-        case "container": WidgetComponent = ContainerFieldComponent; break;
-        case "group": WidgetComponent = GroupFieldComponent; break;
-
-        // Extra Block Widgets
-        case "socialFollow": WidgetComponent = SocialFollowFieldComponent; break;
-        case "video": WidgetComponent = VideoFieldComponent; break;
-
-        case "countdown": WidgetComponent = CountdownFieldComponent; break;
-        case "product": WidgetComponent = ProductFieldComponent; break;
-        case "promoCode": WidgetComponent = PromoCodeFieldComponent; break;
-        case "price": WidgetComponent = PriceFieldComponent; break;
-
-        // WooCommerce Widgets
-        case "shippingAddress": WidgetComponent = ShippingAddressFieldComponent; break;
-        case "billingAddress": WidgetComponent = BillingAddressFieldComponent; break;
-        case "orderItems": WidgetComponent = OrderItemsFieldComponent; break;
-        case "taxBilling": WidgetComponent = TaxBillingFieldComponent; break;
-        case "emailHeader": WidgetComponent = EmailHeaderFieldComponent; break;
-        case "emailFooter": WidgetComponent = EmailFooterFieldComponent; break;
-        case "ctaButton": WidgetComponent = CtaButtonFieldComponent; break;
-        case "relatedProducts": WidgetComponent = RelatedProductsFieldComponent; break;
-        case "orderSubtotal": WidgetComponent = OrderSubtotalFieldComponent; break;
-        case "orderTotal": WidgetComponent = OrderTotalFieldComponent; break;
-        case "shippingMethod": WidgetComponent = ShippingMethodFieldComponent; break;
-        case "paymentMethod": WidgetComponent = PaymentMethodFieldComponent; break;
-        case "customerNote": WidgetComponent = CustomerNoteFieldComponent; break;
-
-        default: return null;
-      }
+      const WidgetComponent = getWidgetComponent(widget.contentType);
 
       const commonProps = {
         key: index,

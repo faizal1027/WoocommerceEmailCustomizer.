@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, IconButton, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Tooltip, Stack, Divider } from '@mui/material';
+import { Box, Typography, TextField, Button, IconButton, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Tooltip, Stack, Divider, OutlinedInput } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateGroupEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -175,14 +175,17 @@ const GroupWidgetEditor = () => {
             Layout
           </Typography>
           <Stack spacing={2}>
-            <TextField
-              label="Spacing (px)"
-              type="number"
-              value={groupEditorOptions.spacing || 0}
-              onChange={handleChange('spacing')}
-              size="small"
-              fullWidth
-            />
+            <FormControl size="small" fullWidth variant="outlined">
+              <InputLabel htmlFor="spacing-input">Spacing (px)</InputLabel>
+              <OutlinedInput
+                id="spacing-input"
+                label="Spacing (px)"
+                type="number"
+                value={groupEditorOptions.spacing || 0}
+                onChange={handleChange('spacing')}
+                size="small"
+              />
+            </FormControl>
 
             <FormControl size="small" fullWidth>
               <InputLabel>Alignment</InputLabel>
@@ -190,11 +193,12 @@ const GroupWidgetEditor = () => {
                 value={groupEditorOptions.alignment || 'left'}
                 label="Alignment"
                 onChange={handleChange('alignment')}
+                MenuProps={{ disablePortal: true }}
               >
-                <MenuItem value="left">Left</MenuItem>
-                <MenuItem value="center">Center</MenuItem>
-                <MenuItem value="right">Right</MenuItem>
-                <MenuItem value="space-between">Space Between</MenuItem>
+                <MenuItem value="left" disableGutters>Left</MenuItem>
+                <MenuItem value="center" disableGutters>Center</MenuItem>
+                <MenuItem value="right" disableGutters>Right</MenuItem>
+                <MenuItem value="space-between" disableGutters>Space Between</MenuItem>
               </Select>
             </FormControl>
 
@@ -204,9 +208,10 @@ const GroupWidgetEditor = () => {
                 value={groupEditorOptions.direction || 'row'}
                 label="Direction"
                 onChange={handleChange('direction')}
+                MenuProps={{ disablePortal: true }}
               >
-                <MenuItem value="row">Horizontal (Row)</MenuItem>
-                <MenuItem value="column">Vertical (Column)</MenuItem>
+                <MenuItem value="row" disableGutters>Horizontal (Row)</MenuItem>
+                <MenuItem value="column" disableGutters>Vertical (Column)</MenuItem>
               </Select>
             </FormControl>
           </Stack>

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, current } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, current, Reducer } from '@reduxjs/toolkit';
 
 interface ColumnStyle {
   bgColor: string;
@@ -24,7 +24,7 @@ interface ColumnStyle {
 // Updated WidgetContentType with ALL component types in correct order
 export type WidgetContentType = 'text' | 'heading' | 'button' | 'socialIcons' | 'divider' | 'image' |
   // Basic Layout
-  'section' | 'spacer' | 'link' | 'linkBox' | 'imageBox' | 'map' | 'icon' |
+  'section' | 'spacer' | 'link' | 'icon' |
   // Layout Block
   'row' | 'container' | 'group' |
   // Extra Block
@@ -57,9 +57,7 @@ interface Column {
   sectionEditorOptions: SectionEditorOptions;
   spacerEditorOptions: SpacerEditorOptions;
   linkEditorOptions: LinkEditorOptions;
-  linkBoxEditorOptions: LinkBoxEditorOptions;
-  imageBoxEditorOptions: ImageBoxEditorOptions;
-  mapEditorOptions: MapEditorOptions;
+
   iconEditorOptions: IconEditorOptions;
 
   // Layout Block
@@ -163,26 +161,18 @@ export interface LinkEditorOptions {
   color: string;
   fontSize: number;
   underline: boolean;
+  textAlign: 'left' | 'center' | 'right' | 'justify';
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
 }
 
-export interface LinkBoxEditorOptions {
-  links: Array<{
-    text: string;
-    url: string;
-  }>;
-  backgroundColor: string;
-  padding: number;
-  borderRadius: number;
-}
 
-export interface ImageBoxEditorOptions {
-  src: string;
-  alt: string;
-  width: string;
-  height: string;
-  link: string;
-  caption: string;
-}
+
+
 
 interface ImageEditorOptions {
   src: string;
@@ -198,18 +188,18 @@ interface ImageEditorOptions {
   };
 }
 
-export interface MapEditorOptions {
-  location: string;
-  zoom: number;
-  width: string;
-  height: string;
-}
+
 
 export interface IconEditorOptions {
   iconType: string;
   color: string;
   size: number;
   link: string;
+  paddingTop: number;
+  paddingRight: number;
+  paddingBottom: number;
+  paddingLeft: number;
+  alignment: 'left' | 'center' | 'right' | 'justify';
 }
 
 export interface TextEditorOptions {
@@ -331,7 +321,7 @@ export interface ContainerEditorOptions {
 export interface GroupEditorOptions {
   elements: string[];
   spacing: number;
-  alignment: 'left' | 'center' | 'right';
+  alignment: 'left' | 'center' | 'right' | 'space-between';
   direction: 'row' | 'column';
 }
 
@@ -837,7 +827,7 @@ export interface RelatedProductsEditorOptions {
 }
 
 
-interface WorkspaceState {
+export interface WorkspaceState {
   blocks: DroppedBlock[];
   selectedBlockId: string | null;
   editorOpen: boolean;
@@ -850,9 +840,7 @@ interface WorkspaceState {
   sectionEditorOptions: SectionEditorOptions;
   spacerEditorOptions: SpacerEditorOptions;
   linkEditorOptions: LinkEditorOptions;
-  linkBoxEditorOptions: LinkBoxEditorOptions;
-  imageBoxEditorOptions: ImageBoxEditorOptions;
-  mapEditorOptions: MapEditorOptions;
+
   iconEditorOptions: IconEditorOptions;
   textEditorOptions: TextEditorOptions;
   headingEditorOptions: HeadingEditorOptions;
@@ -1061,37 +1049,32 @@ const defaultLinkEditorOptions: LinkEditorOptions = {
   url: '#',
   color: '#007bff',
   fontSize: 14,
-  underline: true
+  underline: true,
+  textAlign: 'left',
+  padding: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
+  }
 };
 
-const defaultLinkBoxEditorOptions: LinkBoxEditorOptions = {
-  links: [{ text: 'Link 1', url: '#' }, { text: 'Link 2', url: '#' }],
-  backgroundColor: '#f9f9f9',
-  padding: 10,
-  borderRadius: 5
-};
 
-const defaultImageBoxEditorOptions: ImageBoxEditorOptions = {
-  src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
-  alt: 'Image',
-  width: '100%',
-  height: 'auto',
-  link: '',
-  caption: ''
-};
 
-const defaultMapEditorOptions: MapEditorOptions = {
-  location: 'New York, NY',
-  zoom: 12,
-  width: '100%',
-  height: '300px'
-};
+
+
+
 
 const defaultIconEditorOptions: IconEditorOptions = {
   iconType: 'star',
   color: '#000000',
   size: 24,
-  link: ''
+  link: '',
+  paddingTop: 0,
+  paddingRight: 0,
+  paddingBottom: 0,
+  paddingLeft: 0,
+  alignment: 'left'
 };
 
 // Layout Block Defaults
@@ -1585,9 +1568,6 @@ const initialState: WorkspaceState = {
   sectionEditorOptions: defaultSectionEditorOptions,
   spacerEditorOptions: defaultSpacerEditorOptions,
   linkEditorOptions: defaultLinkEditorOptions,
-  linkBoxEditorOptions: defaultLinkBoxEditorOptions,
-  imageBoxEditorOptions: defaultImageBoxEditorOptions,
-  mapEditorOptions: defaultMapEditorOptions,
   iconEditorOptions: defaultIconEditorOptions,
 
   // Layout Block
@@ -1685,9 +1665,6 @@ const workspaceSlice = createSlice({
           sectionEditorOptions: { ...defaultSectionEditorOptions },
           spacerEditorOptions: { ...defaultSpacerEditorOptions },
           linkEditorOptions: { ...defaultLinkEditorOptions },
-          linkBoxEditorOptions: { ...defaultLinkBoxEditorOptions },
-          imageBoxEditorOptions: { ...defaultImageBoxEditorOptions },
-          mapEditorOptions: { ...defaultMapEditorOptions },
           iconEditorOptions: { ...defaultIconEditorOptions },
 
           // Layout Block
@@ -1767,9 +1744,6 @@ const workspaceSlice = createSlice({
           sectionEditorOptions: { ...col.sectionEditorOptions },
           spacerEditorOptions: { ...col.spacerEditorOptions },
           linkEditorOptions: { ...col.linkEditorOptions },
-          linkBoxEditorOptions: { ...col.linkBoxEditorOptions },
-          imageBoxEditorOptions: { ...col.imageBoxEditorOptions },
-          mapEditorOptions: { ...col.mapEditorOptions },
           iconEditorOptions: { ...col.iconEditorOptions },
           textEditorOptions: { ...col.textEditorOptions },
           headingEditorOptions: { ...col.headingEditorOptions },
@@ -2257,22 +2231,7 @@ const workspaceSlice = createSlice({
               state.sectionEditorOptions = defaultSectionEditorOptions;
             }
           }
-          // Handle Map Component
-          else if (state.selectedContentType === 'map' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
-            if (data) {
-              try {
-                const parsed = JSON.parse(data);
-                state.mapEditorOptions = { ...defaultMapEditorOptions, ...parsed };
-              } catch (e) {
-                state.mapEditorOptions = defaultMapEditorOptions;
-              }
-            } else if (column.mapEditorOptions) {
-              state.mapEditorOptions = { ...defaultMapEditorOptions, ...column.mapEditorOptions };
-            } else {
-              state.mapEditorOptions = defaultMapEditorOptions;
-            }
-          }
+
           // Handle Row Component
           else if (state.selectedContentType === 'row' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
             const data = column.widgetContents[state.selectedWidgetIndex].contentData;
@@ -2705,38 +2664,8 @@ const workspaceSlice = createSlice({
               state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
             }
           }
-          // Handle LinkBox Component
-          else if (state.selectedContentType === 'linkBox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
-            if (data) {
-              try {
-                const parsed = JSON.parse(data);
-                state.linkBoxEditorOptions = { ...defaultLinkBoxEditorOptions, ...parsed };
-              } catch (e) {
-                state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
-              }
-            } else if (column.linkBoxEditorOptions) {
-              state.linkBoxEditorOptions = { ...defaultLinkBoxEditorOptions, ...column.linkBoxEditorOptions };
-            } else {
-              state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
-            }
-          }
-          // Handle ImageBox Component
-          else if (state.selectedContentType === 'imageBox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
-            if (data) {
-              try {
-                const parsed = JSON.parse(data);
-                state.imageBoxEditorOptions = { ...defaultImageBoxEditorOptions, ...parsed };
-              } catch (e) {
-                state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
-              }
-            } else if (column.imageBoxEditorOptions) {
-              state.imageBoxEditorOptions = { ...defaultImageBoxEditorOptions, ...column.imageBoxEditorOptions };
-            } else {
-              state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
-            }
-          }
+
+
           else {
             if (state.selectedContentType === 'link') {
               state.linkEditorOptions = defaultLinkEditorOptions;
@@ -2758,8 +2687,6 @@ const workspaceSlice = createSlice({
               state.spacerEditorOptions = defaultSpacerEditorOptions;
             } else if (state.selectedContentType === 'section') {
               state.sectionEditorOptions = defaultSectionEditorOptions;
-            } else if (state.selectedContentType === 'map') {
-              state.mapEditorOptions = defaultMapEditorOptions;
             } else if (state.selectedContentType === 'row') {
               state.rowEditorOptions = defaultRowEditorOptions;
             } else if (state.selectedContentType === 'container') {
@@ -2814,10 +2741,6 @@ const workspaceSlice = createSlice({
               state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
             } else if (state.selectedContentType === 'customerNote') {
               state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
-            } else if (state.selectedContentType === 'linkBox') {
-              state.linkBoxEditorOptions = defaultLinkBoxEditorOptions;
-            } else if (state.selectedContentType === 'imageBox') {
-              state.imageBoxEditorOptions = defaultImageBoxEditorOptions;
             } else if (state.selectedContentType === 'price') {
               state.priceEditorOptions = defaultPriceEditorOptions;
             }
@@ -3062,18 +2985,7 @@ const workspaceSlice = createSlice({
               column.linkEditorOptions = { ...defaultLinkEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.linkEditorOptions);
               break;
-            case 'linkBox':
-              column.linkBoxEditorOptions = { ...defaultLinkBoxEditorOptions };
-              column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.linkBoxEditorOptions);
-              break;
-            case 'imageBox':
-              column.imageBoxEditorOptions = { ...defaultImageBoxEditorOptions };
-              column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.imageBoxEditorOptions);
-              break;
-            case 'map':
-              column.mapEditorOptions = { ...defaultMapEditorOptions };
-              column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.mapEditorOptions);
-              break;
+
             case 'icon':
               column.iconEditorOptions = { ...defaultIconEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.iconEditorOptions);
@@ -3282,46 +3194,6 @@ const workspaceSlice = createSlice({
         }
       }
     },
-
-    updateLinkBoxEditorOptions: (state, action: PayloadAction<Partial<LinkBoxEditorOptions>>) => {
-      state.linkBoxEditorOptions = { ...state.linkBoxEditorOptions, ...action.payload };
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'linkBox') {
-          column.linkBoxEditorOptions = { ...column.linkBoxEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.linkBoxEditorOptions);
-        }
-      }
-    },
-
-    updateImageBoxEditorOptions: (state, action: PayloadAction<Partial<ImageBoxEditorOptions>>) => {
-      state.imageBoxEditorOptions = { ...state.imageBoxEditorOptions, ...action.payload };
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'imageBox') {
-          column.imageBoxEditorOptions = { ...column.imageBoxEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.imageBoxEditorOptions);
-        }
-      }
-    },
-
-    updateMapEditorOptions: (state, action: PayloadAction<Partial<MapEditorOptions>>) => {
-      state.mapEditorOptions = { ...state.mapEditorOptions, ...action.payload };
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'map') {
-          column.mapEditorOptions = { ...column.mapEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.mapEditorOptions);
-        }
-      }
-    },
-
     updateIconEditorOptions: (state, action: PayloadAction<Partial<IconEditorOptions>>) => {
       state.iconEditorOptions = { ...state.iconEditorOptions, ...action.payload };
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
@@ -3545,8 +3417,9 @@ const workspaceSlice = createSlice({
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
         if (widget && widget.contentType === 'group') {
+          // Sync to column options for legacy/fallback, but use STATE options for the widget data source of truth
           column.groupEditorOptions = { ...column.groupEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.groupEditorOptions);
+          widget.contentData = JSON.stringify(state.groupEditorOptions);
         }
       }
     },
@@ -4074,9 +3947,7 @@ export const {
   updateSectionEditorOptions,
   updateSpacerEditorOptions,
   updateLinkEditorOptions,
-  updateLinkBoxEditorOptions,
-  updateImageBoxEditorOptions,
-  updateMapEditorOptions,
+
   updateIconEditorOptions,
   updateButtonEditorOptions,
   updateColumnHeadingEditorOptions,
@@ -4139,4 +4010,4 @@ export const {
 } = workspaceSlice.actions;
 
 export type { Column, DroppedBlock, WidgetContent };
-export default workspaceSlice.reducer;
+export default workspaceSlice.reducer as Reducer<WorkspaceState>;

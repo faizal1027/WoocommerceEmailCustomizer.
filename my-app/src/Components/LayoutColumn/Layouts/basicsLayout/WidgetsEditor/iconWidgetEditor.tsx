@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Tooltip, IconButton, Stack, Divider, Popover } from '@mui/material';
+import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Tooltip, IconButton, Stack, Divider, Popover, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
+import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
+import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateIconEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -145,7 +149,7 @@ const IconWidgetEditor = () => {
                   Color
                 </Typography>
                 <ColorPicker
-                  label="Color"
+                  label=""
                   value={iconEditorOptions.color || '#000000'}
                   onChange={handleColorChange}
                 />
@@ -162,6 +166,101 @@ const IconWidgetEditor = () => {
                   size="small"
                   fullWidth
                 />
+              </Box>
+            </Box>
+          </Stack>
+        </Box>
+
+        <Divider />
+
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+            Layout
+          </Typography>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Alignment
+              </Typography>
+              <ToggleButtonGroup
+                value={iconEditorOptions.alignment || 'left'}
+                exclusive
+                onChange={(e, newAlignment) => {
+                  if (newAlignment !== null) {
+                    handleChange('alignment')(newAlignment);
+                  }
+                }}
+                size="small"
+                fullWidth
+              >
+                <ToggleButton value="left">
+                  <FormatAlignLeftIcon fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="center">
+                  <FormatAlignCenterIcon fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="right">
+                  <FormatAlignRightIcon fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="justify">
+                  <FormatAlignJustifyIcon fontSize="small" />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 1, color: '#666' }}>
+                Padding (px)
+              </Typography>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
+                    Top
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={iconEditorOptions.paddingTop || 0}
+                    onChange={handleChange('paddingTop')}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
+                    Right
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={iconEditorOptions.paddingRight || 0}
+                    onChange={handleChange('paddingRight')}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
+                    Bottom
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={iconEditorOptions.paddingBottom || 0}
+                    onChange={handleChange('paddingBottom')}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
+                    Left
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={iconEditorOptions.paddingLeft || 0}
+                    onChange={handleChange('paddingLeft')}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
               </Box>
             </Box>
           </Stack>

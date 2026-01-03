@@ -27,12 +27,16 @@ class Posts_List_Table extends \WP_List_Table {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wetc_email_templates';
         
-        // Cache column check to avoid query on every page load if possible, 
-        // but for admin panel robust check is better.
+        // Check for 'status' column
         $row = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'status'");
-        
         if (empty($row)) {
             $wpdb->query("ALTER TABLE $table_name ADD COLUMN status VARCHAR(20) DEFAULT 'publish'");
+        }
+
+        // Check for 'created_at' column
+        $row_date = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'created_at'");
+        if (empty($row_date)) {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
         }
     }
   
@@ -49,7 +53,9 @@ class Posts_List_Table extends \WP_List_Table {
     }
 
     protected function get_sortable_columns() {
-        return [];
+        return [
+            'date' => ['created_at', false], // Sortable by date
+        ];
     }
 
     public function column_default($item, $column_name) {
@@ -60,10 +66,25 @@ class Posts_List_Table extends \WP_List_Table {
             case 'note':
                 return '-'; 
             case 'date':
-                return '-';
+                return $this->column_date($item);
             default:
                 return print_r($item, true); // For debugging
         }
+    }
+
+    public function column_date($item) {
+        $status = !empty($item['status']) ? ucfirst($item['status']) : 'Published';
+        // Use created_at if available, otherwise current time fallback (or empty)
+        $date = !empty($item['created_at']) ? $item['created_at'] : current_time('mysql');
+        
+        $formatted_date = date_i18n(get_option('date_format') . ' \a\t ' . get_option('time_format'), strtotime($date));
+        
+        return sprintf(
+            '%s<br><span title="%s">%s</span>',
+            esc_html($status),
+            esc_attr($formatted_date),
+            esc_html($formatted_date)
+        );
     }
 
     public function column_cb($item) {

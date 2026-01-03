@@ -12,7 +12,7 @@ interface ButtonFieldComponentProps {
   onClick: () => void;
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
-
+  widgetData?: any;
 }
 
 const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
@@ -22,13 +22,16 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
+  widgetData
 }) => {
   const dispatch = useDispatch();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const widgetContent = useSelector((state: RootState) =>
+  const storeWidgetContent = useSelector((state: RootState) =>
     state.workspace.blocks.find((block) => block.id === blockId)?.columns[columnIndex]?.widgetContents[widgetIndex] || null
   );
+
+  const widgetContent = widgetData || storeWidgetContent;
   const buttonData: ButtonEditorOptions | null = widgetContent?.contentData
     ? JSON.parse(widgetContent.contentData)
     : null;

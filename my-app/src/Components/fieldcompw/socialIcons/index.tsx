@@ -142,14 +142,22 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
             const iconData = socialIcons[key];
             return (
               <Box key={key}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {React.cloneElement(iconData.icon, {
-                    sx: {
-                      fontSize: `${iconSize}px`,
-                      color: iconColor === "color" ? socialIcons[key].color : iconColor === "black" ? "#000000" : "#0000",
-                    },
-                  })}
-                </Box>
+                <a
+                  href={addedIcons.url[index] || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {React.cloneElement(iconData.icon, {
+                      sx: {
+                        fontSize: `${iconSize}px`,
+                        color: iconColor === "color" ? socialIcons[key].color : iconColor === "black" ? "#000000" : "#0000",
+                      },
+                    })}
+                  </Box>
+                </a>
               </Box>
             );
           })}

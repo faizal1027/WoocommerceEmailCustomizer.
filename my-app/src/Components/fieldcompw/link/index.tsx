@@ -37,32 +37,39 @@ const LinkFieldComponent: React.FC<LinkFieldComponentProps> = ({
   };
 
   return (
+
     <Box
-      onClick={handleClick}
       sx={{
-        display: 'inline-block',
-        border: isSelected ? '2px dashed blue' : 'none',
-        borderRadius: '4px',
-        padding: '2px 4px',
-        backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
-        cursor: 'pointer',
-        textDecoration: linkEditorOptions.underline ? 'underline' : 'none',
-        '&:hover': {
-          opacity: 0.8,
-        },
+        textAlign: linkEditorOptions.textAlign || 'left',
+        width: '100%',
       }}
     >
-      <Typography
-        sx={{
+      <a
+        href={linkEditorOptions.url || '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={handleClick}
+        style={{
+          display: 'inline-block',
+          border: isSelected ? '2px dashed blue' : 'none',
+          borderRadius: '4px',
+          paddingTop: `${linkEditorOptions.padding?.top || 0}px`,
+          paddingRight: `${linkEditorOptions.padding?.right || 0}px`,
+          paddingBottom: `${linkEditorOptions.padding?.bottom || 0}px`,
+          paddingLeft: `${linkEditorOptions.padding?.left || 0}px`,
+          backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
+          cursor: 'pointer',
+          textDecoration: linkEditorOptions.underline ? 'underline' : 'none',
           fontSize: `${linkEditorOptions.fontSize || 14}px`,
           color: linkEditorOptions.color || '#007bff',
           fontWeight: 'normal',
         }}
       >
         {linkEditorOptions.text || 'Click here'}
-      </Typography>
+      </a>
     </Box>
   );
+
 };
 
 export default LinkFieldComponent;

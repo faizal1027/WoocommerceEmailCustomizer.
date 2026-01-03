@@ -430,10 +430,23 @@ const widgetRenderers: Record<string, (data: any) => string> = {
         </td>`;
     }).join('');
 
+    const containerStyle = [
+      `text-align: ${data.iconAlign || 'center'}`, // Support alignment
+      data.padding ? `padding: ${data.padding.top || 10}px ${data.padding.right || 10}px ${data.padding.bottom || 10}px ${data.padding.left || 10}px` : 'padding: 10px',
+      'width: 100%'
+    ].filter(Boolean).join('; ');
+
+    // Use a wrapper div/table for alignment and padding
     return `
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin: ${data.padding?.top || 10}px auto ${data.padding?.bottom || 10}px; border-collapse: collapse;">
+    <table role="presentation" cellpadding="0" cellspacing="0" style="${containerStyle}; width: 100%;">
       <tr>
-        ${iconsHtml}
+        <td align="${data.iconAlign || 'center'}">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="display: inline-table;">
+            <tr>
+              ${iconsHtml}
+            </tr>
+          </table>
+        </td>
       </tr>
     </table>`;
   },
@@ -452,14 +465,26 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 13. LINK WIDGET ==========
   'link': (d) => {
     const data = d || {};
-    const styles = [
+    // Inner link styles
+    const linkStyles = [
       `color: ${data.color || '#007bff'}`,
       `font-size: ${data.fontSize || 14}px`,
       data.underline !== false ? 'text-decoration: underline' : 'text-decoration: none',
-      'display: inline-block'
+      'display: inline-block',
+      data.padding ? `padding: ${data.padding.top || 0}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px` : ''
     ].filter(Boolean).join('; ');
 
-    return `<a href="${escapeHtml(data.url || '#')}" style="${styles}" target="_blank" rel="noopener">${escapeHtml(data.text || 'Link')}</a>`;
+    // Container styles for alignment
+    const containerStyles = [
+      `text-align: ${data.textAlign || 'left'}`,
+      'width: 100%'
+    ].join('; ');
+
+    return `
+      <div style="${containerStyles}">
+        <a href="${escapeHtml(data.url || '#')}" style="${linkStyles}" target="_blank" rel="noopener">${escapeHtml(data.text || 'Link')}</a>
+      </div>
+    `;
   },
 
 
@@ -486,19 +511,27 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     };
 
     const iconChar = iconTypes[data.iconType || 'star'] || '★';
-    const styles = [
+
+    const iconStyles = [
       `color: ${data.color || '#000000'}`,
       `font-size: ${data.size || 24}px`,
-      'display: inline-block'
+      'display: inline-block',
+      'line-height: 1',
+      data.paddingTop !== undefined ? `padding: ${data.paddingTop}px ${data.paddingRight || 0}px ${data.paddingBottom || 0}px ${data.paddingLeft || 0}px` : ''
     ].filter(Boolean).join('; ');
 
-    let content = `<span style="${styles}">${iconChar}</span>`;
+    const containerStyles = [
+      `text-align: ${data.alignment || 'left'}`,
+      'width: 100%'
+    ].join('; ');
+
+    let content = `<span style="${iconStyles}">${iconChar}</span>`;
 
     if (data.link) {
       content = `<a href="${escapeHtml(data.link)}" style="text-decoration: none;" target="_blank" rel="noopener">${content}</a>`;
     }
 
-    return content;
+    return `<div style="${containerStyles}">${content}</div>`;
   },
 
 

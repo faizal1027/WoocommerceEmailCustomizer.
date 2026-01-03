@@ -12,6 +12,7 @@ interface ImageFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
@@ -20,13 +21,16 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
+  widgetData
 }) => {
   const dispatch = useDispatch();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const widgetContent = useSelector((state: RootState) =>
+  const storeWidgetContent = useSelector((state: RootState) =>
     state.workspace.blocks.find((block) => block.id === blockId)?.columns[columnIndex]?.widgetContents[widgetIndex] || null
   );
+
+  const widgetContent = widgetData || storeWidgetContent;
 
   const imageOptions = widgetContent?.contentData
     ? JSON.parse(widgetContent.contentData)

@@ -21,7 +21,7 @@ import {
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../Store/store";
-import { DroppedBlock, setBlocks } from "../../Store/Slice/workspaceSlice";
+import { DroppedBlock, setBlocks, WorkspaceState } from "../../Store/Slice/workspaceSlice";
 import { exportToHTML, exportToJSON, ExportDialogModal } from "../utils/Export";
 import { importTemplate, importFromText, convertToDroppedBlocks } from "../utils/import";
 
@@ -65,7 +65,7 @@ function TabPanel(props: TabPanelProps) {
 
 const ExportColumn = () => {
   const dispatch = useDispatch();
-  const { blocks } = useSelector((state: RootState) => state.workspace);
+  const { blocks } = useSelector((state: RootState) => state.workspace) as WorkspaceState;
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
@@ -660,7 +660,9 @@ const ExportColumn = () => {
               formData.append("html_content", htmlContent);
 
               // Use the SLUG (type) directly from the dropdown state
-              formData.append("content_type", selectedTemplateId);
+              // Fix: Map the selected NAME back to the SLUG (type)
+              const selectedTypeSlug = typeInfo ? typeInfo.type : selectedTemplateId;
+              formData.append("content_type", selectedTypeSlug);
 
               formData.append("recipient", recipient);
 

@@ -22,17 +22,52 @@ const GroupFieldComponent: React.FC<GroupFieldComponentProps> = ({
   widgetIndex
 }) => {
   const dispatch = useDispatch();
-  const { groupEditorOptions } = useSelector((state: RootState) => state.workspace);
+  const { blocks } = useSelector((state: RootState) => state.workspace);
+  const block = blocks.find((b) => b.id === blockId);
+  const column = block?.columns[columnIndex];
+  const widget = column?.widgetContents[widgetIndex];
 
-  const getAlignmentStyle = () => {
-    switch (groupEditorOptions.alignment) {
-      case 'center':
-        return { justifyContent: 'center' };
-      case 'right':
-        return { justifyContent: 'flex-end' };
-      default:
-        return { justifyContent: 'flex-start' };
+  if (!widget) return null;
+
+  const content = widget.contentData
+    ? JSON.parse(widget.contentData)
+    : { elements: [], spacing: 10, alignment: 'left', direction: 'row' }; // Default fallback
+
+  const getContainerStyles = () => {
+    const direction = content.direction || 'row';
+    const alignment = content.alignment || 'left';
+    const spacing = content.spacing !== undefined ? content.spacing : 10;
+
+    const styles: any = {
+      display: 'flex',
+      flexDirection: direction,
+      gap: `${spacing}px`,
+      flexWrap: 'wrap',
+      minHeight: 'auto'
+    };
+
+    if (alignment === 'space-between') {
+      styles.justifyContent = 'space-between';
+      styles.alignItems = direction === 'column' ? 'stretch' : 'center';
+    } else {
+      const map: Record<string, string> = {
+        left: 'flex-start',
+        center: 'center',
+        right: 'flex-end'
+      };
+
+      const alignValue = map[alignment] || 'flex-start';
+
+      if (direction === 'row') {
+        styles.justifyContent = alignValue;
+        styles.alignItems = 'center';
+      } else {
+        styles.alignItems = alignValue;
+        styles.justifyContent = 'flex-start';
+      }
     }
+
+    return styles;
   };
 
   return (
@@ -53,14 +88,9 @@ const GroupFieldComponent: React.FC<GroupFieldComponentProps> = ({
       }}
     >
       <Box
-        sx={{
-          display: 'flex',
-          gap: `${groupEditorOptions.spacing || 10}px`,
-          flexWrap: 'wrap',
-          ...getAlignmentStyle(),
-        }}
+        sx={getContainerStyles()}
       >
-        {(groupEditorOptions.elements || []).map((element, index) => (
+        {(content.elements || []).map((element: string, index: number) => (
           <Box
             key={index}
             sx={{
