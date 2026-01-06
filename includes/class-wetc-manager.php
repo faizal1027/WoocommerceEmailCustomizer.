@@ -38,6 +38,12 @@ class Posts_List_Table extends \WP_List_Table {
         if (empty($row_date)) {
             $wpdb->query("ALTER TABLE $table_name ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
         }
+
+        // Check for 'template_note' column
+        $row_note = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'template_note'");
+        if (empty($row_note)) {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN template_note TEXT");
+        }
     }
   
     public function get_columns() {
@@ -64,7 +70,7 @@ class Posts_List_Table extends \WP_List_Table {
             case 'recipient':
                 return isset($item[$column_name]) ? esc_html($item[$column_name]) : '';
             case 'note':
-                return '-'; 
+                return isset($item['template_note']) && !empty($item['template_note']) ? esc_html($item['template_note']) : '-';
             case 'date':
                 return $this->column_date($item);
             default:

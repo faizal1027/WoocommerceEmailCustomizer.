@@ -29,7 +29,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../Store/store";
 import {
-  updateWidgetContentData,
+  updateButtonEditorOptions,
   closeEditor,
   deleteColumnContent,
 } from "../../../../../Store/Slice/workspaceSlice";
@@ -39,21 +39,9 @@ import ColorPicker from "../../../../utils/ColorPicker";
 
 const ButtonWidgetEditor = () => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, blocks } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, buttonEditorOptions: buttonData } = useSelector(
     (state: RootState) => state.workspace
   );
-  const column =
-    selectedBlockForEditor && selectedColumnIndex !== null
-      ? blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
-      : null;
-  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-  const parsedData = widgetContent?.contentData ? JSON.parse(widgetContent.contentData) : {};
-  const buttonData: ButtonEditorOptions = {
-    ...defaultButtonEditorOptions,
-    ...parsedData,
-    padding: { ...defaultButtonEditorOptions.padding, ...parsedData?.padding },
-    borderRadius: { ...defaultButtonEditorOptions.borderRadius, ...parsedData?.borderRadius },
-  };
 
 
   const optionsRef = useRef(buttonData);
@@ -61,23 +49,13 @@ const ButtonWidgetEditor = () => {
     optionsRef.current = buttonData;
   }, [buttonData]);
 
-  const updateData = useCallback((newData: any) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const updatedData = { ...optionsRef.current, ...newData };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedData),
-        })
-      );
-    }
-  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+  const updateData = useCallback((newData: Partial<ButtonEditorOptions>) => {
+    dispatch(updateButtonEditorOptions(newData));
+  }, [dispatch]);
 
   const debouncedUpdate = useMemo(() => {
     let timeoutId: any;
-    return (newData: any) => {
+    return (newData: Partial<ButtonEditorOptions>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => updateData(newData), 50);
     };

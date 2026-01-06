@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Link, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, defaultEmailFooterEditorOptions } from '../../../Store/Slice/workspaceSlice';
 import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -37,6 +37,7 @@ interface EmailFooterFieldComponentProps {
     onWidgetClick: (e: React.MouseEvent) => void;
     widgetIndex: number;
     previewMode?: boolean;
+    widgetData?: any;
 }
 
 const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
@@ -46,7 +47,8 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
     onClick,
     onWidgetClick,
     widgetIndex,
-    previewMode = true
+    previewMode = true,
+    widgetData
 }) => {
     const dispatch = useDispatch();
     // Select data from the specific block/column instead of global editor state
@@ -55,16 +57,24 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
 
     // Parse the saved options
     const options = React.useMemo(() => {
-        const contentData = column?.widgetContents?.[widgetIndex]?.contentData;
-        if (contentData) {
+        if (widgetData && widgetData.contentData) {
             try {
-                return JSON.parse(contentData);
+                return { ...defaultEmailFooterEditorOptions, ...JSON.parse(widgetData.contentData) };
             } catch (e) {
                 console.error("Failed to parse footer options", e);
             }
         }
-        return column?.emailFooterEditorOptions || {};
-    }, [column, widgetIndex]);
+
+        const contentData = column?.widgetContents?.[widgetIndex]?.contentData;
+        if (contentData) {
+            try {
+                return { ...defaultEmailFooterEditorOptions, ...JSON.parse(contentData) };
+            } catch (e) {
+                console.error("Failed to parse footer options", e);
+            }
+        }
+        return defaultEmailFooterEditorOptions;
+    }, [column, widgetIndex, widgetData]);
 
     const emailFooterEditorOptions = options;
 
@@ -74,7 +84,10 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
     return (
         <Box
             onClick={(e) => {
-                // Allow bubbling
+                e.stopPropagation();
+                onWidgetClick(e);
+                onClick();
+                dispatch(setSelectedBlockId(blockId));
             }}
             sx={{
                 width: '100%',

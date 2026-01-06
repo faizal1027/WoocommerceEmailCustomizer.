@@ -42,6 +42,9 @@ import {
   defaultEmailHeaderEditorOptions,
   defaultEmailFooterEditorOptions,
   defaultPriceEditorOptions,
+  defaultContactEditorOptions,
+  defaultProductDetailsEditorOptions,
+  setMobileView, // Added import
 } from "../../../Store/Slice/workspaceSlice";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
@@ -78,16 +81,25 @@ const WorkspaceArea = ({
 
   const [, dropLayout] = useDrop(() => ({
     accept: "layout",
-    drop: (item: { columns: number }) => {
+    drop: (item: { columns: number }, monitor) => {
+      if (monitor.didDrop()) return;
       if (!previewMode) {
         dispatch(addBlock({ columns: item.columns }));
       }
     },
-  }));
+  }), [previewMode, dispatch]);
 
   useEffect(() => {
     if (dropRef.current) dropLayout(dropRef.current);
   }, [dropLayout]);
+
+  useEffect(() => {
+    if (viewMode === "mobile") {
+      dispatch(setMobileView(true));
+    } else {
+      dispatch(setMobileView(false));
+    }
+  }, [viewMode, dispatch]);
 
   useEffect(() => {
     if (!window.emailCustomizerAjax) {
@@ -120,7 +132,39 @@ const WorkspaceArea = ({
 
         if (response.data.success && response.data.data?.json_data) {
           try {
-            const parsedBlocks: DroppedBlock[] = JSON.parse(response.data.data.json_data);
+            let parsedBlocks: DroppedBlock[] = JSON.parse(response.data.data.json_data);
+
+            // Smart Cleanup: Fix "Phantom Columns" issue
+            if (parsedBlocks.length > 0) {
+              console.log("DEBUG: Starting Cleanup. Blocks:", parsedBlocks.length);
+              parsedBlocks = parsedBlocks.map(block => {
+                // Check if the block has content in the first column
+                const firstCol = block.columns[0];
+                const firstColContent = firstCol?.widgetContents?.[0];
+
+                console.log(`Block ${block.id}: Cols=${block.columns.length}, FirstColType=${firstColContent?.contentType}`);
+
+                // If the first column contains a "Layout" widget that should be full-width (Section, Row, Container)
+                // And there are extra empty columns... delete the extra columns.
+                if (firstColContent && firstColContent.contentType && ['section', 'row', 'container'].includes(firstColContent.contentType) && block.columns.length > 1) {
+                  const hasExtraEmptyCols = block.columns.slice(1).every(col => col.widgetContents.length === 0);
+                  if (hasExtraEmptyCols) {
+                    console.log(`Fixing phantom columns for block ${block.id}`);
+                    return {
+                      ...block,
+                      columns: [firstCol] // Keep only the first column
+                    };
+                  }
+                }
+                return block;
+              });
+
+              // Also remove completely empty blocks (as before)
+              parsedBlocks = parsedBlocks.filter(block => {
+                return !block.columns.every(col => col.widgetContents.length === 0);
+              });
+            }
+
             dispatch(setBlocks(parsedBlocks));
             sessionStorage.setItem("templateJsonData", response.data.data.json_data);
           } catch (parseError: any) {
@@ -391,7 +435,7 @@ const Block = ({
     >
       {block.columns.map((column, i) => (
         <ColumnDropTarget
-          key={column.id}
+          key={column.id || i}
           block={block}
           column={column}
           columnIndex={i}
@@ -493,39 +537,20 @@ const ColumnDropTarget = ({
     drop: (item: {
       widgetType: WidgetContentType;
       initialContent?: string;
-    }) => {
+    }, monitor) => {
+      if (monitor.didDrop()) {
+        return;
+      }
       if (previewMode) return;
       let contentDataToSend: string | null = null;
 
       // Handle content data based on widget type
-      if (item.widgetType === "text") {
-        contentDataToSend = JSON.stringify(defaultTextEditorOptions);
-      } else if (item.widgetType === "button") {
-        contentDataToSend = JSON.stringify(defaultButtonEditorOptions);
-      } else if (item.widgetType === "heading") {
-        contentDataToSend = JSON.stringify(defaultHeadingEditorOptions);
-      } else if (item.widgetType === "socialIcons") {
-        contentDataToSend = JSON.stringify(defaultSocialIconsEditorOptions);
-      } else if (item.widgetType === "image") {
+      if (item.widgetType === "image") {
         contentDataToSend = item.initialContent || "";
-      } else if (item.widgetType === "divider") {
-        contentDataToSend = JSON.stringify(defaultDividerEditorOptions);
-      } else if (item.widgetType === "taxBilling") {
-        contentDataToSend = JSON.stringify(defaultTaxBillingEditorOptions);
-      } else if (item.widgetType === "orderSubtotal") {
-        contentDataToSend = JSON.stringify(defaultOrderSubtotalEditorOptions);
-      } else if (item.widgetType === "orderTotal") {
-        contentDataToSend = JSON.stringify(defaultOrderTotalEditorOptions);
-      } else if (item.widgetType === "shippingMethod") {
-        contentDataToSend = JSON.stringify(defaultShippingMethodEditorOptions);
-      } else if (item.widgetType === "paymentMethod") {
-        contentDataToSend = JSON.stringify(defaultPaymentMethodEditorOptions);
-      } else if (item.widgetType === "customerNote") {
-        contentDataToSend = JSON.stringify(defaultCustomerNoteEditorOptions);
       } else if (item.widgetType === "row") {
         contentDataToSend = JSON.stringify({
           backgroundColor: 'transparent',
-          columns: 2,
+          columns: 1, // Corrected to 1 as Row manages its own cols
           gap: 20
         });
       } else if (item.widgetType === "emailHeader") {
@@ -541,6 +566,22 @@ const ColumnDropTarget = ({
           padding: { top: 20, right: 20, bottom: 20, left: 20 },
           border: { width: 1, style: 'solid', color: '#ddd', radius: 0 }
         });
+      } else if (item.widgetType === "taxBilling") {
+        contentDataToSend = JSON.stringify(defaultTaxBillingEditorOptions);
+      } else if (item.widgetType === "orderSubtotal") {
+        contentDataToSend = JSON.stringify(defaultOrderSubtotalEditorOptions);
+      } else if (item.widgetType === "orderTotal") {
+        contentDataToSend = JSON.stringify(defaultOrderTotalEditorOptions);
+      } else if (item.widgetType === "shippingMethod") {
+        contentDataToSend = JSON.stringify(defaultShippingMethodEditorOptions);
+      } else if (item.widgetType === "paymentMethod") {
+        contentDataToSend = JSON.stringify(defaultPaymentMethodEditorOptions);
+      } else if (item.widgetType === "customerNote") {
+        contentDataToSend = JSON.stringify(defaultCustomerNoteEditorOptions);
+      } else if (item.widgetType === "contact") {
+        contentDataToSend = JSON.stringify(defaultContactEditorOptions);
+      } else if (item.widgetType === "productDetails") {
+        contentDataToSend = JSON.stringify(defaultProductDetailsEditorOptions);
       } else {
         contentDataToSend = JSON.stringify({});
       }
@@ -558,7 +599,7 @@ const ColumnDropTarget = ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
-  }));
+  }), [block.id, columnIndex, previewMode, dispatch]);
 
   useEffect(() => {
     if (columnRef.current) {
@@ -601,7 +642,7 @@ const ColumnDropTarget = ({
         selectedContentType === widget.contentType &&
         selectedWidgetIndex === index;
 
-      const WidgetComponent = getWidgetComponent(widget.contentType);
+      const WidgetComponent = getWidgetComponent(widget.contentType || '');
 
       const commonProps = {
         key: index,

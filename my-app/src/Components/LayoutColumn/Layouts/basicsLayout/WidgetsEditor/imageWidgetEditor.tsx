@@ -19,7 +19,7 @@ import { RootState } from "../../../../../Store/store";
 import {
   closeEditor,
   deleteColumnContent,
-  updateWidgetContentData,
+  updateImageEditorOptions,
 } from "../../../../../Store/Slice/workspaceSlice";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -55,26 +55,9 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
   columnIndex,
 }) => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, imageEditorOptions: imageOptions } = useSelector(
     (state: RootState) => state.workspace
   );
-  const column = useSelector((state: RootState) =>
-    selectedBlockForEditor && selectedColumnIndex !== null
-      ? state.workspace.blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
-      : null
-  );
-  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-  const defaultOptions: ImageEditorOptions = {
-    src: "https://cdn.tools.unlayer.com/image/placeholder.png",
-    altText: "Uploaded content",
-    width: "100%",
-    align: "center",
-    autoWidth: true,
-    padding: { top: 0, left: 0, right: 0, bottom: 0 },
-  };
-  const imageOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : defaultOptions;
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(imageOptions.src);
 
@@ -85,17 +68,7 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        const updatedOptions = { ...imageOptions, src: result };
-        if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-          dispatch(
-            updateWidgetContentData({
-              blockId: selectedBlockForEditor,
-              columnIndex: selectedColumnIndex,
-              widgetIndex: selectedWidgetIndex,
-              data: JSON.stringify(updatedOptions),
-            })
-          );
-        }
+        dispatch(updateImageEditorOptions({ src: result }));
         setPreviewUrl(result);
       };
       reader.readAsDataURL(file);
@@ -117,18 +90,7 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
       mediaFrame.on('select', () => {
         const attachment = mediaFrame.state().get('selection').first().toJSON();
         const imageUrl = attachment.url;
-
-        const updatedOptions = { ...imageOptions, src: imageUrl };
-        if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-          dispatch(
-            updateWidgetContentData({
-              blockId: selectedBlockForEditor,
-              columnIndex: selectedColumnIndex,
-              widgetIndex: selectedWidgetIndex,
-              data: JSON.stringify(updatedOptions),
-            })
-          );
-        }
+        dispatch(updateImageEditorOptions({ src: imageUrl }));
         setPreviewUrl(imageUrl);
       });
 
@@ -142,72 +104,32 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
     const placeholder = "https://cdn.tools.unlayer.com/image/placeholder.png";
     setSelectedFile(null);
     setPreviewUrl(placeholder);
-    const updatedOptions = { ...imageOptions, src: placeholder };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    dispatch(updateImageEditorOptions({ src: placeholder }));
   };
 
   const handleAlignChange = (
     event: React.MouseEvent<HTMLElement>,
     newAlign: "left" | "center" | "right"
   ) => {
-    if (newAlign !== null && selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const updatedOptions = { ...imageOptions, align: newAlign };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
+    if (newAlign !== null) {
+      dispatch(updateImageEditorOptions({ align: newAlign }));
     }
   };
 
   const handleWidthToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAuto = e.target.checked;
-    const updatedOptions = {
-      ...imageOptions,
+    dispatch(updateImageEditorOptions({
       autoWidth: newAuto,
       width: newAuto ? "100%" : imageOptions.width,
-    };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    }));
   };
 
   const handleWidthChange = (event: Event, newValue: number | number[]) => {
     const widthValue = typeof newValue === "number" ? newValue : newValue[0];
-    const updatedOptions = {
-      ...imageOptions,
+    dispatch(updateImageEditorOptions({
       width: `${widthValue}%`,
       autoWidth: false,
-    };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    }));
   };
 
   const handleCloseEditor = () => {
@@ -217,49 +139,18 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
     setPreviewUrl(newUrl);
-    const updatedOptions = { ...imageOptions, src: newUrl };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    dispatch(updateImageEditorOptions({ src: newUrl }));
   };
 
   const handleAltTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAltText = e.target.value;
-    const updatedOptions = { ...imageOptions, altText: newAltText };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    dispatch(updateImageEditorOptions({ altText: newAltText }));
   };
 
   const handlePaddingChange = (side: keyof PaddingOptions, value: number) => {
-    const updatedOptions = {
-      ...imageOptions,
+    dispatch(updateImageEditorOptions({
       padding: { ...imageOptions.padding, [side]: Math.max(0, value) },
-    };
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedOptions),
-        })
-      );
-    }
+    }));
   };
 
   const handleDeleteContent = () => {

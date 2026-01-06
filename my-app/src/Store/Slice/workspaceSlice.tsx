@@ -22,7 +22,7 @@ interface ColumnStyle {
 }
 
 // Updated WidgetContentType with ALL component types in correct order
-export type WidgetContentType = 'text' | 'heading' | 'button' | 'socialIcons' | 'divider' | 'image' |
+export type WidgetContentType = 'text' | 'heading' | 'socialIcons' | 'button' | 'divider' | 'image' |
   // Basic Layout
   'section' | 'spacer' | 'link' | 'icon' |
   // Layout Block
@@ -33,12 +33,44 @@ export type WidgetContentType = 'text' | 'heading' | 'button' | 'socialIcons' | 
   'form' | 'survey' | 'input' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'label' |
   // WooCommerce Layout
   'billingAddress' | 'shippingAddress' | 'orderItems' | 'taxBilling' | 'emailHeader' | 'emailFooter' | 'ctaButton' | 'relatedProducts' |
-  'orderSubtotal' | 'orderTotal' | 'shippingMethod' | 'paymentMethod' | 'customerNote' | null;
+  'orderSubtotal' | 'orderTotal' | 'shippingMethod' | 'paymentMethod' | 'customerNote' | 'contact' | 'productDetails' | null;
 
 interface WidgetContent {
   contentType: WidgetContentType;
   contentData: string | null;
 }
+
+const deepUpdateWidgetData = (contentData: string | null, path: Array<{ colIdx: number; childIdx: number }>, payload: any): string => {
+  const data = JSON.parse(contentData || '{}');
+  if (!path || path.length === 0) {
+    // If payload is meant to strictly replace, we might need a flag. 
+    // But usually standard merge is fine for options. 
+    // However, for structure updates (Row/Container), we pass the FULL structure.
+    // So spreading ...payload over ...data overrides keys. 
+    // If payload is the full options object, it works.
+    return JSON.stringify({ ...data, ...payload });
+  }
+
+  const [head, ...tail] = path;
+  let targetWidget = null;
+  if (head.colIdx === -1) {
+    // FLAT CHILDREN (e.g. Container)
+    if (!data.children) data.children = [];
+    if (!data.children[head.childIdx]) data.children[head.childIdx] = { contentType: 'unknown', contentData: '{}' }; // Fallback
+    targetWidget = data.children[head.childIdx];
+  } else {
+    // COLUMN BASED (e.g. Row)
+    if (!data.columnsData) data.columnsData = [];
+    if (!data.columnsData[head.colIdx]) data.columnsData[head.colIdx] = { id: head.colIdx.toString(), children: [] };
+    if (!data.columnsData[head.colIdx].children) data.columnsData[head.colIdx].children = [];
+    targetWidget = data.columnsData[head.colIdx].children[head.childIdx];
+  }
+
+  if (targetWidget) {
+    targetWidget.contentData = deepUpdateWidgetData(targetWidget.contentData, tail, payload);
+  }
+  return JSON.stringify(data);
+};
 
 interface Column {
   id: string;
@@ -148,6 +180,11 @@ export interface SectionEditorOptions {
     color: string;
     radius: number;
   };
+  children: Array<{
+    id: string;
+    contentType: WidgetContentType;
+    contentData: string | null;
+  }>;
 }
 
 export interface SpacerEditorOptions {
@@ -305,6 +342,14 @@ export interface RowEditorOptions {
   columns: number;
   gap: number;
   backgroundColor: string;
+  columnsData: Array<{
+    id: string;
+    children: Array<{
+      id: string;
+      contentType: WidgetContentType;
+      contentData: string | null;
+    }>;
+  }>;
 }
 
 export interface ContainerEditorOptions {
@@ -316,6 +361,11 @@ export interface ContainerEditorOptions {
     style: 'solid' | 'dashed' | 'dotted' | 'none';
     color: string;
   };
+  children: Array<{
+    id: string;
+    contentType: WidgetContentType;
+    contentData: string | null;
+  }>;
 }
 
 export interface GroupEditorOptions {
@@ -417,6 +467,7 @@ export interface PriceEditorOptions {
   showCurrencySymbol?: boolean;
   currencySymbol?: string;
   label?: string;
+  showCurrencyCode?: boolean;
 }
 
 export interface TestimonialEditorOptions {
@@ -516,6 +567,67 @@ export interface InputEditorOptions {
   required: boolean;
   name: string;
 }
+// Contact Widget Options
+export interface ContactEditorOptions {
+  url: string;
+  email: string;
+  phone: string;
+  showUrl?: boolean;
+  showEmail?: boolean;
+  showPhone?: boolean;
+  backgroundColor: string;
+  textColor: string;
+  fontFamily: string;
+  fontSize: number | string;
+  padding: string;
+  textAlign: string;
+  iconColor: string;
+  iconSize: number;
+}
+
+// Product Details Widget Options
+export interface ProductDetailsEditorOptions {
+  padding: string;
+  backgroundColor: string;
+  textColor: string;
+  borderColor: string;
+  headerBackgroundColor: string;
+  headerTextColor: string;
+  fontFamily: string;
+  fontSize: number | string;
+  textAlign?: string;
+  showImage?: boolean; // If they want to toggle images in the table
+}
+
+export const defaultContactEditorOptions: ContactEditorOptions = {
+  url: '{{site_url}}',
+  email: '{{store_email}}',
+  phone: '{{store_phone}}',
+  showUrl: true,
+  showEmail: true,
+  showPhone: true,
+  backgroundColor: 'transparent',
+  textColor: '#333333',
+  fontFamily: 'inherit',
+  fontSize: '14px',
+  padding: '10px',
+  textAlign: 'center',
+  iconColor: '#333333',
+  iconSize: 20
+};
+
+export const defaultProductDetailsEditorOptions: ProductDetailsEditorOptions = {
+  padding: '20px',
+  backgroundColor: '#ffffff',
+  textColor: '#333333',
+  borderColor: '#eeeeee',
+  headerBackgroundColor: '#f8f9fa',
+  headerTextColor: '#333333',
+  fontFamily: 'inherit',
+  fontSize: 14,
+  textAlign: 'left', // Default alignment
+  showImage: true
+};
 
 export interface TextareaEditorOptions {
   label: string;
@@ -835,6 +947,7 @@ export interface WorkspaceState {
   selectedBlockForEditor: string | null;
   selectedContentType: WidgetContentType | null;
   selectedWidgetIndex: number | null;
+  selectedNestedPath: Array<{ colIdx: number; childIdx: number }> | null;
 
   // Basic Layout
   sectionEditorOptions: SectionEditorOptions;
@@ -1019,7 +1132,7 @@ export const defaultDividerEditorOptions: DividerEditorOptions = {
   },
 };
 
-const defaultImageEditorOptions: ImageEditorOptions = {
+export const defaultImageEditorOptions: ImageEditorOptions = {
   src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
   altText: '',
   width: '100%',
@@ -1033,13 +1146,14 @@ const defaultImageEditorOptions: ImageEditorOptions = {
   }
 };
 
-const defaultSectionEditorOptions: SectionEditorOptions = {
+export const defaultSectionEditorOptions: SectionEditorOptions = {
   backgroundColor: '#f5f5f5',
   padding: { top: 20, right: 20, bottom: 20, left: 20 },
   border: { width: 1, style: 'solid', color: '#ddd', radius: 4 },
+  children: [],
 };
 
-const defaultSpacerEditorOptions: SpacerEditorOptions = {
+export const defaultSpacerEditorOptions: SpacerEditorOptions = {
   height: 20,
   backgroundColor: 'transparent'
 };
@@ -1082,13 +1196,15 @@ const defaultRowEditorOptions: RowEditorOptions = {
   columns: 2,
   gap: 20,
   backgroundColor: 'transparent',
+  columnsData: [],
 };
 
 const defaultContainerEditorOptions: ContainerEditorOptions = {
   maxWidth: '800px',
   backgroundColor: '#ffffff',
   padding: 20,
-  border: { width: 1, style: 'solid', color: '#ddd' }
+  border: { width: 1, style: 'solid', color: '#ddd' },
+  children: [],
 };
 
 const defaultGroupEditorOptions: GroupEditorOptions = {
@@ -1118,6 +1234,7 @@ export const defaultPriceEditorOptions: PriceEditorOptions = {
   decimals: 2,
   showDecimals: true,
   showCurrencySymbol: true,
+  showCurrencyCode: true,
   period: '',
   features: [],
   buttonText: '',
@@ -1557,6 +1674,7 @@ const initialState: WorkspaceState = {
   selectedBlockForEditor: null,
   selectedContentType: null,
   selectedWidgetIndex: null,
+  selectedNestedPath: null,
 
   // Basic Layout
   textEditorOptions: defaultTextEditorOptions,
@@ -1918,10 +2036,18 @@ const workspaceSlice = createSlice({
       state.selectedBlockId = action.payload;
     },
 
-    openEditor: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number | null; contentType?: WidgetContentType | null; widgetIndex?: number | null }>) => {
+    openEditor: (state, action: PayloadAction<{
+      blockId: string | null;
+      columnIndex: number | null;
+      contentType?: WidgetContentType | null;
+      widgetIndex?: number | null;
+      nestedPath?: Array<{ colIdx: number; childIdx: number }> | null
+    }>) => {
       state.editorOpen = true;
       state.selectedBlockForEditor = action.payload.blockId;
       state.selectedColumnIndex = action.payload.columnIndex;
+      state.selectedNestedPath = action.payload.nestedPath || null;
+
       state.selectedContentType = action.payload.contentType !== undefined
         ? action.payload.contentType
         : (
@@ -1936,74 +2062,100 @@ const workspaceSlice = createSlice({
         const column = block?.columns[state.selectedColumnIndex];
 
         if (column) {
+          // NESTED LOGIC: If we have a nested path, load the nested widget data instead of the top-level one
+          let targetContentData: string | null = null;
+          if (state.selectedNestedPath && state.selectedNestedPath.length > 0 && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            let currentContentData = column.widgetContents[state.selectedWidgetIndex].contentData;
+
+            try {
+              for (const pathPart of state.selectedNestedPath) {
+                const parentData = JSON.parse(currentContentData || '{}');
+                let nestedWidget = null;
+
+                if (pathPart.colIdx === -1) {
+                  // FLAT CHILDREN (e.g. Section)
+                  nestedWidget = parentData.children?.[pathPart.childIdx];
+                } else {
+                  // COLUMN BASED (e.g. Row)
+                  nestedWidget = parentData.columnsData?.[pathPart.colIdx]?.children?.[pathPart.childIdx];
+                }
+
+                if (nestedWidget) {
+                  currentContentData = nestedWidget.contentData;
+                  state.selectedContentType = nestedWidget.contentType;
+                } else {
+                  break; // Path invalid
+                }
+              }
+              targetContentData = currentContentData;
+            } catch (e) {
+              console.error("Error parsing nested contentData:", e);
+            }
+          } else if (state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
+            targetContentData = column.widgetContents[state.selectedWidgetIndex].contentData;
+          }
           // Handle Select Component special case (JSON parsing)
-          if (state.selectedContentType === 'select' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const contentData = column.widgetContents[state.selectedWidgetIndex].contentData;
+          if (state.selectedContentType === 'select') {
+            const contentData = targetContentData;
             if (contentData) {
               try {
                 const parsed = JSON.parse(contentData);
                 state.selectEditorOptions = parsed;
               } catch (e) {
                 console.error("Error parsing select content data:", e);
-                console.error("Problematic contentData:", contentData);
-                // Fallback to column options or default
-                if (column.selectEditorOptions) {
-                  state.selectEditorOptions = column.selectEditorOptions;
-                } else {
-                  state.selectEditorOptions = defaultSelectEditorOptions;
-                }
+                state.selectEditorOptions = column.selectEditorOptions || defaultSelectEditorOptions;
               }
-            } else if (column.selectEditorOptions) {
-              state.selectEditorOptions = column.selectEditorOptions;
             } else {
-              state.selectEditorOptions = defaultSelectEditorOptions;
+              state.selectEditorOptions = column.selectEditorOptions || defaultSelectEditorOptions;
             }
           }
           // Handle Product Component
-          else if (state.selectedContentType === 'product' && column.productEditorOptions) {
-            state.productEditorOptions = column.productEditorOptions;
+          else if (state.selectedContentType === 'product') {
+            if (targetContentData) {
+              try {
+                state.productEditorOptions = JSON.parse(targetContentData);
+              } catch (e) {
+                state.productEditorOptions = column.productEditorOptions || defaultProductEditorOptions;
+              }
+            } else {
+              state.productEditorOptions = column.productEditorOptions || defaultProductEditorOptions;
+            }
           }
           // Handle WooCommerce Components
-          else if (state.selectedContentType === 'emailHeader' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'emailHeader') {
+            const data = targetContentData;
             if (data) {
               try {
                 state.emailHeaderEditorOptions = JSON.parse(data);
               } catch (e) {
-                state.emailHeaderEditorOptions = defaultEmailHeaderEditorOptions;
+                state.emailHeaderEditorOptions = column.emailHeaderEditorOptions || defaultEmailHeaderEditorOptions;
               }
-            } else if (column.emailHeaderEditorOptions) {
-              state.emailHeaderEditorOptions = column.emailHeaderEditorOptions;
             } else {
-              state.emailHeaderEditorOptions = defaultEmailHeaderEditorOptions;
+              state.emailHeaderEditorOptions = column.emailHeaderEditorOptions || defaultEmailHeaderEditorOptions;
             }
           }
-          else if (state.selectedContentType === 'emailFooter' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'emailFooter') {
+            const data = targetContentData;
             if (data) {
               try {
                 state.emailFooterEditorOptions = JSON.parse(data);
               } catch (e) {
-                state.emailFooterEditorOptions = defaultEmailFooterEditorOptions;
+                state.emailFooterEditorOptions = column.emailFooterEditorOptions || defaultEmailFooterEditorOptions;
               }
-            } else if (column.emailFooterEditorOptions) {
-              state.emailFooterEditorOptions = column.emailFooterEditorOptions;
             } else {
-              state.emailFooterEditorOptions = defaultEmailFooterEditorOptions;
+              state.emailFooterEditorOptions = column.emailFooterEditorOptions || defaultEmailFooterEditorOptions;
             }
           }
-          else if (state.selectedContentType === 'ctaButton' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'ctaButton') {
+            const data = targetContentData;
             if (data) {
               try {
                 state.ctaButtonEditorOptions = JSON.parse(data);
               } catch (e) {
-                state.ctaButtonEditorOptions = defaultCtaButtonEditorOptions;
+                state.ctaButtonEditorOptions = column.ctaButtonEditorOptions || defaultCtaButtonEditorOptions;
               }
-            } else if (column.ctaButtonEditorOptions) {
-              state.ctaButtonEditorOptions = column.ctaButtonEditorOptions;
             } else {
-              state.ctaButtonEditorOptions = defaultCtaButtonEditorOptions;
+              state.ctaButtonEditorOptions = column.ctaButtonEditorOptions || defaultCtaButtonEditorOptions;
             }
           }
           else if (state.selectedContentType === 'relatedProducts' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
@@ -2020,221 +2172,190 @@ const workspaceSlice = createSlice({
               state.relatedProductsEditorOptions = defaultRelatedProductsEditorOptions;
             }
           }
-          else if (state.selectedContentType === 'taxBilling' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'taxBilling') {
+            const data = targetContentData;
             if (data) {
               try {
                 state.taxBillingEditorOptions = JSON.parse(data);
               } catch (e) {
-                state.taxBillingEditorOptions = defaultTaxBillingEditorOptions;
+                state.taxBillingEditorOptions = column.taxBillingEditorOptions || defaultTaxBillingEditorOptions;
               }
-            } else if (column.taxBillingEditorOptions) {
-              state.taxBillingEditorOptions = column.taxBillingEditorOptions;
             } else {
-              state.taxBillingEditorOptions = defaultTaxBillingEditorOptions;
+              state.taxBillingEditorOptions = column.taxBillingEditorOptions || defaultTaxBillingEditorOptions;
             }
           }
-          else if (state.selectedContentType === 'orderItems' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'orderItems') {
+            const data = targetContentData;
             if (data) {
               try {
-                // If data is empty object (which JSON.parse('{}') returns), we should merge with default
                 const parsed = JSON.parse(data);
-                if (Object.keys(parsed).length === 0) {
-                  state.orderItemsEditorOptions = defaultOrderItemsEditorOptions;
-                } else {
-                  state.orderItemsEditorOptions = parsed;
-                }
+                state.orderItemsEditorOptions = Object.keys(parsed).length === 0 ? defaultOrderItemsEditorOptions : parsed;
               } catch (e) {
-                state.orderItemsEditorOptions = defaultOrderItemsEditorOptions;
+                state.orderItemsEditorOptions = column.orderItemsEditorOptions || defaultOrderItemsEditorOptions;
               }
-            } else if (column.orderItemsEditorOptions) {
-              state.orderItemsEditorOptions = column.orderItemsEditorOptions;
             } else {
-              state.orderItemsEditorOptions = defaultOrderItemsEditorOptions;
+              state.orderItemsEditorOptions = column.orderItemsEditorOptions || defaultOrderItemsEditorOptions;
             }
           }
 
           // Handle Price Component
-          else if (state.selectedContentType === 'price' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'price') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.priceEditorOptions = { ...defaultPriceEditorOptions, ...parsed };
               } catch (e) {
-                state.priceEditorOptions = defaultPriceEditorOptions;
+                state.priceEditorOptions = column.priceEditorOptions ? { ...defaultPriceEditorOptions, ...column.priceEditorOptions } : defaultPriceEditorOptions;
               }
-            } else if (column.priceEditorOptions) {
-              state.priceEditorOptions = { ...defaultPriceEditorOptions, ...column.priceEditorOptions };
             } else {
-              state.priceEditorOptions = defaultPriceEditorOptions;
+              state.priceEditorOptions = column.priceEditorOptions ? { ...defaultPriceEditorOptions, ...column.priceEditorOptions } : defaultPriceEditorOptions;
             }
           }
           // Handle Link Component
-          else if (state.selectedContentType === 'link' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'link') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.linkEditorOptions = { ...defaultLinkEditorOptions, ...parsed };
               } catch (e) {
-                state.linkEditorOptions = defaultLinkEditorOptions;
+                state.linkEditorOptions = column.linkEditorOptions ? { ...defaultLinkEditorOptions, ...column.linkEditorOptions } : defaultLinkEditorOptions;
               }
-            } else if (column.linkEditorOptions) {
-              state.linkEditorOptions = { ...defaultLinkEditorOptions, ...column.linkEditorOptions };
             } else {
-              state.linkEditorOptions = defaultLinkEditorOptions;
+              state.linkEditorOptions = column.linkEditorOptions ? { ...defaultLinkEditorOptions, ...column.linkEditorOptions } : defaultLinkEditorOptions;
             }
           }
           // Handle Icon Component
-          else if (state.selectedContentType === 'icon' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'icon') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.iconEditorOptions = { ...defaultIconEditorOptions, ...parsed };
               } catch (e) {
-                state.iconEditorOptions = defaultIconEditorOptions;
+                state.iconEditorOptions = column.iconEditorOptions ? { ...defaultIconEditorOptions, ...column.iconEditorOptions } : defaultIconEditorOptions;
               }
-            } else if (column.iconEditorOptions) {
-              state.iconEditorOptions = { ...defaultIconEditorOptions, ...column.iconEditorOptions };
             } else {
-              state.iconEditorOptions = defaultIconEditorOptions;
+              state.iconEditorOptions = column.iconEditorOptions ? { ...defaultIconEditorOptions, ...column.iconEditorOptions } : defaultIconEditorOptions;
             }
           }
           // Handle Button Component
-          else if (state.selectedContentType === 'button' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'button') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.buttonEditorOptions = { ...defaultButtonEditorOptions, ...parsed };
               } catch (e) {
-                state.buttonEditorOptions = defaultButtonEditorOptions;
+                state.buttonEditorOptions = column.buttonEditorOptions ? { ...defaultButtonEditorOptions, ...column.buttonEditorOptions } : defaultButtonEditorOptions;
               }
-            } else if (column.buttonEditorOptions) {
-              state.buttonEditorOptions = { ...defaultButtonEditorOptions, ...column.buttonEditorOptions };
             } else {
-              state.buttonEditorOptions = defaultButtonEditorOptions;
+              state.buttonEditorOptions = column.buttonEditorOptions ? { ...defaultButtonEditorOptions, ...column.buttonEditorOptions } : defaultButtonEditorOptions;
             }
           }
           // Handle Social Icons Component
-          else if (state.selectedContentType === 'socialIcons' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'socialIcons') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions, ...parsed };
               } catch (e) {
-                state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
+                state.socialIconsEditorOptions = column.socialIconsEditorOptions ? { ...defaultSocialIconsEditorOptions, ...column.socialIconsEditorOptions } : defaultSocialIconsEditorOptions;
               }
-            } else if (column.socialIconsEditorOptions) {
-              state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions, ...column.socialIconsEditorOptions };
             } else {
-              state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
+              state.socialIconsEditorOptions = column.socialIconsEditorOptions ? { ...defaultSocialIconsEditorOptions, ...column.socialIconsEditorOptions } : defaultSocialIconsEditorOptions;
             }
           }
           // Handle Heading Component
-          else if (state.selectedContentType === 'heading' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'heading') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.headingEditorOptions = { ...defaultHeadingEditorOptions, ...parsed };
               } catch (e) {
-                state.headingEditorOptions = defaultHeadingEditorOptions;
+                state.headingEditorOptions = column.headingEditorOptions ? { ...defaultHeadingEditorOptions, ...column.headingEditorOptions } : defaultHeadingEditorOptions;
               }
-            } else if (column.headingEditorOptions) {
-              state.headingEditorOptions = { ...defaultHeadingEditorOptions, ...column.headingEditorOptions };
             } else {
-              state.headingEditorOptions = defaultHeadingEditorOptions;
+              state.headingEditorOptions = column.headingEditorOptions ? { ...defaultHeadingEditorOptions, ...column.headingEditorOptions } : defaultHeadingEditorOptions;
             }
           }
           // Handle Text Component
-          else if (state.selectedContentType === 'text' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'text') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.textEditorOptions = { ...defaultTextEditorOptions, ...parsed };
               } catch (e) {
-                state.textEditorOptions = defaultTextEditorOptions;
+                state.textEditorOptions = column.textEditorOptions ? { ...defaultTextEditorOptions, ...column.textEditorOptions } : defaultTextEditorOptions;
               }
-            } else if (column.textEditorOptions) {
-              state.textEditorOptions = { ...defaultTextEditorOptions, ...column.textEditorOptions };
             } else {
-              state.textEditorOptions = defaultTextEditorOptions;
+              state.textEditorOptions = column.textEditorOptions ? { ...defaultTextEditorOptions, ...column.textEditorOptions } : defaultTextEditorOptions;
             }
           }
           // Handle Image Component
-          else if (state.selectedContentType === 'image' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'image') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.imageEditorOptions = { ...defaultImageEditorOptions, ...parsed };
               } catch (e) {
-                state.imageEditorOptions = defaultImageEditorOptions;
+                state.imageEditorOptions = column.imageEditorOptions ? { ...defaultImageEditorOptions, ...column.imageEditorOptions } : defaultImageEditorOptions;
               }
-            } else if (column.imageEditorOptions) {
-              state.imageEditorOptions = { ...defaultImageEditorOptions, ...column.imageEditorOptions };
             } else {
-              state.imageEditorOptions = defaultImageEditorOptions;
+              state.imageEditorOptions = column.imageEditorOptions ? { ...defaultImageEditorOptions, ...column.imageEditorOptions } : defaultImageEditorOptions;
             }
           }
           // Handle Divider Component
-          else if (state.selectedContentType === 'divider' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'divider') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.dividerEditorOptions = { ...defaultDividerEditorOptions, ...parsed };
               } catch (e) {
-                state.dividerEditorOptions = defaultDividerEditorOptions;
+                state.dividerEditorOptions = column.dividerEditorOptions ? { ...defaultDividerEditorOptions, ...column.dividerEditorOptions } : defaultDividerEditorOptions;
               }
-            } else if (column.dividerEditorOptions) {
-              state.dividerEditorOptions = { ...defaultDividerEditorOptions, ...column.dividerEditorOptions };
             } else {
-              state.dividerEditorOptions = defaultDividerEditorOptions;
+              state.dividerEditorOptions = column.dividerEditorOptions ? { ...defaultDividerEditorOptions, ...column.dividerEditorOptions } : defaultDividerEditorOptions;
             }
           }
           // Handle Spacer Component
-          else if (state.selectedContentType === 'spacer' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'spacer') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.spacerEditorOptions = { ...defaultSpacerEditorOptions, ...parsed };
               } catch (e) {
-                state.spacerEditorOptions = defaultSpacerEditorOptions;
+                state.spacerEditorOptions = column.spacerEditorOptions ? { ...defaultSpacerEditorOptions, ...column.spacerEditorOptions } : defaultSpacerEditorOptions;
               }
-            } else if (column.spacerEditorOptions) {
-              state.spacerEditorOptions = { ...defaultSpacerEditorOptions, ...column.spacerEditorOptions };
             } else {
-              state.spacerEditorOptions = defaultSpacerEditorOptions;
+              state.spacerEditorOptions = column.spacerEditorOptions ? { ...defaultSpacerEditorOptions, ...column.spacerEditorOptions } : defaultSpacerEditorOptions;
             }
           }
           // Handle Section Component
-          else if (state.selectedContentType === 'section' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'section') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.sectionEditorOptions = { ...defaultSectionEditorOptions, ...parsed };
               } catch (e) {
-                state.sectionEditorOptions = defaultSectionEditorOptions;
+                state.sectionEditorOptions = column.sectionEditorOptions ? { ...defaultSectionEditorOptions, ...column.sectionEditorOptions } : defaultSectionEditorOptions;
               }
-            } else if (column.sectionEditorOptions) {
-              state.sectionEditorOptions = { ...defaultSectionEditorOptions, ...column.sectionEditorOptions };
             } else {
-              state.sectionEditorOptions = defaultSectionEditorOptions;
+              state.sectionEditorOptions = column.sectionEditorOptions ? { ...defaultSectionEditorOptions, ...column.sectionEditorOptions } : defaultSectionEditorOptions;
             }
           }
 
           // Handle Row Component
-          else if (state.selectedContentType === 'row' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'row') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
@@ -2249,99 +2370,101 @@ const workspaceSlice = createSlice({
             }
           }
           // Handle Container Component
-          else if (state.selectedContentType === 'container' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'container') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.containerEditorOptions = { ...defaultContainerEditorOptions, ...parsed };
               } catch (e) {
-                state.containerEditorOptions = defaultContainerEditorOptions;
+                state.containerEditorOptions = column.containerEditorOptions ? { ...defaultContainerEditorOptions, ...column.containerEditorOptions } : defaultContainerEditorOptions;
               }
-            } else if (column.containerEditorOptions) {
-              state.containerEditorOptions = { ...defaultContainerEditorOptions, ...column.containerEditorOptions };
             } else {
-              state.containerEditorOptions = defaultContainerEditorOptions;
+              state.containerEditorOptions = column.containerEditorOptions ? { ...defaultContainerEditorOptions, ...column.containerEditorOptions } : defaultContainerEditorOptions;
             }
           }
           // Handle Group Component
-          else if (state.selectedContentType === 'group' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'group') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.groupEditorOptions = { ...defaultGroupEditorOptions, ...parsed };
               } catch (e) {
-                state.groupEditorOptions = defaultGroupEditorOptions;
+                state.groupEditorOptions = column.groupEditorOptions ? { ...defaultGroupEditorOptions, ...column.groupEditorOptions } : defaultGroupEditorOptions;
               }
-            } else if (column.groupEditorOptions) {
-              state.groupEditorOptions = { ...defaultGroupEditorOptions, ...column.groupEditorOptions };
             } else {
-              state.groupEditorOptions = defaultGroupEditorOptions;
+              state.groupEditorOptions = column.groupEditorOptions ? { ...defaultGroupEditorOptions, ...column.groupEditorOptions } : defaultGroupEditorOptions;
+            }
+          }
+          // Handle SocialIcons Component
+          else if ((state.selectedContentType as any) === 'socialIcons') {
+            const data = targetContentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions, ...parsed };
+              } catch (e) {
+                state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions };
+              }
+            } else {
+              state.socialIconsEditorOptions = { ...defaultSocialIconsEditorOptions };
             }
           }
           // Handle SocialFollow Component
-          else if (state.selectedContentType === 'socialFollow' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'socialFollow') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.socialFollowEditorOptions = { ...defaultSocialFollowEditorOptions, ...parsed };
               } catch (e) {
-                state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
+                state.socialFollowEditorOptions = column.socialFollowEditorOptions ? { ...defaultSocialFollowEditorOptions, ...column.socialFollowEditorOptions } : defaultSocialFollowEditorOptions;
               }
-            } else if (column.socialFollowEditorOptions) {
-              state.socialFollowEditorOptions = { ...defaultSocialFollowEditorOptions, ...column.socialFollowEditorOptions };
             } else {
-              state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
+              state.socialFollowEditorOptions = column.socialFollowEditorOptions ? { ...defaultSocialFollowEditorOptions, ...column.socialFollowEditorOptions } : defaultSocialFollowEditorOptions;
             }
           }
           // Handle Video Component
-          else if (state.selectedContentType === 'video' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'video') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.videoEditorOptions = { ...defaultVideoEditorOptions, ...parsed };
               } catch (e) {
-                state.videoEditorOptions = defaultVideoEditorOptions;
+                state.videoEditorOptions = column.videoEditorOptions ? { ...defaultVideoEditorOptions, ...column.videoEditorOptions } : defaultVideoEditorOptions;
               }
-            } else if (column.videoEditorOptions) {
-              state.videoEditorOptions = { ...defaultVideoEditorOptions, ...column.videoEditorOptions };
             } else {
-              state.videoEditorOptions = defaultVideoEditorOptions;
+              state.videoEditorOptions = column.videoEditorOptions ? { ...defaultVideoEditorOptions, ...column.videoEditorOptions } : defaultVideoEditorOptions;
             }
           }
           // Handle Countdown Component
-          else if (state.selectedContentType === 'countdown' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'countdown') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.countdownEditorOptions = { ...defaultCountdownEditorOptions, ...parsed };
               } catch (e) {
-                state.countdownEditorOptions = defaultCountdownEditorOptions;
+                state.countdownEditorOptions = column.countdownEditorOptions ? { ...defaultCountdownEditorOptions, ...column.countdownEditorOptions } : defaultCountdownEditorOptions;
               }
-            } else if (column.countdownEditorOptions) {
-              state.countdownEditorOptions = { ...defaultCountdownEditorOptions, ...column.countdownEditorOptions };
             } else {
-              state.countdownEditorOptions = defaultCountdownEditorOptions;
+              state.countdownEditorOptions = column.countdownEditorOptions ? { ...defaultCountdownEditorOptions, ...column.countdownEditorOptions } : defaultCountdownEditorOptions;
             }
           }
           // Handle ProgressBar Component
-          else if (state.selectedContentType === 'progressBar' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'progressBar') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.progressBarEditorOptions = { ...defaultProgressBarEditorOptions, ...parsed };
               } catch (e) {
-                state.progressBarEditorOptions = defaultProgressBarEditorOptions;
+                state.progressBarEditorOptions = column.progressBarEditorOptions ? { ...defaultProgressBarEditorOptions, ...column.progressBarEditorOptions } : defaultProgressBarEditorOptions;
               }
-            } else if (column.progressBarEditorOptions) {
-              state.progressBarEditorOptions = { ...defaultProgressBarEditorOptions, ...column.progressBarEditorOptions };
             } else {
-              state.progressBarEditorOptions = defaultProgressBarEditorOptions;
+              state.progressBarEditorOptions = column.progressBarEditorOptions ? { ...defaultProgressBarEditorOptions, ...column.progressBarEditorOptions } : defaultProgressBarEditorOptions;
             }
           }
           // Handle PromoCode Component
@@ -2361,51 +2484,45 @@ const workspaceSlice = createSlice({
             }
           }
           // Handle Testimonial Component
-          else if (state.selectedContentType === 'testimonial' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'testimonial') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.testimonialEditorOptions = { ...defaultTestimonialEditorOptions, ...parsed };
               } catch (e) {
-                state.testimonialEditorOptions = defaultTestimonialEditorOptions;
+                state.testimonialEditorOptions = column.testimonialEditorOptions ? { ...defaultTestimonialEditorOptions, ...column.testimonialEditorOptions } : defaultTestimonialEditorOptions;
               }
-            } else if (column.testimonialEditorOptions) {
-              state.testimonialEditorOptions = { ...defaultTestimonialEditorOptions, ...column.testimonialEditorOptions };
             } else {
-              state.testimonialEditorOptions = defaultTestimonialEditorOptions;
+              state.testimonialEditorOptions = column.testimonialEditorOptions ? { ...defaultTestimonialEditorOptions, ...column.testimonialEditorOptions } : defaultTestimonialEditorOptions;
             }
           }
           // Handle Navbar Component
-          else if (state.selectedContentType === 'navbar' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'navbar') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.navbarEditorOptions = { ...defaultNavbarEditorOptions, ...parsed };
               } catch (e) {
-                state.navbarEditorOptions = defaultNavbarEditorOptions;
+                state.navbarEditorOptions = column.navbarEditorOptions ? { ...defaultNavbarEditorOptions, ...column.navbarEditorOptions } : defaultNavbarEditorOptions;
               }
-            } else if (column.navbarEditorOptions) {
-              state.navbarEditorOptions = { ...defaultNavbarEditorOptions, ...column.navbarEditorOptions };
             } else {
-              state.navbarEditorOptions = defaultNavbarEditorOptions;
+              state.navbarEditorOptions = column.navbarEditorOptions ? { ...defaultNavbarEditorOptions, ...column.navbarEditorOptions } : defaultNavbarEditorOptions;
             }
           }
           // Handle Card Component
-          else if (state.selectedContentType === 'card' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'card') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.cardEditorOptions = { ...defaultCardEditorOptions, ...parsed };
               } catch (e) {
-                state.cardEditorOptions = defaultCardEditorOptions;
+                state.cardEditorOptions = column.cardEditorOptions ? { ...defaultCardEditorOptions, ...column.cardEditorOptions } : defaultCardEditorOptions;
               }
-            } else if (column.cardEditorOptions) {
-              state.cardEditorOptions = { ...defaultCardEditorOptions, ...column.cardEditorOptions };
             } else {
-              state.cardEditorOptions = defaultCardEditorOptions;
+              state.cardEditorOptions = column.cardEditorOptions ? { ...defaultCardEditorOptions, ...column.cardEditorOptions } : defaultCardEditorOptions;
             }
           }
           // Handle Alert Component
@@ -2425,326 +2542,258 @@ const workspaceSlice = createSlice({
             }
           }
           // Handle Progress Component
-          else if (state.selectedContentType === 'progress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'progress') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.progressEditorOptions = { ...defaultProgressEditorOptions, ...parsed };
               } catch (e) {
-                state.progressEditorOptions = defaultProgressEditorOptions;
+                state.progressEditorOptions = column.progressEditorOptions ? { ...defaultProgressEditorOptions, ...column.progressEditorOptions } : defaultProgressEditorOptions;
               }
-            } else if (column.progressEditorOptions) {
-              state.progressEditorOptions = { ...defaultProgressEditorOptions, ...column.progressEditorOptions };
             } else {
-              state.progressEditorOptions = defaultProgressEditorOptions;
+              state.progressEditorOptions = column.progressEditorOptions ? { ...defaultProgressEditorOptions, ...column.progressEditorOptions } : defaultProgressEditorOptions;
             }
           }
           // Handle Form Component
-          else if (state.selectedContentType === 'form' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'form') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.formEditorOptions = { ...defaultFormEditorOptions, ...parsed };
               } catch (e) {
-                state.formEditorOptions = defaultFormEditorOptions;
+                state.formEditorOptions = column.formEditorOptions ? { ...defaultFormEditorOptions, ...column.formEditorOptions } : defaultFormEditorOptions;
               }
-            } else if (column.formEditorOptions) {
-              state.formEditorOptions = { ...defaultFormEditorOptions, ...column.formEditorOptions };
             } else {
-              state.formEditorOptions = defaultFormEditorOptions;
+              state.formEditorOptions = column.formEditorOptions ? { ...defaultFormEditorOptions, ...column.formEditorOptions } : defaultFormEditorOptions;
             }
           }
           // Handle Survey Component
-          else if (state.selectedContentType === 'survey' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'survey') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.surveyEditorOptions = { ...defaultSurveyEditorOptions, ...parsed };
               } catch (e) {
-                state.surveyEditorOptions = defaultSurveyEditorOptions;
+                state.surveyEditorOptions = column.surveyEditorOptions ? { ...defaultSurveyEditorOptions, ...column.surveyEditorOptions } : defaultSurveyEditorOptions;
               }
-            } else if (column.surveyEditorOptions) {
-              state.surveyEditorOptions = { ...defaultSurveyEditorOptions, ...column.surveyEditorOptions };
             } else {
-              state.surveyEditorOptions = defaultSurveyEditorOptions;
+              state.surveyEditorOptions = column.surveyEditorOptions ? { ...defaultSurveyEditorOptions, ...column.surveyEditorOptions } : defaultSurveyEditorOptions;
             }
           }
           // Handle Input Component
-          else if (state.selectedContentType === 'input' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'input') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.inputEditorOptions = { ...defaultInputEditorOptions, ...parsed };
               } catch (e) {
-                state.inputEditorOptions = defaultInputEditorOptions;
+                state.inputEditorOptions = column.inputEditorOptions ? { ...defaultInputEditorOptions, ...column.inputEditorOptions } : defaultInputEditorOptions;
               }
-            } else if (column.inputEditorOptions) {
-              state.inputEditorOptions = { ...defaultInputEditorOptions, ...column.inputEditorOptions };
             } else {
-              state.inputEditorOptions = defaultInputEditorOptions;
+              state.inputEditorOptions = column.inputEditorOptions ? { ...defaultInputEditorOptions, ...column.inputEditorOptions } : defaultInputEditorOptions;
             }
           }
           // Handle Textarea Component
-          else if (state.selectedContentType === 'textarea' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'textarea') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.textareaEditorOptions = { ...defaultTextareaEditorOptions, ...parsed };
               } catch (e) {
-                state.textareaEditorOptions = defaultTextareaEditorOptions;
+                state.textareaEditorOptions = column.textareaEditorOptions ? { ...defaultTextareaEditorOptions, ...column.textareaEditorOptions } : defaultTextareaEditorOptions;
               }
-            } else if (column.textareaEditorOptions) {
-              state.textareaEditorOptions = { ...defaultTextareaEditorOptions, ...column.textareaEditorOptions };
             } else {
-              state.textareaEditorOptions = defaultTextareaEditorOptions;
+              state.textareaEditorOptions = column.textareaEditorOptions ? { ...defaultTextareaEditorOptions, ...column.textareaEditorOptions } : defaultTextareaEditorOptions;
+            }
+          }
+          // Handle Email Header
+          else if ((state.selectedContentType as any) === 'emailHeader') {
+            const data = targetContentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.emailHeaderEditorOptions = { ...defaultEmailHeaderEditorOptions, ...parsed };
+              } catch (e) {
+                state.emailHeaderEditorOptions = defaultEmailHeaderEditorOptions;
+              }
+            } else {
+              state.emailHeaderEditorOptions = defaultEmailHeaderEditorOptions;
+            }
+          }
+          // Handle Email Footer
+          else if ((state.selectedContentType as any) === 'emailFooter') {
+            const data = targetContentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.emailFooterEditorOptions = { ...defaultEmailFooterEditorOptions, ...parsed };
+              } catch (e) {
+                state.emailFooterEditorOptions = defaultEmailFooterEditorOptions;
+              }
+            } else {
+              state.emailFooterEditorOptions = defaultEmailFooterEditorOptions;
+            }
+          }
+          // Handle CTA Button
+          else if ((state.selectedContentType as any) === 'ctaButton') {
+            const data = targetContentData;
+            if (data) {
+              try {
+                const parsed = JSON.parse(data);
+                state.ctaButtonEditorOptions = { ...defaultCtaButtonEditorOptions, ...parsed };
+              } catch (e) {
+                state.ctaButtonEditorOptions = defaultCtaButtonEditorOptions;
+              }
+            } else {
+              state.ctaButtonEditorOptions = defaultCtaButtonEditorOptions;
             }
           }
           // Handle Checkbox Component
-          else if (state.selectedContentType === 'checkbox' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'checkbox') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.checkboxEditorOptions = { ...defaultCheckboxEditorOptions, ...parsed };
               } catch (e) {
-                state.checkboxEditorOptions = defaultCheckboxEditorOptions;
+                state.checkboxEditorOptions = column.checkboxEditorOptions ? { ...defaultCheckboxEditorOptions, ...column.checkboxEditorOptions } : defaultCheckboxEditorOptions;
               }
-            } else if (column.checkboxEditorOptions) {
-              state.checkboxEditorOptions = { ...defaultCheckboxEditorOptions, ...column.checkboxEditorOptions };
             } else {
-              state.checkboxEditorOptions = defaultCheckboxEditorOptions;
+              state.checkboxEditorOptions = column.checkboxEditorOptions ? { ...defaultCheckboxEditorOptions, ...column.checkboxEditorOptions } : defaultCheckboxEditorOptions;
             }
           }
           // Handle Radio Component
-          else if (state.selectedContentType === 'radio' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'radio') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.radioEditorOptions = { ...defaultRadioEditorOptions, ...parsed };
               } catch (e) {
-                state.radioEditorOptions = defaultRadioEditorOptions;
+                state.radioEditorOptions = column.radioEditorOptions ? { ...defaultRadioEditorOptions, ...column.radioEditorOptions } : defaultRadioEditorOptions;
               }
-            } else if (column.radioEditorOptions) {
-              state.radioEditorOptions = { ...defaultRadioEditorOptions, ...column.radioEditorOptions };
             } else {
-              state.radioEditorOptions = defaultRadioEditorOptions;
+              state.radioEditorOptions = column.radioEditorOptions ? { ...defaultRadioEditorOptions, ...column.radioEditorOptions } : defaultRadioEditorOptions;
             }
           }
           // Handle Label Component
-          else if (state.selectedContentType === 'label' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'label') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.labelEditorOptions = { ...defaultLabelEditorOptions, ...parsed };
               } catch (e) {
-                state.labelEditorOptions = defaultLabelEditorOptions;
+                state.labelEditorOptions = column.labelEditorOptions ? { ...defaultLabelEditorOptions, ...column.labelEditorOptions } : defaultLabelEditorOptions;
               }
-            } else if (column.labelEditorOptions) {
-              state.labelEditorOptions = { ...defaultLabelEditorOptions, ...column.labelEditorOptions };
             } else {
-              state.labelEditorOptions = defaultLabelEditorOptions;
+              state.labelEditorOptions = column.labelEditorOptions ? { ...defaultLabelEditorOptions, ...column.labelEditorOptions } : defaultLabelEditorOptions;
             }
           }
           // Handle ShippingAddress Component
-          else if (state.selectedContentType === 'shippingAddress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'shippingAddress') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.shippingAddressEditorOptions = { ...defaultShippingAddressEditorOptions, ...parsed };
               } catch (e) {
-                state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
+                state.shippingAddressEditorOptions = column.shippingAddressEditorOptions ? { ...defaultShippingAddressEditorOptions, ...column.shippingAddressEditorOptions } : defaultShippingAddressEditorOptions;
               }
-            } else if (column.shippingAddressEditorOptions) {
-              state.shippingAddressEditorOptions = { ...defaultShippingAddressEditorOptions, ...column.shippingAddressEditorOptions };
             } else {
-              state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
+              state.shippingAddressEditorOptions = column.shippingAddressEditorOptions ? { ...defaultShippingAddressEditorOptions, ...column.shippingAddressEditorOptions } : defaultShippingAddressEditorOptions;
             }
           }
           // Handle BillingAddress Component
-          else if (state.selectedContentType === 'billingAddress' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'billingAddress') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.billingAddressEditorOptions = { ...defaultBillingAddressEditorOptions, ...parsed };
               } catch (e) {
-                state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
+                state.billingAddressEditorOptions = column.billingAddressEditorOptions ? { ...defaultBillingAddressEditorOptions, ...column.billingAddressEditorOptions } : defaultBillingAddressEditorOptions;
               }
-            } else if (column.billingAddressEditorOptions) {
-              state.billingAddressEditorOptions = { ...defaultBillingAddressEditorOptions, ...column.billingAddressEditorOptions };
             } else {
-              state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
+              state.billingAddressEditorOptions = column.billingAddressEditorOptions ? { ...defaultBillingAddressEditorOptions, ...column.billingAddressEditorOptions } : defaultBillingAddressEditorOptions;
             }
           }
           // Handle OrderSubtotal Component
-          else if (state.selectedContentType === 'orderSubtotal' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'orderSubtotal') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.orderSubtotalEditorOptions = { ...defaultOrderSubtotalEditorOptions, ...parsed };
               } catch (e) {
-                state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
+                state.orderSubtotalEditorOptions = column.orderSubtotalEditorOptions ? { ...defaultOrderSubtotalEditorOptions, ...column.orderSubtotalEditorOptions } : defaultOrderSubtotalEditorOptions;
               }
-            } else if (column.orderSubtotalEditorOptions) {
-              state.orderSubtotalEditorOptions = { ...defaultOrderSubtotalEditorOptions, ...column.orderSubtotalEditorOptions };
             } else {
-              state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
+              state.orderSubtotalEditorOptions = column.orderSubtotalEditorOptions ? { ...defaultOrderSubtotalEditorOptions, ...column.orderSubtotalEditorOptions } : defaultOrderSubtotalEditorOptions;
             }
           }
           // Handle OrderTotal Component
-          else if (state.selectedContentType === 'orderTotal' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'orderTotal') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.orderTotalEditorOptions = { ...defaultOrderTotalEditorOptions, ...parsed };
               } catch (e) {
-                state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
+                state.orderTotalEditorOptions = column.orderTotalEditorOptions ? { ...defaultOrderTotalEditorOptions, ...column.orderTotalEditorOptions } : defaultOrderTotalEditorOptions;
               }
-            } else if (column.orderTotalEditorOptions) {
-              state.orderTotalEditorOptions = { ...defaultOrderTotalEditorOptions, ...column.orderTotalEditorOptions };
             } else {
-              state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
+              state.orderTotalEditorOptions = column.orderTotalEditorOptions ? { ...defaultOrderTotalEditorOptions, ...column.orderTotalEditorOptions } : defaultOrderTotalEditorOptions;
             }
           }
           // Handle ShippingMethod Component
-          else if (state.selectedContentType === 'shippingMethod' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'shippingMethod') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.shippingMethodEditorOptions = { ...defaultShippingMethodEditorOptions, ...parsed };
               } catch (e) {
-                state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
+                state.shippingMethodEditorOptions = column.shippingMethodEditorOptions ? { ...defaultShippingMethodEditorOptions, ...column.shippingMethodEditorOptions } : defaultShippingMethodEditorOptions;
               }
-            } else if (column.shippingMethodEditorOptions) {
-              state.shippingMethodEditorOptions = { ...defaultShippingMethodEditorOptions, ...column.shippingMethodEditorOptions };
             } else {
-              state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
+              state.shippingMethodEditorOptions = column.shippingMethodEditorOptions ? { ...defaultShippingMethodEditorOptions, ...column.shippingMethodEditorOptions } : defaultShippingMethodEditorOptions;
             }
           }
           // Handle PaymentMethod Component
-          else if (state.selectedContentType === 'paymentMethod' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'paymentMethod') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.paymentMethodEditorOptions = { ...defaultPaymentMethodEditorOptions, ...parsed };
               } catch (e) {
-                state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
+                state.paymentMethodEditorOptions = column.paymentMethodEditorOptions ? { ...defaultPaymentMethodEditorOptions, ...column.paymentMethodEditorOptions } : defaultPaymentMethodEditorOptions;
               }
-            } else if (column.paymentMethodEditorOptions) {
-              state.paymentMethodEditorOptions = { ...defaultPaymentMethodEditorOptions, ...column.paymentMethodEditorOptions };
             } else {
-              state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
+              state.paymentMethodEditorOptions = column.paymentMethodEditorOptions ? { ...defaultPaymentMethodEditorOptions, ...column.paymentMethodEditorOptions } : defaultPaymentMethodEditorOptions;
             }
           }
           // Handle CustomerNote Component
-          else if (state.selectedContentType === 'customerNote' && state.selectedWidgetIndex !== null && column.widgetContents[state.selectedWidgetIndex]) {
-            const data = column.widgetContents[state.selectedWidgetIndex].contentData;
+          else if (state.selectedContentType === 'customerNote') {
+            const data = targetContentData;
             if (data) {
               try {
                 const parsed = JSON.parse(data);
                 state.customerNoteEditorOptions = { ...defaultCustomerNoteEditorOptions, ...parsed };
               } catch (e) {
-                state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
+                state.customerNoteEditorOptions = column.customerNoteEditorOptions ? { ...defaultCustomerNoteEditorOptions, ...column.customerNoteEditorOptions } : defaultCustomerNoteEditorOptions;
               }
-            } else if (column.customerNoteEditorOptions) {
-              state.customerNoteEditorOptions = { ...defaultCustomerNoteEditorOptions, ...column.customerNoteEditorOptions };
             } else {
-              state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
+              state.customerNoteEditorOptions = column.customerNoteEditorOptions ? { ...defaultCustomerNoteEditorOptions, ...column.customerNoteEditorOptions } : defaultCustomerNoteEditorOptions;
             }
           }
 
-
-          else {
-            if (state.selectedContentType === 'link') {
-              state.linkEditorOptions = defaultLinkEditorOptions;
-            } else if (state.selectedContentType === 'icon') {
-              state.iconEditorOptions = defaultIconEditorOptions;
-            } else if (state.selectedContentType === 'socialIcons') {
-              state.socialIconsEditorOptions = defaultSocialIconsEditorOptions;
-            } else if (state.selectedContentType === 'button') {
-              state.buttonEditorOptions = defaultButtonEditorOptions;
-            } else if (state.selectedContentType === 'heading') {
-              state.headingEditorOptions = defaultHeadingEditorOptions;
-            } else if (state.selectedContentType === 'text') {
-              state.textEditorOptions = defaultTextEditorOptions;
-            } else if (state.selectedContentType === 'image') {
-              state.imageEditorOptions = defaultImageEditorOptions;
-            } else if (state.selectedContentType === 'divider') {
-              state.dividerEditorOptions = defaultDividerEditorOptions;
-            } else if (state.selectedContentType === 'spacer') {
-              state.spacerEditorOptions = defaultSpacerEditorOptions;
-            } else if (state.selectedContentType === 'section') {
-              state.sectionEditorOptions = defaultSectionEditorOptions;
-            } else if (state.selectedContentType === 'row') {
-              state.rowEditorOptions = defaultRowEditorOptions;
-            } else if (state.selectedContentType === 'container') {
-              state.containerEditorOptions = defaultContainerEditorOptions;
-            } else if (state.selectedContentType === 'group') {
-              state.groupEditorOptions = defaultGroupEditorOptions;
-            } else if (state.selectedContentType === 'socialFollow') {
-              state.socialFollowEditorOptions = defaultSocialFollowEditorOptions;
-            } else if (state.selectedContentType === 'video') {
-              state.videoEditorOptions = defaultVideoEditorOptions;
-            } else if (state.selectedContentType === 'countdown') {
-              state.countdownEditorOptions = defaultCountdownEditorOptions;
-            } else if (state.selectedContentType === 'progressBar') {
-              state.progressBarEditorOptions = defaultProgressBarEditorOptions;
-            } else if (state.selectedContentType === 'promoCode') {
-              state.promoCodeEditorOptions = defaultPromoCodeEditorOptions;
-            } else if (state.selectedContentType === 'testimonial') {
-              state.testimonialEditorOptions = defaultTestimonialEditorOptions;
-            } else if (state.selectedContentType === 'navbar') {
-              state.navbarEditorOptions = defaultNavbarEditorOptions;
-            } else if (state.selectedContentType === 'card') {
-              state.cardEditorOptions = defaultCardEditorOptions;
-            } else if (state.selectedContentType === 'alert') {
-              state.alertEditorOptions = defaultAlertEditorOptions;
-            } else if (state.selectedContentType === 'progress') {
-              state.progressEditorOptions = defaultProgressEditorOptions;
-            } else if (state.selectedContentType === 'form') {
-              state.formEditorOptions = defaultFormEditorOptions;
-            } else if (state.selectedContentType === 'survey') {
-              state.surveyEditorOptions = defaultSurveyEditorOptions;
-            } else if (state.selectedContentType === 'input') {
-              state.inputEditorOptions = defaultInputEditorOptions;
-            } else if (state.selectedContentType === 'textarea') {
-              state.textareaEditorOptions = defaultTextareaEditorOptions;
-            } else if (state.selectedContentType === 'checkbox') {
-              state.checkboxEditorOptions = defaultCheckboxEditorOptions;
-            } else if (state.selectedContentType === 'radio') {
-              state.radioEditorOptions = defaultRadioEditorOptions;
-            } else if (state.selectedContentType === 'label') {
-              state.labelEditorOptions = defaultLabelEditorOptions;
-            } else if (state.selectedContentType === 'shippingAddress') {
-              state.shippingAddressEditorOptions = defaultShippingAddressEditorOptions;
-            } else if (state.selectedContentType === 'billingAddress') {
-              state.billingAddressEditorOptions = defaultBillingAddressEditorOptions;
-            } else if (state.selectedContentType === 'orderSubtotal') {
-              state.orderSubtotalEditorOptions = defaultOrderSubtotalEditorOptions;
-            } else if (state.selectedContentType === 'orderTotal') {
-              state.orderTotalEditorOptions = defaultOrderTotalEditorOptions;
-            } else if (state.selectedContentType === 'shippingMethod') {
-              state.shippingMethodEditorOptions = defaultShippingMethodEditorOptions;
-            } else if (state.selectedContentType === 'paymentMethod') {
-              state.paymentMethodEditorOptions = defaultPaymentMethodEditorOptions;
-            } else if (state.selectedContentType === 'customerNote') {
-              state.customerNoteEditorOptions = defaultCustomerNoteEditorOptions;
-            } else if (state.selectedContentType === 'price') {
-              state.priceEditorOptions = defaultPriceEditorOptions;
-            }
-          }
 
         }
       }
@@ -2881,26 +2930,6 @@ const workspaceSlice = createSlice({
       }
     },
 
-    updateTextEditorOptions: (state, action: PayloadAction<Partial<TextEditorOptions>>) => {
-      // This is a global update - update the global state
-      state.textEditorOptions = { ...state.textEditorOptions, ...action.payload };
-
-      // Also update the selected column if there is one
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        if (column && column.contentType === 'text') {
-          column.textEditorOptions = { ...column.textEditorOptions, ...action.payload };
-          if (column.widgetContents[state.selectedWidgetIndex]) {
-            column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.textEditorOptions);
-          }
-        }
-      }
-    },
-
-    resetTextEditorOptions: (state) => {
-      state.textEditorOptions = { ...defaultTextEditorOptions };
-    },
 
     addColumnContent: (state, action: PayloadAction<{
       blockId: string | null;
@@ -3131,11 +3160,39 @@ const workspaceSlice = createSlice({
       columnIndex: number;
       widgetIndex: number;
       data: string;
+      nestedPath?: Array<{ colIdx: number; childIdx: number }>;
     }>) => {
       if (action.payload.blockId) {
         const block = state.blocks.find((b) => b.id === action.payload.blockId);
         if (block && block.columns[action.payload.columnIndex] && block.columns[action.payload.columnIndex].widgetContents[action.payload.widgetIndex]) {
-          block.columns[action.payload.columnIndex].widgetContents[action.payload.widgetIndex].contentData = action.payload.data;
+          const widget = block.columns[action.payload.columnIndex].widgetContents[action.payload.widgetIndex];
+
+          if (action.payload.nestedPath && action.payload.nestedPath.length > 0) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, action.payload.nestedPath, JSON.parse(action.payload.data));
+            // BUT here we want to replace the WHOLE contentData of the target widget?
+            // Actually, deepUpdateWidgetData merges payload into the target. 
+            // If payload is { contentData: "..." }, it might try to merge keys?
+            // unique logic: deepUpdateWidgetData usually takes payload as properties to merge.
+            // If we just want to replace contentData string of the child...
+            // Let's look at deepUpdateWidgetData again.
+            // It does: JSON.stringify({ ...data, ...payload })
+            // So if we pass payload as the WHOLE object structure?
+            // Wait. The `data` argument here IS the stringified structure.
+            // So we want the target widget's `contentData` to become action.payload.data (string).
+            // But deepUpdateWidgetData expects payload to be partial OBJECT to merge.
+            // We can't use deepUpdateWidgetData as is if we want to replace the string.
+            // UNLESS we pass the object version of string?
+            // No, `data` in RowFieldComponent is JSON.stringify(updatedRowOptions).
+            // So we want targetWidget.contentData = JSON.stringify(updatedRowOptions).
+            // Using deepUpdateWidgetData:
+            // It parses target contentData. It finds sub-target. 
+            // It does: targetWidget.contentData = deepUpdateWidgetData(..., payload).
+            // At the leaf: return JSON.stringify({ ...data, ...payload }).
+            // If payload is the FULL object of row options?
+            // Yes!
+          } else {
+            widget.contentData = action.payload.data;
+          }
         }
       }
     },
@@ -3162,7 +3219,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'section') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'section' && column) {
           column.sectionEditorOptions = { ...column.sectionEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.sectionEditorOptions);
         }
@@ -3175,7 +3237,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'spacer') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'spacer' && column) {
           column.spacerEditorOptions = { ...column.spacerEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.spacerEditorOptions);
         }
@@ -3188,40 +3255,50 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'link') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'link' && column) {
           column.linkEditorOptions = { ...column.linkEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.linkEditorOptions);
         }
       }
     },
+
     updateIconEditorOptions: (state, action: PayloadAction<Partial<IconEditorOptions>>) => {
       state.iconEditorOptions = { ...state.iconEditorOptions, ...action.payload };
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'icon') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'icon') {
           column.iconEditorOptions = { ...column.iconEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.iconEditorOptions);
         }
       }
     },
 
-    updateColumnTextEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<TextEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex]) {
-          block.columns[action.payload.columnIndex].textEditorOptions = {
-            ...block.columns[action.payload.columnIndex].textEditorOptions,
-            ...action.payload.options,
-          };
+    updateTextEditorOptions: (state, action: PayloadAction<Partial<TextEditorOptions>>) => {
+      state.textEditorOptions = { ...state.textEditorOptions, ...action.payload };
+      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
+        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
+        const column = block?.columns[state.selectedColumnIndex];
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'text' && column) {
+          column.textEditorOptions = { ...column.textEditorOptions, ...action.payload };
+          widget.contentData = JSON.stringify(column.textEditorOptions);
         }
       }
     },
@@ -3232,28 +3309,32 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'heading') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'heading' && column) {
           column.headingEditorOptions = { ...column.headingEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.headingEditorOptions);
         }
       }
     },
 
-    updateColumnHeadingEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<HeadingEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex]) {
-          block.columns[action.payload.columnIndex].headingEditorOptions = {
-            ...(block.columns[action.payload.columnIndex].headingEditorOptions || defaultHeadingEditorOptions),
-            ...action.payload.options,
-          };
+    updateButtonEditorOptions: (state, action: PayloadAction<Partial<ButtonEditorOptions>>) => {
+      state.buttonEditorOptions = { ...state.buttonEditorOptions, ...action.payload };
+      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
+        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
+        const column = block?.columns[state.selectedColumnIndex];
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'button' && column) {
+          column.buttonEditorOptions = { ...column.buttonEditorOptions, ...action.payload };
+          widget.contentData = JSON.stringify(column.buttonEditorOptions);
         }
       }
     },
@@ -3264,55 +3345,14 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'socialIcons') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'socialIcons' && column) {
           column.socialIconsEditorOptions = { ...column.socialIconsEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.socialIconsEditorOptions);
-        }
-      }
-    },
-
-    updateColumnSocialIconsEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<SocialIconsEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex]) {
-          block.columns[action.payload.columnIndex].socialIconsEditorOptions = {
-            ...block.columns[action.payload.columnIndex].socialIconsEditorOptions,
-            ...action.payload.options,
-          };
-        }
-      }
-    },
-
-    updateButtonEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<ButtonEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex]) {
-          block.columns[action.payload.columnIndex].buttonEditorOptions = {
-            ...block.columns[action.payload.columnIndex].buttonEditorOptions,
-            ...action.payload.options,
-          };
-
-          // Update the widget content data
-          if (state.selectedWidgetIndex !== null) {
-            const widgetContent = block.columns[action.payload.columnIndex].widgetContents[state.selectedWidgetIndex];
-            if (widgetContent && widgetContent.contentType === 'button') {
-              widgetContent.contentData = JSON.stringify(block.columns[action.payload.columnIndex].buttonEditorOptions);
-            }
-          }
         }
       }
     },
@@ -3323,30 +3363,14 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'divider') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'divider' && column) {
           column.dividerEditorOptions = { ...column.dividerEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.dividerEditorOptions);
-        }
-      }
-    },
-
-    updateColumnDividerEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<DividerEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex] && state.selectedWidgetIndex !== null) {
-          const column = block.columns[action.payload.columnIndex];
-          const widgetContent = column.widgetContents[state.selectedWidgetIndex];
-          if (widgetContent && widgetContent.contentType === 'divider') {
-            column.dividerEditorOptions = { ...column.dividerEditorOptions, ...action.payload.options };
-            widgetContent.contentData = JSON.stringify(column.dividerEditorOptions);
-          }
         }
       }
     },
@@ -3357,28 +3381,14 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'image') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'image' && column) {
           column.imageEditorOptions = { ...column.imageEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.imageEditorOptions);
-        }
-      }
-    },
-
-    updateColumnImageEditorOptions: (
-      state,
-      action: PayloadAction<{
-        blockId: string | null;
-        columnIndex: number;
-        options: Partial<ImageEditorOptions>;
-      }>
-    ) => {
-      if (action.payload.blockId) {
-        const block = state.blocks.find((b) => b.id === action.payload.blockId);
-        if (block && block.columns[action.payload.columnIndex]) {
-          block.columns[action.payload.columnIndex].imageEditorOptions = {
-            ...block.columns[action.payload.columnIndex].imageEditorOptions || defaultImageEditorOptions,
-            ...action.payload.options,
-          };
         }
       }
     },
@@ -3390,7 +3400,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'row') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'row' && column) {
           column.rowEditorOptions = { ...column.rowEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.rowEditorOptions);
         }
@@ -3403,7 +3418,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'container') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'container' && column) {
           column.containerEditorOptions = { ...column.containerEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.containerEditorOptions);
         }
@@ -3416,10 +3436,14 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'group') {
-          // Sync to column options for legacy/fallback, but use STATE options for the widget data source of truth
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'group' && column) {
           column.groupEditorOptions = { ...column.groupEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(state.groupEditorOptions);
+          widget.contentData = JSON.stringify(column.groupEditorOptions);
         }
       }
     },
@@ -3431,7 +3455,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'socialFollow') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'socialFollow') {
           column.socialFollowEditorOptions = { ...column.socialFollowEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.socialFollowEditorOptions);
         }
@@ -3444,7 +3473,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'video') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'video') {
           column.videoEditorOptions = { ...column.videoEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.videoEditorOptions);
         }
@@ -3485,7 +3519,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'product') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'product') {
           column.productEditorOptions = { ...column.productEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.productEditorOptions);
         }
@@ -3512,8 +3551,11 @@ const workspaceSlice = createSlice({
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
 
-
-        if (widget && widget.contentType === 'price') {
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'price') {
           // Log before saving
           console.log('Reducer: Saving price options to contentData:', state.priceEditorOptions);
           widget.contentData = JSON.stringify(state.priceEditorOptions);
@@ -3734,7 +3776,7 @@ const workspaceSlice = createSlice({
         const widget = column?.widgetContents[state.selectedWidgetIndex];
         if (widget && widget.contentType === 'taxBilling') {
           column.taxBillingEditorOptions = { ...column.taxBillingEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.taxBillingEditorOptions);
+          column.widgetContents[state.selectedWidgetIndex].contentData = JSON.stringify(column.taxBillingEditorOptions);
         }
       }
     },
@@ -3744,7 +3786,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'emailHeader') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'emailHeader') {
           column.emailHeaderEditorOptions = { ...column.emailHeaderEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.emailHeaderEditorOptions);
         }
@@ -3756,7 +3803,12 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'emailFooter') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'emailFooter') {
           column.emailFooterEditorOptions = { ...column.emailFooterEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.emailFooterEditorOptions);
         }
@@ -3768,12 +3820,58 @@ const workspaceSlice = createSlice({
         const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
         const column = block?.columns[state.selectedColumnIndex];
         const widget = column?.widgetContents[state.selectedWidgetIndex];
-        if (widget && widget.contentType === 'ctaButton') {
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'ctaButton') {
           column.ctaButtonEditorOptions = { ...column.ctaButtonEditorOptions, ...action.payload };
           widget.contentData = JSON.stringify(column.ctaButtonEditorOptions);
         }
       }
     },
+
+    updateContactEditorOptions: (state, action: PayloadAction<Partial<ContactEditorOptions>>) => {
+      // Assuming you might want to store it in state too, but primarily in the widget
+      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
+        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
+        const column = block?.columns[state.selectedColumnIndex];
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'contact') {
+          // We'll store it in contentData primarily, but maybe also on column if needed (but 'contact' is likely a widget inside column, not column property).
+          // Assuming 'contactEditorOptions' property doesn't exist on column by default, we just update contentData.
+          // However, to follow pattern, we usually merge with existing.
+          const currentData = widget.contentData ? JSON.parse(widget.contentData) : defaultContactEditorOptions;
+          const newData = { ...currentData, ...action.payload };
+          widget.contentData = JSON.stringify(newData);
+        }
+      }
+    },
+
+    updateProductDetailsEditorOptions: (state, action: PayloadAction<Partial<ProductDetailsEditorOptions>>) => {
+      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
+        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
+        const column = block?.columns[state.selectedColumnIndex];
+        const widget = column?.widgetContents[state.selectedWidgetIndex];
+
+        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
+          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
+            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
+          }
+        } else if (widget && widget.contentType === 'productDetails') {
+          const currentData = widget.contentData ? JSON.parse(widget.contentData) : defaultProductDetailsEditorOptions;
+          const newData = { ...currentData, ...action.payload };
+          widget.contentData = JSON.stringify(newData);
+        }
+      }
+    },
+
 
     updateOrderSubtotalEditorOptions: (state, action: PayloadAction<Partial<OrderSubtotalEditorOptions>>) => {
       state.orderSubtotalEditorOptions = { ...state.orderSubtotalEditorOptions, ...action.payload };
@@ -3942,21 +4040,16 @@ export const {
   addColumnContent, deleteColumnContent, reorderColumnContent, copyColumnContent,
 
   // Basic Layout Editor Options
-  updateColumnTextEditorOptions,
-  updateTextEditorOptions, resetTextEditorOptions,
+  updateTextEditorOptions,
   updateSectionEditorOptions,
   updateSpacerEditorOptions,
   updateLinkEditorOptions,
 
   updateIconEditorOptions,
   updateButtonEditorOptions,
-  updateColumnHeadingEditorOptions,
   updateSocialIconsEditorOptions,
   updateHeadingEditorOptions,
-  updateColumnSocialIconsEditorOptions,
-  updateColumnDividerEditorOptions,
   updateDividerEditorOptions,
-  updateColumnImageEditorOptions,
   updateImageEditorOptions,
 
   // Layout Block Editor Options
@@ -4007,6 +4100,7 @@ export const {
   // View Mode
   setMobileView, setPreviewMode,
   undo, redo,
+  updateContactEditorOptions, updateProductDetailsEditorOptions,
 } = workspaceSlice.actions;
 
 export type { Column, DroppedBlock, WidgetContent };

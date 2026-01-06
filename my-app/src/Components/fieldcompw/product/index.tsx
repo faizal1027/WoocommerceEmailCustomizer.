@@ -12,6 +12,7 @@ interface ProductFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const ProductFieldComponent: React.FC<ProductFieldComponentProps> = ({
@@ -21,10 +22,24 @@ const ProductFieldComponent: React.FC<ProductFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
-  previewMode = true
+  previewMode = true,
+  widgetData
 }) => {
   const dispatch = useDispatch();
-  const { productEditorOptions } = useSelector((state: RootState) => state.workspace);
+  const { productEditorOptions: storeProductOptions } = useSelector((state: RootState) => state.workspace);
+
+  // Determine which options to use:
+  // 1. If widgetData is provided (nested), use that.
+  // 2. Otherwise, use the Redux store options (active/top-level).
+  let productEditorOptions = storeProductOptions;
+
+  if (widgetData && widgetData.contentData) {
+    try {
+      productEditorOptions = JSON.parse(widgetData.contentData);
+    } catch (e) {
+      console.error("Error parsing product data", e);
+    }
+  }
 
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();

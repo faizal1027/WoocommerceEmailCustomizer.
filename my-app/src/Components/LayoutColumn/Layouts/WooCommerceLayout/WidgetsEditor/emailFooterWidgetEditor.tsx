@@ -93,7 +93,10 @@ const EmailFooterWidgetEditor: React.FC = () => {
             isInitializingRef.current = true;
 
             GlobalClassicEditor.create(editorRef.current, {
-                toolbar: ["heading", "|", "bold", "italic", "underline", "|", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
+                toolbar: {
+                    items: ["heading", "|", "bold", "italic", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
+                    shouldNotGroupWhenFull: true
+                }
             })
                 .then((editor: any) => {
                     setEditorInstance(editor);
@@ -408,7 +411,7 @@ const EmailFooterWidgetEditor: React.FC = () => {
                         fullWidth
                         type="color"
                         size="small"
-                        value={emailFooterEditorOptions?.linkColor || '#4CAF50'}
+                        value={emailFooterEditorOptions?.linkColor === 'transparent' ? '#4CAF50' : (emailFooterEditorOptions?.linkColor || '#4CAF50')}
                         onChange={(e) => handleChange('linkColor', e.target.value)}
                         sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                     />

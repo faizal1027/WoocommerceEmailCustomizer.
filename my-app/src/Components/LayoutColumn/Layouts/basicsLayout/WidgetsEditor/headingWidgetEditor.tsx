@@ -24,49 +24,19 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../Store/store";
 import {
-  updateColumnHeadingEditorOptions,
+  updateHeadingEditorOptions,
   deleteColumnContent,
   closeEditor,
-  updateWidgetContentData,
 } from "../../../../../Store/Slice/workspaceSlice";
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import ColorPicker from "../../../../utils/ColorPicker";
+import { HeadingEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
 
 const HeadingWidgetEditor = () => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, blocks, selectedWidgetIndex } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, headingEditorOptions } = useSelector(
     (state: RootState) => state.workspace
   );
-  const column = useSelector((state: RootState) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null) {
-      const block = state.workspace.blocks.find(block => block.id === selectedBlockForEditor);
-      return block?.columns[selectedColumnIndex];
-    }
-    return null;
-  });
-  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-  // Stable calculation of options
-  const headingEditorOptions = useMemo(() => {
-    if (widgetContent?.contentData) {
-      try {
-        return JSON.parse(widgetContent.contentData);
-      } catch (e) {
-        console.error("Failed to parse widget content data", e);
-      }
-    }
-    return {
-      headingType: "h1",
-      fontFamily: "global",
-      fontWeight: "bold",
-      fontSize: 22,
-      color: "#000000",
-      backgroundColor: "transparent",
-      textAlign: "left",
-      lineHeight: 140,
-      letterSpace: 1,
-      padding: { top: 0, left: 0, right: 0, bottom: 0 },
-    };
-  }, [widgetContent?.contentData]);
 
   const {
     fontFamily,
@@ -103,23 +73,13 @@ const HeadingWidgetEditor = () => {
     }
   }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
 
-  const updateData = useCallback((newData: any) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const updatedData = { ...optionsRef.current, ...newData };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedData),
-        })
-      );
-    }
-  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+  const updateData = useCallback((newData: Partial<HeadingEditorOptions>) => {
+    dispatch(updateHeadingEditorOptions(newData));
+  }, [dispatch]);
 
   const debouncedUpdate = useMemo(() => {
     let timeoutId: any;
-    return (newData: any) => {
+    return (newData: Partial<HeadingEditorOptions>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => updateData(newData), 50);
     };

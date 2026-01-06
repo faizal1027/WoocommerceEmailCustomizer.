@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../Store/store';
 import { setSelectedBlockId, updateColumnHeight } from '../../../Store/Slice/workspaceSlice';
 import { useRef, useEffect, useCallback } from 'react';
-import { ButtonEditorOptions } from '../../../Store/Slice/workspaceSlice';
+import { ButtonEditorOptions, defaultButtonEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
 interface ButtonFieldComponentProps {
   blockId: string;
@@ -33,8 +33,8 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
 
   const widgetContent = widgetData || storeWidgetContent;
   const buttonData: ButtonEditorOptions | null = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : null;
+    ? { ...defaultButtonEditorOptions, ...JSON.parse(widgetContent.contentData) }
+    : defaultButtonEditorOptions;
 
   const buttonContent = buttonData?.text || 'Button';
   const bgColor = buttonData?.bgColor || '#1976d2';
@@ -108,7 +108,12 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
       px={`${padding.left}px`}
       py={`${padding.top}px`}
       onClick={(e) => {
-        // Allow bubbling to wrapper
+        if (onWidgetClick) {
+          onWidgetClick(e);
+        } else if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       sx={{
         cursor: 'pointer',

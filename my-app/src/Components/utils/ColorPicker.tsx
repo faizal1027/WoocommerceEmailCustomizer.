@@ -43,7 +43,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
                         sx={{
                             width: 24,
                             height: 24,
-                            backgroundColor: value || 'transparent',
+                            backgroundColor: value === 'transparent' ? 'transparent' : value,
                             borderRadius: 0.5,
                             border: "1px solid #ccc"
                         }}
@@ -68,7 +68,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
                     sx={{ zIndex: 1300001 }}
                 >
                     <ChromePicker
-                        color={value || '#ffffff'}
+                        color={value === 'transparent' ? '#ffffff' : (value || '#ffffff')}
                         onChange={(newColor) => onChange(newColor.hex)}
                     />
                 </Popover>

@@ -133,7 +133,7 @@ const CtaButtonWidgetEditor: React.FC = () => {
                                     fullWidth
                                     type="color"
                                     size="small"
-                                    value={ctaButtonEditorOptions?.hoverColor || '#45a049'}
+                                    value={ctaButtonEditorOptions?.hoverColor === 'transparent' ? '#45a049' : (ctaButtonEditorOptions?.hoverColor || '#45a049')}
                                     onChange={(e) => handleChange('hoverColor', e.target.value)}
                                     sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                                 />

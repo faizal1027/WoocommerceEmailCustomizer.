@@ -148,7 +148,7 @@ const ContainerWidgetEditor = () => {
             <TextField
               label="Background Color"
               type="color"
-              value={containerEditorOptions.backgroundColor || '#ffffff'}
+              value={containerEditorOptions.backgroundColor === 'transparent' ? '#ffffff' : (containerEditorOptions.backgroundColor || '#ffffff')}
               onChange={handleChange('backgroundColor')}
               size="small"
               fullWidth
@@ -170,7 +170,7 @@ const ContainerWidgetEditor = () => {
                   <TextField
                     label="Color"
                     type="color"
-                    value={containerEditorOptions.border?.color || '#cccccc'}
+                    value={containerEditorOptions.border?.color === 'transparent' ? '#cccccc' : (containerEditorOptions.border?.color || '#cccccc')}
                     onChange={handleBorderChange('color')}
                     size="small"
                     fullWidth

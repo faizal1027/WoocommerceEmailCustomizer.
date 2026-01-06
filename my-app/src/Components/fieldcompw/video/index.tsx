@@ -36,7 +36,10 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        // Allow bubbling
+        e.stopPropagation();
+        onWidgetClick(e);
+        onClick();
+        dispatch(setSelectedBlockId(blockId));
       }}
       sx={{
         width: videoEditorOptions.width || '100%',
@@ -48,19 +51,34 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
       }}
     >
       {videoId ? (
-        <Box
-          component="iframe"
-          width="100%"
-          height={videoEditorOptions.height || '315px'}
-          src={`https://www.youtube.com/embed/${videoId}${videoEditorOptions.autoplay ? '?autoplay=1' : ''}${videoEditorOptions.controls === false ? '&controls=0' : ''}`}
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          sx={{
-            display: 'block',
-          }}
-        />
+        <>
+          <Box
+            component="iframe"
+            width="100%"
+            height={videoEditorOptions.height || '315px'}
+            src={`https://www.youtube.com/embed/${videoId}${videoEditorOptions.autoplay ? '?autoplay=1' : ''}${videoEditorOptions.controls === false ? '&controls=0' : ''}`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            sx={{
+              display: 'block',
+            }}
+          />
+          {/* Click Overlay */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 10,
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+            }}
+          />
+        </>
       ) : (
         <Box
           sx={{

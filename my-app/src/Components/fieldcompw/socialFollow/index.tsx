@@ -68,7 +68,10 @@ const SocialFollowFieldComponent: React.FC<SocialFollowFieldComponentProps> = ({
   return (
     <Box
       onClick={(e) => {
-        // Allow bubbling
+        e.stopPropagation();
+        onWidgetClick(e);
+        onClick();
+        dispatch(setSelectedBlockId(blockId));
       }}
       sx={{
         width: '100%',

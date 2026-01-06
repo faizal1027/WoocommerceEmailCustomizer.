@@ -155,7 +155,7 @@ const RelatedProductsWidgetEditor: React.FC = () => {
                                     fullWidth
                                     type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.titleColor || '#333'}
+                                    value={relatedProductsEditorOptions?.titleColor === 'transparent' ? '#333333' : (relatedProductsEditorOptions?.titleColor || '#333333')}
                                     onChange={(e) => handleChange('titleColor', e.target.value)}
                                     sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                                 />
@@ -166,7 +166,7 @@ const RelatedProductsWidgetEditor: React.FC = () => {
                                     fullWidth
                                     type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.priceColor || '#4CAF50'}
+                                    value={relatedProductsEditorOptions?.priceColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.priceColor || '#4CAF50')}
                                     onChange={(e) => handleChange('priceColor', e.target.value)}
                                     sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                                 />
@@ -179,7 +179,7 @@ const RelatedProductsWidgetEditor: React.FC = () => {
                                     fullWidth
                                     type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.buttonColor || '#4CAF50'}
+                                    value={relatedProductsEditorOptions?.buttonColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.buttonColor || '#4CAF50')}
                                     onChange={(e) => handleChange('buttonColor', e.target.value)}
                                     sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                                 />
@@ -190,7 +190,7 @@ const RelatedProductsWidgetEditor: React.FC = () => {
                                     fullWidth
                                     type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.buttonHoverColor || '#45a049'}
+                                    value={relatedProductsEditorOptions?.buttonHoverColor === 'transparent' ? '#45a049' : (relatedProductsEditorOptions?.buttonHoverColor || '#45a049')}
                                     onChange={(e) => handleChange('buttonHoverColor', e.target.value)}
                                     sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
                                 />

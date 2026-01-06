@@ -40,6 +40,8 @@ import OrderTotalFieldComponent from "../fieldcompw/orderTotal";
 import ShippingMethodFieldComponent from "../fieldcompw/shippingMethod";
 import PaymentMethodFieldComponent from "../fieldcompw/paymentMethod";
 import CustomerNoteFieldComponent from "../fieldcompw/customerNote";
+import ContactFieldComponent from "../fieldcompw/contact";
+import ProductDetailsFieldComponent from "../fieldcompw/productDetails";
 
 export const getWidgetComponent = (widgetType: string) => {
     switch (widgetType) {
@@ -82,6 +84,8 @@ export const getWidgetComponent = (widgetType: string) => {
         case "shippingMethod": return ShippingMethodFieldComponent;
         case "paymentMethod": return PaymentMethodFieldComponent;
         case "customerNote": return CustomerNoteFieldComponent;
+        case "contact": return ContactFieldComponent;
+        case "productDetails": return ProductDetailsFieldComponent;
 
         default: return null;
     }

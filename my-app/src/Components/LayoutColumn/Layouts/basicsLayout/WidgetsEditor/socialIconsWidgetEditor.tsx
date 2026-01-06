@@ -35,6 +35,7 @@ import {
   updateWidgetContentData,
   deleteColumnContent,
   closeEditor,
+  updateSocialIconsEditorOptions
 } from "../../../../../Store/Slice/workspaceSlice";
 
 const socialIcons = {
@@ -55,40 +56,18 @@ type SocialIconKey = keyof typeof socialIcons;
 
 const SocialIconsWidgetEditor = memo(() => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, blocks } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, socialIconsEditorOptions } = useSelector(
     (state: RootState) => state.workspace
   );
-  const column =
-    selectedBlockForEditor && selectedColumnIndex !== null
-      ? blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
-      : null;
-  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-  const socialIconsEditorOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : {
-      padding: { top: 0, left: 0, right: 0, bottom: 0 },
-      iconSize: 14,
-      iconColor: "#0000",
-      iconAlign: "center",
-      iconSpace: 1,
-      addedIcons: { icons: [], url: [] },
-    };
 
   const { iconAlign, padding, iconColor, iconSize, iconSpace, addedIcons } =
     socialIconsEditorOptions;
 
+  // const { updateSocialIconsEditorOptions, deleteColumnContent } = workspaceSlice.actions; // Removed invalid line
+
+
   const updateSocialIconsData = (updates: Partial<typeof socialIconsEditorOptions>) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const updatedData = { ...socialIconsEditorOptions, ...updates };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedData),
-        })
-      );
-    }
+    dispatch(updateSocialIconsEditorOptions(updates));
   };
 
   const handleAddIcon = (key: SocialIconKey) => {
@@ -139,10 +118,9 @@ const SocialIconsWidgetEditor = memo(() => {
           widgetIndex: selectedWidgetIndex,
         })
       );
-    } else {
-      console.warn("Cannot delete content: No widget selected or invalid state.");
     }
   };
+
 
 
   const handleCloseEditor = () => {

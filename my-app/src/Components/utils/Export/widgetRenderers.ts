@@ -392,7 +392,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const iconSpace = data.iconSpace || 8;
 
     // Use high-quality official icon assets (CDNs) for better look
-    // NOTE: To use local icons, upload PNGs to assets/img/social/ and uncomment the code below
     // const pluginUrl = (window as any).emailTemplateAjax?.plugin_url || '';
     // const localIconBase = `${pluginUrl}assets/img/social/`;
 
@@ -455,11 +454,14 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 12. SPACER WIDGET ==========
   'spacer': (d) => {
     const data = d || {};
-    const height = data.height || 20;
+    // Ensure height is parsed correctly (removing 'px' if present in string)
+    const heightVal = parseInt(String(data.height || 20), 10);
+    const height = isNaN(heightVal) ? 20 : heightVal;
     const bgColor = data.backgroundColor || 'transparent';
 
     // Must trigger layout with &nbsp; and line-height/font-size
-    return `<div style="height: ${height}px; line-height: ${height}px; font-size: 0px; background-color: ${bgColor}; width: 100%;">&nbsp;</div>`;
+    // Added min-height, clear:both to ensure it consumes space in all clients
+    return `<div style="height: ${height}px; line-height: ${height}px; font-size: 0px; background-color: ${bgColor}; width: 100%; min-height: ${height}px; clear: both; display: block;">&nbsp;</div>`;
   },
 
   // ========== 13. LINK WIDGET ==========
@@ -548,7 +550,16 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       'box-sizing: border-box'
     ].filter(Boolean).join('; ');
 
-    return `<div style="${styles}">${data.content || ''}</div>`;
+    const children = data.children || [];
+    let contentHtml = '';
+
+    if (children.length > 0) {
+      contentHtml = children.map((child: any) => widgetToHTML(child)).join('');
+    } else {
+      contentHtml = data.content || '';
+    }
+
+    return `<div style="${styles}">${contentHtml}</div>`;
   },
 
   // ========== 20. GROUP WIDGET ==========
@@ -591,23 +602,42 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   },
 
   // ========== 22. ROW WIDGET ==========
+  // ========== 22. ROW WIDGET ==========
   'row': (d) => {
     const data = d || {};
     const colCount = data.columns || 2;
     const gap = data.gap || 20;
+    const backgroundColor = data.backgroundColor || 'transparent';
+    const columnsData = data.columnsData || [];
+
+    // Calculate column width percentages
     const colWidth = Math.floor(100 / colCount);
 
     const containerStyles = [
-      `background-color: ${data.backgroundColor || 'transparent'}`,
+      `background-color: ${backgroundColor}`,
       'width: 100%',
       'border-collapse: collapse'
     ].filter(Boolean).join('; ');
 
     let colsHtml = '';
+
     for (let i = 0; i < colCount; i++) {
+      const colData = columnsData[i];
+      let childrenHtml = '';
+
+      if (colData && colData.children && colData.children.length > 0) {
+        childrenHtml = colData.children.map((child: any) => {
+          return widgetToHTML(child);
+        }).join('');
+      }
+
+      // Apply gap as padding
+      const padding = gap / 2;
+
+      // Use a wrapper div for padding inside TD to ensure gap logic works visually similar to grid
       colsHtml += `
-          <td width="${colWidth}%" style="width: ${colWidth}%; padding: ${gap / 2}px; border: 1px dashed #ccc; text-align: center; color: #aaa; font-size: 12px; vertical-align: top;">
-            Column ${i + 1}
+          <td width="${colWidth}%" style="width: ${colWidth}%; padding: ${padding}px; vertical-align: top;">
+            ${childrenHtml}
           </td>`;
     }
 
@@ -762,7 +792,7 @@ const widgetRenderers: Record<string, (data: any) => string> = {
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-size: 20px; font-weight: bold; color: #28a745;">
-              ${escapeHtml(data.price || '$0.00')}
+              ${escapeHtml(data.currency || '$')}${escapeHtml(data.price || '0.00')}
             </div>
             <a href="${escapeHtml(buttonUrl)}" 
                style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500;">
@@ -820,6 +850,9 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       }
     }
 
+    const currencySymbol = data.showCurrencySymbol !== false ? (data.currencySymbol || '$') : '';
+    const currencyCode = data.showCurrencyCode !== false ? (data.currency || 'USD') : '';
+
     const styles = [
       'border: 2px solid #dee2e6',
       'border-radius: 12px',
@@ -838,12 +871,13 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     return `
       <div style="${styles}">
         <div style="background-color: #f8f9fa; padding: 24px; border-bottom: 2px solid #dee2e6;">
-          <div style="font-size: 14px; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Pricing Plan</div>
+          <div style="font-size: 14px; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">${escapeHtml(data.label || 'Price')}</div>
           <div style="font-size: 48px; font-weight: bold; color: #2d3748; margin-bottom: 4px;">
-            <span style="font-size: 24px; vertical-align: super;">${escapeHtml(data.currencySymbol || data.currency || '$')}</span>
+            <span style="font-size: 24px; vertical-align: super;">${escapeHtml(currencySymbol)}</span>
             ${escapeHtml(formattedAmount)}
+            <span style="font-size: 0.5em; color: #666; vertical-align: middle;">${escapeHtml(currencyCode)}</span>
           </div>
-          <div style="font-size: 16px; color: #6c757d;">${escapeHtml(data.period || '/month')}</div>
+          <div style="font-size: 16px; color: #6c757d;">${escapeHtml(data.period || '')}</div>
         </div>
         <div style="padding: 24px;">
           <div style="margin-bottom: 16px;">
@@ -1257,6 +1291,90 @@ const widgetRenderers: Record<string, (data: any) => string> = {
           </td>
         </tr>
       </table>
+    `;
+  },
+
+
+  // ========== 51. CONTACT WIDGET ==========
+  'contact': (d) => {
+    const data = d || {};
+    const padding = data.padding || '10px';
+    const align = data.textAlign || 'center';
+
+    const styles = [
+      data.backgroundColor ? `background-color: ${data.backgroundColor}` : '',
+      data.textColor ? `color: ${data.textColor}` : '',
+      data.fontFamily ? `font-family: ${data.fontFamily}` : '',
+      `padding: ${padding}`,
+      `text-align: ${align}`
+    ].filter(Boolean).join('; ');
+
+    const iconSize = data.iconSize || 20;
+    const items = [];
+
+    if (data.showUrl !== false) {
+      items.push({ icon: 'home', text: data.url || '{{site_url}}' });
+    }
+    if (data.showEmail !== false) {
+      items.push({ icon: 'email', text: data.email || '{{admin_email}}' });
+    }
+    if (data.showPhone !== false) {
+      items.push({ icon: 'phone', text: data.phone || '' });
+    }
+
+    const itemRows = items.map(item => `
+      <tr>
+        <td style="padding: 5px 5px 5px 0; width: ${iconSize}px; vertical-align: middle;">
+           <img src="https://img.icons8.com/ios-filled/50/${data.iconColor ? data.iconColor.replace('#', '') : '333333'}/${item.icon}.png" width="${iconSize}" height="${iconSize}" style="display: block;" alt="${item.icon}" />
+        </td>
+        <td style="padding: 5px; text-align: left; vertical-align: middle;">
+           <span style="font-size: ${data.fontSize || '14px'};">${escapeHtml(item.text)}</span>
+        </td>
+      </tr>
+    `).join('');
+
+    // Determine table alignment props
+    const tableAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
+    const tableStyle = [
+      'width: auto',
+      data.fontFamily ? `font-family: ${data.fontFamily}` : '',
+      data.textColor ? `color: ${data.textColor}` : '',
+      (align === 'center' ? 'margin: 0 auto' : ''),
+      (align === 'right' ? 'margin-left: auto' : ''),
+    ].filter(Boolean).join('; ');
+
+    const wrapperStyles = [
+      data.backgroundColor ? `background-color: ${data.backgroundColor}` : '',
+      `padding: ${padding}`,
+      `text-align: ${align}` // Aligns the table within the wrapper
+    ].filter(Boolean).join('; ');
+
+    return `
+      <div style="${wrapperStyles}">
+        <table align="${tableAlign}" cellpadding="0" cellspacing="0" role="presentation" style="${tableStyle}">
+            ${itemRows}
+        </table>
+      </div>
+    `;
+  },
+
+  // ========== 52. PRODUCT DETAILS WIDGET ==========
+  'productDetails': (d) => {
+    const data = d || {};
+    // Product details typically rendered by WooCommerce placeholder {{email_order_items_table}}.
+    // We wrap it to apply styles where possible, although WooCommerce styles might override.
+
+    const styles = [
+      data.backgroundColor ? `background-color: ${data.backgroundColor}` : '',
+      data.padding ? `padding: ${data.padding}` : '',
+    ].filter(Boolean).join('; ');
+
+    const placeholder = (data.showImage) ? '{{order_details_table_with_images}}' : '{{order_details_table_basic}}';
+
+    return `
+      <div style="${styles}">
+          ${placeholder}
+      </div>
     `;
   },
 

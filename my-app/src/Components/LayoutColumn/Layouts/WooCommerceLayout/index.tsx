@@ -11,6 +11,8 @@ import OrderTotalWidget from './Widgets/orderTotalWidget'
 import ShippingMethodWidget from './Widgets/shippingMethodWidget'
 import PaymentMethodWidget from './Widgets/paymentMethodWidget'
 import CustomerNoteWidget from './Widgets/customerNoteWidget'
+import ContactWidget from './Widgets/contactWidget'
+import ProductDetailsWidget from './Widgets/productDetailsWidget'
 import { Box } from '@mui/material';
 
 export const wooCommerceWidgets = [
@@ -26,6 +28,8 @@ export const wooCommerceWidgets = [
   { Component: CustomerNoteWidget, name: 'Customer Note' },
   { Component: CtaButtonWidget, name: 'CTA Button' },
   { Component: EmailFooterWidget, name: 'Email Footer' },
+  { Component: ContactWidget, name: 'Contact' },
+  { Component: ProductDetailsWidget, name: 'Product Details' },
 ];
 
 const WooCommerceLayout = ({ searchTerm = '' }: { searchTerm?: string }) => {

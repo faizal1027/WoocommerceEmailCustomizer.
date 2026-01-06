@@ -603,11 +603,21 @@ class WETC_Connector {
         $content_type = isset($_POST['content_type']) ? sanitize_text_field($_POST['content_type']) : 'JSON';
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
         $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 0;
+        $template_note = isset($_POST['template_note']) ? sanitize_textarea_field($_POST['template_note']) : '';
+
+        error_log('WETC Debug: Saving template note: ' . print_r($template_note, true));
+        error_log('WETC Debug: POST data keys: ' . print_r(array_keys($_POST), true));
 
         // Ensure creation column exists (failsafe for direct access to editor)
         $column_date = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'created_at'");
         if (empty($column_date)) {
             $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
+        }
+
+        // Ensure note column exists (failsafe)
+        $column_note = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'template_note'");
+        if (empty($column_note)) {
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN template_note TEXT");
         }
 
         // FIX: If content_type appears to be a label (e.g. "New Order (Admin)"), clear it
@@ -657,10 +667,11 @@ class WETC_Connector {
             'json_data' => $json_data,
             'content_type' => $content_type,
             'recipient' => $recipient,
+            'template_note' => $template_note,
             'created_at' => $current_time // Update timestamp
         ];
         
-        $formats = ['%s', '%s', '%s', '%s', '%s', '%s'];
+        $formats = ['%s', '%s', '%s', '%s', '%s', '%s', '%s'];
 
         if ($has_priority) {
             $data['priority'] = $priority;

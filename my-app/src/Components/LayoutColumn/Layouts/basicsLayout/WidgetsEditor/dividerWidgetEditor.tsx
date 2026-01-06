@@ -13,65 +13,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../Store/store";
 import CloseIcon from "@mui/icons-material/Close";
-import { updateWidgetContentData, deleteColumnContent, closeEditor } from "../../../../../Store/Slice/workspaceSlice";
+import { updateDividerEditorOptions, deleteColumnContent, closeEditor } from "../../../../../Store/Slice/workspaceSlice";
 import { useState } from "react";
 import ColorPicker from "../../../../utils/ColorPicker";
+import { DividerEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
 
 const DividerWidgetEditor = () => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, dividerEditorOptions: dividerOptions } = useSelector(
     (state: RootState) => state.workspace
   );
-  const column = useSelector((state: RootState) =>
-    selectedBlockForEditor && selectedColumnIndex !== null
-      ? state.workspace.blocks.find((block) => block.id === selectedBlockForEditor)?.columns[selectedColumnIndex]
-      : null
-  );
-  const widgetContent = (selectedWidgetIndex !== null && column?.widgetContents)
-    ? column.widgetContents[selectedWidgetIndex]
-    : null;
 
 
-  const dividerOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : {
-      width: "75",
-      style: "solid",
-      thickness: 2,
-      color: "#000000",
-      alignment: "center",
-      padding: { top: 10, right: 0, bottom: 10, left: 0 },
-    };
-
-  const paddingSides: (keyof typeof dividerOptions.padding)[] = [
-    "top",
-    "right",
-    "bottom",
-    "left",
-  ];
-
-
-  if (!widgetContent) {
-    return (
-      <Box p={3} textAlign="center">
-        <Typography color="textSecondary">No widget selected.</Typography>
-      </Box>
-    );
-  }
-
-
-  const handleOptionChange = (field: keyof typeof dividerOptions, value: any) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const newOptions = { ...dividerOptions, [field]: value };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(newOptions),
-        })
-      );
-    }
+  const handleOptionChange = (field: keyof DividerEditorOptions, value: any) => {
+    dispatch(updateDividerEditorOptions({ [field]: value }));
   };
 
   const handleDeleteContent = () => {
@@ -90,19 +45,9 @@ const DividerWidgetEditor = () => {
     dispatch(closeEditor());
   };
 
-  const handlePaddingChange = (side: keyof typeof dividerOptions.padding, value: number) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const newPadding = { ...dividerOptions.padding, [side]: Math.max(0, value) };
-      const newOptions = { ...dividerOptions, padding: newPadding };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(newOptions),
-        })
-      );
-    }
+  const handlePaddingChange = (side: keyof DividerEditorOptions["padding"], value: number) => {
+    const newPadding = { ...dividerOptions.padding, [side]: Math.max(0, value) };
+    dispatch(updateDividerEditorOptions({ padding: newPadding }));
   };
 
 

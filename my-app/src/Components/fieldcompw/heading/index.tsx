@@ -7,6 +7,7 @@ import {
   openEditor,
   setSelectedBlockId,
   defaultHeadingEditorOptions,
+  updateHeadingEditorOptions
 } from '../../../Store/Slice/workspaceSlice';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -14,11 +15,13 @@ interface HeadingFieldComponentProps {
   blockId: string;
   columnIndex: number;
   onClick: (e: React.MouseEvent) => void;
+  onWidgetClick?: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
-const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, columnIndex, onClick, widgetIndex }) => {
+const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, columnIndex, onClick, onWidgetClick, widgetIndex, widgetData }) => {
   const dispatch = useDispatch();
   const contentRef = useRef<HTMLDivElement>(null);
   const { selectedBlockForEditor, selectedColumnIndex } = useSelector((state: RootState) => state.workspace);
@@ -26,12 +29,11 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
   const column = useSelector((state: RootState) =>
     state.workspace.blocks.find(block => block.id === blockId)?.columns[columnIndex]
   );
-  const widgetContent = column?.widgetContents[widgetIndex] || null;
-  const headingContent = widgetContent?.contentData ? JSON.parse(widgetContent.contentData) : {
-    ...defaultHeadingEditorOptions,
-    ...defaultHeadingEditorOptions,
-    content: widgetContent ? "" : "Heading"
-  };
+  const storeWidgetContent = column?.widgetContents[widgetIndex] || null;
+  const finalContentData = widgetData ? widgetData.contentData : storeWidgetContent?.contentData;
+  const headingContent = finalContentData
+    ? { ...defaultHeadingEditorOptions, ...JSON.parse(finalContentData) }
+    : defaultHeadingEditorOptions;
 
   // Ensure padding exists
   if (!headingContent.padding) {
@@ -41,17 +43,20 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const updatedContent = event.target.value;
     const updatedData = { ...headingContent, content: updatedContent }
-    dispatch(updateWidgetContentData({
-      blockId,
-      columnIndex,
-      widgetIndex,
-      data: JSON.stringify(updatedData),
-    }));
+    dispatch(updateHeadingEditorOptions(updatedData));
   };
 
-  const handleSelectTextField = () => {
-    if (!isSelected) {
-      dispatch(openEditor({ blockId, columnIndex, widgetIndex }));
+  const handleSelectTextField = (e?: React.MouseEvent) => {
+    if (onWidgetClick && e) {
+      onWidgetClick(e);
+    } else if (onClick && e) {
+      e.stopPropagation();
+      onClick(e);
+    } else {
+      // Fallback for standalone usage if any
+      if (!isSelected) {
+        dispatch(openEditor({ blockId, columnIndex, widgetIndex }));
+      }
     }
   };
 
@@ -98,7 +103,9 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
 
   const { fontFamily, fontWeight, fontSize, color, textAlign, lineHeight, letterSpace, content, backgroundColor } = headingContent;
   const padding = headingContent.padding || { top: 0, right: 0, bottom: 0, left: 0 };
-  const hasContent = widgetContent?.contentType === "heading";
+  const hasContent = true; // Since we default to options, we rely on content string availability or editor handling. 
+  // Actually, keeping original logic's intent:
+  // const hasContent = (widgetData?.contentType || storeWidgetContent?.contentType) === "heading";
 
   return (
     <Box
@@ -149,7 +156,7 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
             '.MuiInputBase-root': { height: "100%", alignItems: "flex-start" },
             '.MuiInputBase-inputMultiline': { height: "auto", overflowY: "auto", resize: "none" },
           }}
-          onClick={handleSelectTextField}
+          onClick={(e) => handleSelectTextField(e as any)}
         />
       ) : (
         <Box sx={{ color: "text.secondary", textAlign: "center", fontStyle: "italic" }}>

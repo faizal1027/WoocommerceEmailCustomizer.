@@ -113,7 +113,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                         </Typography>
                         <input
                             type="color"
-                            value={options.textColor || '#333333'}
+                            value={(options.textColor && options.textColor !== 'transparent') ? options.textColor : '#333333'}
                             onChange={(e) => handleChange('textColor', e.target.value)}
                             style={{ width: '100%', height: '32px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', padding: '0 2px' }}
                         />
@@ -128,7 +128,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                         <input
                             type="color"
-                            value={options.backgroundColor === 'transparent' ? '#ffffff' : options.backgroundColor || '#ffffff'}
+                            value={options.backgroundColor === 'transparent' ? '#ffffff' : (options.backgroundColor || '#ffffff')}
                             onChange={(e) => handleChange('backgroundColor', e.target.value)}
                             style={{ width: '32px', height: '32px', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', padding: '0 2px' }}
                         />

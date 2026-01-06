@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId, updateColumnHeight } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, updateColumnHeight, defaultDividerEditorOptions, DividerEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
 interface DividerFieldComponentProps {
   blockId: string;
@@ -11,27 +11,23 @@ interface DividerFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
-const DividerFieldComponent: React.FC<DividerFieldComponentProps> = ({ blockId, columnIndex, onClick, onWidgetClick, widgetIndex }) => {
+const DividerFieldComponent: React.FC<DividerFieldComponentProps> = ({ blockId, columnIndex, onClick, onWidgetClick, widgetIndex, widgetData }) => {
   const dispatch = useDispatch();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const widgetContent = useSelector((state: RootState) => {
+  const storeWidgetContent = useSelector((state: RootState) => {
     const block = state.workspace.blocks.find((b) => b.id === blockId);
     return block?.columns[columnIndex]?.widgetContents[widgetIndex] || null;
   });
 
-  const dividerOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : {
-      width: '75',
-      style: 'solid',
-      thickness: 2,
-      color: '#000000',
-      alignment: 'center',
-      padding: { top: 10, right: 0, bottom: 10, left: 0 },
-    };
+  const finalContentData = widgetData ? widgetData.contentData : storeWidgetContent?.contentData;
+
+  const dividerOptions: DividerEditorOptions = finalContentData
+    ? { ...defaultDividerEditorOptions, ...JSON.parse(finalContentData) }
+    : defaultDividerEditorOptions;
 
   // Ensure padding exists
   if (!dividerOptions.padding) {
@@ -86,7 +82,12 @@ const DividerFieldComponent: React.FC<DividerFieldComponentProps> = ({ blockId, 
     <Box
       ref={contentRef}
       onClick={(e) => {
-        // Allow bubbling
+        if (onWidgetClick) {
+          onWidgetClick(e);
+        } else if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       sx={{
         width: '100%',

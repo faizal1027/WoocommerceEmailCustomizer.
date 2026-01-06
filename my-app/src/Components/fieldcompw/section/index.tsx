@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedBlockId, updateWidgetContentData } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, updateWidgetContentData, openEditor } from '../../../Store/Slice/workspaceSlice';
 import { RootState } from '../../../Store/store';
 import { useDrop } from 'react-dnd';
 import { getWidgetComponent } from '../../utils/getWidgetComponent';
@@ -22,6 +22,7 @@ interface SectionFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   widgetData?: any;
+  path?: Array<{ colIdx: number; childIdx: number }>;
 }
 
 const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
@@ -31,9 +32,11 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
-  widgetData
+  widgetData,
+  path = []
 }) => {
   const dispatch = useDispatch();
+  const selectedNestedPath = useSelector((state: RootState) => state.workspace.selectedNestedPath);
 
   const storeWidgetContent = useSelector((state: RootState) => {
     const block = state.workspace.blocks.find((b) => b.id === blockId);
@@ -47,13 +50,9 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
     : {
       backgroundColor: '#f5f5f5',
       padding: { top: 20, right: 20, bottom: 20, left: 20 },
-      border: { width: 1, style: 'solid', color: '#ddd', radius: 0 }
+      border: { width: 1, style: 'solid', color: '#ddd', radius: 0 },
+      children: []
     };
-
-  // Ensure children array exists
-  if (!sectionOptions.children) {
-    sectionOptions.children = [];
-  }
 
   const dropRef = React.useRef<HTMLDivElement>(null);
 
@@ -75,7 +74,7 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
         contentData: newWidgetContentData
       };
 
-      const updatedChildren = [...sectionOptions.children, newChild];
+      const updatedChildren = [...(sectionOptions.children || []), newChild];
       const updatedSectionOptions = { ...sectionOptions, children: updatedChildren };
 
       dispatch(updateWidgetContentData({
@@ -105,6 +104,15 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
     }));
   };
 
+  const isCurrentSelection = (childIdx: number) => {
+    if (!selectedNestedPath || selectedNestedPath.length !== path.length + 1) return false;
+    for (let i = 0; i < path.length; i++) {
+      if (selectedNestedPath[i].colIdx !== path[i].colIdx || selectedNestedPath[i].childIdx !== path[i].childIdx) return false;
+    }
+    const lastPart = selectedNestedPath[selectedNestedPath.length - 1];
+    return lastPart.colIdx === -1 && lastPart.childIdx === childIdx;
+  };
+
   return (
     <Box
       ref={dropRef}
@@ -127,12 +135,12 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
         minHeight: '100px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: sectionOptions.children.length === 0 ? 'center' : 'flex-start',
+        justifyContent: (!sectionOptions.children || sectionOptions.children.length === 0) ? 'center' : 'flex-start',
         alignItems: 'center',
         outline: isOver ? '2px dashed green' : 'none'
       }}
     >
-      {sectionOptions.children.length === 0 ? (
+      {(!sectionOptions.children || sectionOptions.children.length === 0) ? (
         <Typography sx={{ color: '#999', fontSize: '14px' }}>
           Drag Content Here
         </Typography>
@@ -141,19 +149,40 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
           const WidgetComponent = getWidgetComponent(child.contentType);
           if (!WidgetComponent) return null;
 
+          const isChildSelected = isCurrentSelection(idx);
+          const childPath = [...path, { colIdx: -1, childIdx: idx }];
+
           return (
-            <Box key={child.id || idx} sx={{ position: 'relative', width: '100%', mb: 1, '&:hover .delete-btn': { display: 'flex' } }}>
+            <Box key={child.id || idx} sx={{ position: 'relative', width: '100%', mb: 1, '&:hover .delete-btn-section': { display: 'flex' } }}>
               <WidgetComponent
                 blockId={blockId}
                 columnIndex={columnIndex}
-                widgetIndex={-1}
+                widgetIndex={widgetIndex}
                 widgetData={child}
-                isSelected={false}
-                onClick={() => { }}
-                onWidgetClick={(e) => e.stopPropagation()}
+                isSelected={isChildSelected}
+                path={childPath}
+                onClick={() => {
+                  dispatch(openEditor({
+                    blockId,
+                    columnIndex,
+                    widgetIndex,
+                    contentType: child.contentType,
+                    nestedPath: childPath
+                  }));
+                }}
+                onWidgetClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  dispatch(openEditor({
+                    blockId,
+                    columnIndex,
+                    widgetIndex,
+                    contentType: child.contentType,
+                    nestedPath: childPath
+                  }));
+                }}
               />
               <Box
-                className="delete-btn"
+                className="delete-btn-section"
                 sx={{
                   display: 'none',
                   position: 'absolute',

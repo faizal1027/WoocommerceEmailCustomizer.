@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId, updateColumnHeight } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, updateColumnHeight, defaultImageEditorOptions } from '../../../Store/Slice/workspaceSlice';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface ImageFieldComponentProps {
@@ -33,15 +33,8 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
   const widgetContent = widgetData || storeWidgetContent;
 
   const imageOptions = widgetContent?.contentData
-    ? JSON.parse(widgetContent.contentData)
-    : {
-      src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
-      altText: 'Uploaded content',
-      width: '100%',
-      align: 'center',
-      autoWidth: true,
-      padding: { top: 0, left: 0, right: 0, bottom: 0 },
-    };
+    ? { ...defaultImageEditorOptions, ...JSON.parse(widgetContent.contentData) }
+    : defaultImageEditorOptions;
 
   // Ensure padding exists if it's missing from the JSON
   if (!imageOptions.padding) {
@@ -91,7 +84,12 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
     <Box
       ref={contentRef}
       onClick={(e) => {
-        // Allow bubbling
+        if (onWidgetClick) {
+          onWidgetClick(e);
+        } else if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       sx={{
         cursor: 'pointer',

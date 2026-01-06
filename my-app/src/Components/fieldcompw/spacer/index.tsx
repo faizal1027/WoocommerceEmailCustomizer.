@@ -9,8 +9,9 @@ interface SpacerFieldComponentProps {
   columnIndex: number;
   isSelected: boolean;
   onClick: () => void;
-  onWidgetClick: (e: React.MouseEvent) => void;
+  onWidgetClick?: (e: React.MouseEvent) => void;
   widgetIndex: number;
+  widgetData?: any;
 }
 
 const SpacerFieldComponent: React.FC<SpacerFieldComponentProps> = ({
@@ -19,15 +20,26 @@ const SpacerFieldComponent: React.FC<SpacerFieldComponentProps> = ({
   isSelected,
   onClick,
   onWidgetClick,
-  widgetIndex
+  widgetIndex,
+  widgetData
 }) => {
   const dispatch = useDispatch();
-  const { spacerEditorOptions } = useSelector((state: RootState) => state.workspace);
+
+  const storeSpacerOptions = useSelector((state: RootState) => state.workspace.spacerEditorOptions);
+
+  const spacerEditorOptions = widgetData?.contentData
+    ? JSON.parse(widgetData.contentData)
+    : storeSpacerOptions;
 
   return (
     <Box
       onClick={(e) => {
-        // Allow bubbling
+        if (onWidgetClick) {
+          onWidgetClick(e);
+        } else if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       sx={{
         width: '100%',

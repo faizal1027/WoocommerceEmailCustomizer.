@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Tooltip, IconButton, Stack, Divider, InputAdornment, Button } from '@mui/material';
+import { Box, Typography, TextField, Tooltip, IconButton, Stack, Divider, InputAdornment, Button, Select, MenuItem } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateProductEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -168,13 +168,19 @@ const ProductWidgetEditor = () => {
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Currency
                 </Typography>
-                <TextField
+                <Select
                   value={productEditorOptions.currency || '$'}
                   onChange={handleChange('currency')}
                   size="small"
-                  placeholder="$"
                   fullWidth
-                />
+                  MenuProps={{ disablePortal: true }}
+                >
+                  {['$', '€', '£', '¥', '₹', 'Rp', 'R$', 'AED', 'sar', 'Fr'].map((symbol) => (
+                    <MenuItem key={symbol} value={symbol}>
+                      {symbol}
+                    </MenuItem>
+                  ))}
+                </Select>
               </Box>
             </Box>
           </Stack>
@@ -259,8 +265,8 @@ const ProductWidgetEditor = () => {
             </Box>
           </Stack>
         </Box>
-      </Stack>
-    </Box>
+      </Stack >
+    </Box >
   );
 };
 

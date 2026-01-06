@@ -27,16 +27,17 @@ const PriceFieldComponent: React.FC<PriceFieldComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  let priceEditorOptions = defaultPriceEditorOptions;
+  const { priceEditorOptions: storePriceOptions } = useSelector((state: RootState) => state.workspace);
+
+
+  let priceEditorOptions = storePriceOptions;
+
   if (widgetData && widgetData.contentData) {
     try {
       priceEditorOptions = JSON.parse(widgetData.contentData);
-      console.log('PriceWidget: Parsed options from contentData:', priceEditorOptions);
     } catch (e) {
       console.error("Error parsing price data", e);
     }
-  } else {
-    console.log('PriceWidget: No contentData found, using defaults', priceEditorOptions);
   }
 
   const formatPrice = () => {
@@ -48,7 +49,7 @@ const PriceFieldComponent: React.FC<PriceFieldComponentProps> = ({
       decimals = Number(priceEditorOptions.decimals);
     }
 
-    // If user specifically turned OFF decimals, set decimals to 0
+
     if (priceEditorOptions.showDecimals === false) {
       decimals = 0;
     }
@@ -100,7 +101,7 @@ const PriceFieldComponent: React.FC<PriceFieldComponentProps> = ({
             fontSize: '0.8em',
           }}
         >
-          {priceEditorOptions.currency || 'USD'}
+          {priceEditorOptions.showCurrencyCode !== false ? (priceEditorOptions.currency || 'USD') : ''}
         </Typography>
       </Typography>
     </Box>

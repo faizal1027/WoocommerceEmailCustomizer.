@@ -80,6 +80,8 @@ import OrderTotalWidgetEditor from './WooCommerceLayout/WidgetsEditor/orderTotal
 import ShippingMethodWidgetEditor from './WooCommerceLayout/WidgetsEditor/shippingMethodWidgetEditor';
 import PaymentMethodWidgetEditor from './WooCommerceLayout/WidgetsEditor/paymentMethodWidgetEditor';
 import CustomerNoteWidgetEditor from './WooCommerceLayout/WidgetsEditor/customerNoteWidgetEditor';
+import ContactWidgetEditor from './WooCommerceLayout/WidgetsEditor/contactWidgetEditor';
+import ProductDetailsWidgetEditor from './WooCommerceLayout/WidgetsEditor/productDetailsWidgetEditor';
 
 const OverallLayout = () => {
   const {
@@ -207,6 +209,10 @@ const OverallLayout = () => {
         return <PaymentMethodWidgetEditor />;
       case 'customerNote':
         return <CustomerNoteWidgetEditor />;
+      case 'contact':
+        return <ContactWidgetEditor />;
+      case 'productDetails':
+        return <ProductDetailsWidgetEditor />;
 
       default:
         return <LayoutEditorWidget />;

@@ -2,12 +2,14 @@ import { Typography } from "@mui/material";
 import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../Store/store";
+import { defaultTextEditorOptions } from "../../../Store/Slice/workspaceSlice";
 
 interface TextFieldComponentProps {
     blockId: string;
     columnIndex: number;
     widgetIndex: number;
     onClick?: (e: React.MouseEvent) => void;
+    onWidgetClick?: (e: React.MouseEvent) => void;
     isSelected?: boolean;
     widgetData?: any;
 }
@@ -17,6 +19,7 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
     columnIndex,
     widgetIndex,
     onClick,
+    onWidgetClick,
     isSelected,
     widgetData
 }) => {
@@ -30,8 +33,8 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
     if (!widget || widget.contentType !== "text") return null;
 
     const content = widget.contentData
-        ? JSON.parse(widget.contentData)
-        : { content: "Text Block" };
+        ? { ...defaultTextEditorOptions, ...JSON.parse(widget.contentData) }
+        : defaultTextEditorOptions;
 
     const sxStyles = {
         fontFamily: content.fontFamily,
@@ -48,8 +51,17 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
         whiteSpace: "pre-wrap",
     };
 
+    const handleClick = (e: React.MouseEvent) => {
+        if (onWidgetClick) {
+            onWidgetClick(e);
+        } else if (onClick) {
+            e.stopPropagation();
+            onClick(e);
+        }
+    };
+
     return (
-        <div onClick={onClick} style={{ cursor: "pointer", border: isSelected ? "2px solid blue" : "none" }}>
+        <div onClick={handleClick} style={{ cursor: "pointer", border: isSelected ? "2px solid blue" : "none" }}>
             <Typography
                 sx={sxStyles}
                 dangerouslySetInnerHTML={{ __html: content.content }}

@@ -188,7 +188,7 @@ const ExportColumn = () => {
 
 
   const handleTemplateSelect = (templateIdOrName: string) => {
-    // Note: templateIdOrName here is now the NAME (e.g. 'New order (Admin)')
+
     setSelectedTemplateId(templateIdOrName);
 
     // Verify Edit Mode to prevent accidental content replacement
@@ -664,6 +664,9 @@ const ExportColumn = () => {
               const selectedTypeSlug = typeInfo ? typeInfo.type : selectedTemplateId;
               formData.append("content_type", selectedTypeSlug);
 
+              // Map Description UI field to template_note DB column
+              formData.append("template_note", templateDescription || "");
+
               formData.append("recipient", recipient);
 
               // ONLY send template_id if we are in EDIT mode
@@ -708,7 +711,7 @@ const ExportColumn = () => {
                   setIsEditMode(true);
                   // Also fix the template name in state to match what was saved (with increments)
                   setTemplateName(finalTemplateName);
-                  // Note: selectedTemplateId stays as the NAME so the dropdown matches correctly
+
 
                   // CRITICAL: Update URL so refresh/re-refetch doesn't clear blocks
                   const newUrl = new URL(window.location.href);
@@ -814,7 +817,7 @@ const ExportColumn = () => {
             </MenuItem>
           ))}
 
-          {/* Note: Saved Templates section removed to keep dropdown focused on Categories */}
+
         </Select>
       </Box>
 
@@ -857,6 +860,18 @@ const ExportColumn = () => {
           placeholder="Description"
           value={templateDescription}
           onChange={(e) => setTemplateDescription(e.target.value)}
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              padding: "8px",
+              // Fix for WP admin double border: Reset WP global styles on the inner textarea
+              "& textarea": {
+                border: "none !important",
+                boxShadow: "none !important",
+                background: "transparent !important"
+              }
+            }
+          }}
         />
       </Box>
 

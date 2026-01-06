@@ -149,7 +149,7 @@ const RowWidgetEditor = () => {
             <TextField
               label="Background Color"
               type="color"
-              value={rowEditorOptions.backgroundColor || '#ffffff'}
+              value={rowEditorOptions.backgroundColor === 'transparent' ? '#ffffff' : (rowEditorOptions.backgroundColor || '#ffffff')}
               onChange={handleChange('backgroundColor')}
               size="small"
               fullWidth

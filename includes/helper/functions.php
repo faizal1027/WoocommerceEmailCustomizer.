@@ -385,6 +385,7 @@ private function get_order_id_from_object($email) {
         $shipping_phone = "";
         $shipping_email = "";
         $order_items_rows = "";
+        $order_items_rows_with_images = "";
         $order_date = "";
         $shipping_method = "";
         $combined_discount = 0;
@@ -454,14 +455,17 @@ private function get_order_id_from_object($email) {
             $shipping_state      = $order->get_shipping_state();
             $shipping_postcode   = $order->get_shipping_postcode();
             
-            // Refund Details
+            // Refund Details (Global Calculation)
             $refund_amount = '';
             $refund_reason = '';
-            $refunds = $order->get_refunds();
-            if (!empty($refunds)) {
-                $latest_refund = reset($refunds);
-                $refund_amount = wc_price($latest_refund->get_amount());
-                $refund_reason = $latest_refund->get_reason() ?: 'Not specified';
+            $total_refunded = $order->get_total_refunded();
+            if ($total_refunded > 0) {
+                 $refund_amount = wc_price($total_refunded);
+                 $refunds = $order->get_refunds();
+                 if (!empty($refunds)) {
+                     $latest_refund = reset($refunds);
+                     $refund_reason = $latest_refund->get_reason() ?: 'Not specified';
+                 }
             }
 
             // Items breakdown
@@ -476,7 +480,51 @@ private function get_order_id_from_object($email) {
                 if ($line_regular_total > $item_subtotal) {
                     $total_sale_discount += ($line_regular_total - $item_subtotal);
                 }
+                $img_cell_html = '';
+                $product = $item->get_product();
+                
+                // Determine Image Cell Content
+                if ($product) {
+                    $img_id = $product->get_image_id();
+                    $img_src = '';
+                    if ($img_id) {
+                         $img_src_data = wp_get_attachment_image_src($img_id, 'thumbnail');
+                         $img_src = $img_src_data ? $img_src_data[0] : '';
+                    }
+                    if (empty($img_src)) {
+                         $img_src = wc_placeholder_img_src();
+                    }
+
+                    // Check if localhost/127.0.0.1 to prevent broken image icon in external emails
+                    $is_local = (strpos($img_src, 'localhost') !== false || strpos($img_src, '127.0.0.1') !== false);
+                    
+                    if (!empty($img_src) && !$is_local) {
+                        $img_cell_html = '<td style="padding: 10px; border: 1px solid #ddd; width: 60px;"><img src="' . esc_url($img_src) . '" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" /></td>';
+                    }
+                }
+                
                 $order_items_rows .= "<tr><td style='padding: 10px; border: 1px solid #ddd;'>$product_name</td><td style='padding: 10px; border: 1px solid #ddd;'>$quantity</td><td style='padding: 10px; border: 1px solid #ddd;'>" . wc_price($line_regular_total) . "</td></tr>";
+                
+                /*
+                 * Logic:
+                 * 1. If we have a valid image (and not localhost), yield standard 4-column row.
+                 * 2. If no image or localhost image (which breaks), yield 3-column row where Product Name spans 2 cols.
+                 *    This satisfies "don't show empty image" and "don't show placeholder" and "empty cell is not correct".
+                 */
+                if (!empty($img_cell_html)) {
+                    $order_items_rows_with_images .= "<tr>
+                        $img_cell_html
+                        <td style='padding: 10px; border: 1px solid #ddd;'>$product_name</td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>$quantity</td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>" . wc_price($line_regular_total) . "</td>
+                    </tr>";
+                } else {
+                     $order_items_rows_with_images .= "<tr>
+                        <td colspan='2' style='padding: 10px; border: 1px solid #ddd;'>$product_name</td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>$quantity</td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>" . wc_price($line_regular_total) . "</td>
+                    </tr>";
+                }
             }
             $combined_discount = $coupon_discount + $total_sale_discount;
 
@@ -550,6 +598,8 @@ private function get_order_id_from_object($email) {
             '{{font}}' => $font,
             '{{order_items_rows}}' => $order_items_rows,
             '{{order_items}}' => $order_items_rows, // Alias for compatibility
+            '{{order_details_table_basic}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows . '</tbody></table>',
+            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;" colspan="2">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
 
             '{{order_subtotal}}' => $subtotal,
             '{{order_shipping}}' => $order_shipping,
@@ -600,7 +650,10 @@ private function get_order_id_from_object($email) {
             '{{refund_reason}}' => $refund_reason,
             '{{customer_note}}' => $customer_note,
             '{{order_tracking_url}}' => $order_url, // Standard fallback
+            '{{order_tracking_url}}' => $order_url, // Standard fallback
             '{{order_totals_table}}' => $order_totals_table,
+            '{{order_details_table_basic}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border:1px solid #ddd;">Product</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Qty</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Price</th></tr></thead><tbody>' . $order_items_rows . '</tbody></table>',
+            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border:1px solid #ddd;">Image</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Product</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Qty</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
             '{{tax_rate}}' => ($order instanceof \WC_Order) ? (function($order) {
                 $taxes = $order->get_taxes();
                 foreach ($taxes as $tax) {

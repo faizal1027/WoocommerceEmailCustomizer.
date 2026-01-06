@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedBlockId, updateWidgetContentData } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, updateWidgetContentData, openEditor } from '../../../Store/Slice/workspaceSlice';
 import { RootState } from '../../../Store/store';
 import { useDrop } from 'react-dnd';
 import { getWidgetComponent } from '../../utils/getWidgetComponent';
@@ -22,6 +22,7 @@ interface RowFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   widgetData?: any;
+  path?: Array<{ colIdx: number; childIdx: number }>;
 }
 
 const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
@@ -31,9 +32,11 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
-  widgetData
+  widgetData,
+  path = []
 }) => {
   const dispatch = useDispatch();
+  const selectedNestedPath = useSelector((state: RootState) => state.workspace.selectedNestedPath);
 
   const storeWidgetContent = useSelector((state: RootState) => {
     const block = state.workspace.blocks.find((b) => b.id === blockId);
@@ -57,14 +60,16 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
     rowOptions.columnsData = Array(numColumns).fill(0).map((_, i) => (rowOptions.columnsData && rowOptions.columnsData[i]) || { id: `col_${i}_${Date.now()}`, children: [] });
   }
 
+  // This change is in RowFieldComponent, but I need to fix workspaceSlice first.
+  // I will perform the workspaceSlice fix in the next tool call then.
+  // Wait, I can do it here if I verify the logic. 
+  // Yes, JSON.parse(action.payload.data) makes sense because previously we were just assigning the string. 
+  // Now we want to MERGE expected properties into the nested one.
+  // Since RowFieldComponent sends the full object stringified, merging it spread over the old one is effectively a replace/update.
+
   const handleDrop = (item: any, colIndex: number) => {
     let newWidgetContentData = "{}";
-    if (item.widgetType === "text") newWidgetContentData = JSON.stringify(defaultTextEditorOptions);
-    else if (item.widgetType === "button") newWidgetContentData = JSON.stringify(defaultButtonEditorOptions);
-    else if (item.widgetType === "heading") newWidgetContentData = JSON.stringify(defaultHeadingEditorOptions);
-    else if (item.widgetType === "divider") newWidgetContentData = JSON.stringify(defaultDividerEditorOptions);
-    else if (item.widgetType === "image") newWidgetContentData = item.initialContent || "";
-    else if (item.widgetType === "spacer") newWidgetContentData = JSON.stringify({});
+    if (item.widgetType === "image") newWidgetContentData = item.initialContent || "";
 
     const newChild = {
       id: `child_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -84,7 +89,8 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
       blockId,
       columnIndex,
       widgetIndex,
-      data: JSON.stringify(updatedRowOptions)
+      data: JSON.stringify(updatedRowOptions),
+      nestedPath: path
     }));
   };
 
@@ -100,18 +106,13 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
       blockId,
       columnIndex,
       widgetIndex,
-      data: JSON.stringify(updatedRowOptions)
+      data: JSON.stringify(updatedRowOptions),
+      nestedPath: path
     }));
   };
 
   return (
     <Box
-      onClick={(e) => {
-        e.stopPropagation();
-        onWidgetClick(e);
-        onClick();
-        dispatch(setSelectedBlockId(blockId));
-      }}
       sx={{
         width: '100%',
         backgroundColor: rowOptions.backgroundColor || 'transparent',
@@ -130,10 +131,13 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
           key={colData.id || colIdx}
           colData={colData}
           colIdx={colIdx}
-          onDrop={(item: any) => handleDrop(item, colIdx)} // Added type annotation
-          onDeleteChild={(e: React.MouseEvent, childIdx: number) => handleDeleteChild(e, colIdx, childIdx)} // Added type annotation
+          onDrop={(item: any) => handleDrop(item, colIdx)}
+          onDeleteChild={(e: React.MouseEvent, childIdx: number) => handleDeleteChild(e, colIdx, childIdx)}
           blockId={blockId}
           columnIndex={columnIndex}
+          widgetIndex={widgetIndex}
+          selectedNestedPath={selectedNestedPath}
+          path={path}
         />
       ))}
     </Box>
@@ -141,7 +145,8 @@ const RowFieldComponent: React.FC<RowFieldComponentProps> = ({
 };
 
 // Sub-component for individual column drop target
-const ColumnDropTarget = ({ colData, colIdx, onDrop, onDeleteChild, blockId, columnIndex }: any) => {
+const ColumnDropTarget = ({ colData, colIdx, onDrop, onDeleteChild, blockId, columnIndex, widgetIndex, selectedNestedPath, path }: any) => {
+  const dispatch = useDispatch();
   const dropRef = React.useRef<HTMLDivElement>(null);
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'content',
@@ -149,9 +154,18 @@ const ColumnDropTarget = ({ colData, colIdx, onDrop, onDeleteChild, blockId, col
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [onDrop]);
 
   drop(dropRef);
+
+  const isCurrentSelection = (childIdx: number) => {
+    if (!selectedNestedPath || selectedNestedPath.length !== path.length + 1) return false;
+    for (let i = 0; i < path.length; i++) {
+      if (selectedNestedPath[i].colIdx !== path[i].colIdx || selectedNestedPath[i].childIdx !== path[i].childIdx) return false;
+    }
+    const lastPart = selectedNestedPath[selectedNestedPath.length - 1];
+    return lastPart.colIdx === colIdx && lastPart.childIdx === childIdx;
+  };
 
   return (
     <Box
@@ -174,16 +188,38 @@ const ColumnDropTarget = ({ colData, colIdx, onDrop, onDeleteChild, blockId, col
         colData.children.map((child: any, idx: number) => {
           const WidgetComponent = getWidgetComponent(child.contentType);
           if (!WidgetComponent) return null;
+
+          const isChildSelected = isCurrentSelection(idx);
+          const childPath = [...path, { colIdx, childIdx: idx }];
+
           return (
             <Box key={child.id || idx} sx={{ position: 'relative', width: '100%', mb: 1, '&:hover .delete-btn': { display: 'flex' } }}>
               <WidgetComponent
-                blockId={blockId} // Passing parent block/column context
+                blockId={blockId}
                 columnIndex={columnIndex}
-                widgetIndex={-1}
+                widgetIndex={widgetIndex}
                 widgetData={child}
-                isSelected={false}
-                onClick={() => { }}
-                onWidgetClick={(e: React.MouseEvent) => e.stopPropagation()} // Added type annotation
+                isSelected={isChildSelected}
+                path={childPath}
+                onClick={() => {
+                  dispatch(openEditor({
+                    blockId,
+                    columnIndex,
+                    contentType: child.contentType,
+                    widgetIndex: widgetIndex,
+                    nestedPath: childPath
+                  }));
+                }}
+                onWidgetClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  dispatch(openEditor({
+                    blockId,
+                    columnIndex,
+                    contentType: child.contentType,
+                    widgetIndex: widgetIndex,
+                    nestedPath: childPath
+                  }));
+                }}
               />
               <Box
                 className="delete-btn"

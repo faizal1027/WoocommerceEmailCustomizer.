@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, defaultEmailHeaderEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
 interface EmailHeaderFieldComponentProps {
     blockId: string;
@@ -12,6 +12,7 @@ interface EmailHeaderFieldComponentProps {
     onWidgetClick: (e: React.MouseEvent) => void;
     widgetIndex: number;
     previewMode?: boolean;
+    widgetData?: any;
 }
 
 const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
@@ -21,7 +22,8 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
     onClick,
     onWidgetClick,
     widgetIndex,
-    previewMode = true
+    previewMode = true,
+    widgetData
 }) => {
     const dispatch = useDispatch();
     // Select data from the specific block/column instead of global editor state
@@ -30,17 +32,25 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
 
     // Parse the saved options
     const options = React.useMemo(() => {
+        if (widgetData && widgetData.contentData) {
+            try {
+                return { ...defaultEmailHeaderEditorOptions, ...JSON.parse(widgetData.contentData) };
+            } catch (e) {
+                console.error("Failed to parse header options", e);
+            }
+        }
+
         const contentData = column?.widgetContents?.[widgetIndex]?.contentData;
         if (contentData) {
             try {
-                return JSON.parse(contentData);
+                return { ...defaultEmailHeaderEditorOptions, ...JSON.parse(contentData) };
             } catch (e) {
                 console.error("Failed to parse header options", e);
             }
         }
         // Fallback for legacy loops or if contentData missing
-        return column?.emailHeaderEditorOptions || {};
-    }, [column, widgetIndex]);
+        return defaultEmailHeaderEditorOptions;
+    }, [column, widgetIndex, widgetData]);
 
     // Use options instead of emailHeaderEditorOptions
     const emailHeaderEditorOptions = options;
@@ -52,7 +62,10 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
     return (
         <Box
             onClick={(e) => {
-                // Allow bubbling
+                e.stopPropagation();
+                onWidgetClick(e);
+                onClick();
+                dispatch(setSelectedBlockId(blockId));
             }}
             sx={{
                 width: '100%',

@@ -229,30 +229,42 @@ const CountdownWidgetEditor = () => {
             <Divider sx={{ my: 1 }} />
             <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Unit Labels</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              <TextField
-                label="Days"
-                value={countdownEditorOptions.daysLabel || 'Days'}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ daysLabel: e.target.value }))}
-                size="small"
-              />
-              <TextField
-                label="Hours"
-                value={countdownEditorOptions.hoursLabel || 'Hours'}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ hoursLabel: e.target.value }))}
-                size="small"
-              />
-              <TextField
-                label="Minutes"
-                value={countdownEditorOptions.minutesLabel || 'Minutes'}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ minutesLabel: e.target.value }))}
-                size="small"
-              />
-              <TextField
-                label="Seconds"
-                value={countdownEditorOptions.secondsLabel || 'Seconds'}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ secondsLabel: e.target.value }))}
-                size="small"
-              />
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Days</Typography>
+                <TextField
+                  value={countdownEditorOptions.daysLabel || 'Days'}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ daysLabel: e.target.value }))}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Hours</Typography>
+                <TextField
+                  value={countdownEditorOptions.hoursLabel || 'Hours'}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ hoursLabel: e.target.value }))}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Minutes</Typography>
+                <TextField
+                  value={countdownEditorOptions.minutesLabel || 'Minutes'}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ minutesLabel: e.target.value }))}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Seconds</Typography>
+                <TextField
+                  value={countdownEditorOptions.secondsLabel || 'Seconds'}
+                  onChange={(e) => dispatch(updateCountdownEditorOptions({ secondsLabel: e.target.value }))}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
             </Box>
           </Stack>
         </Box>

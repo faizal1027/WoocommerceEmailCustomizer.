@@ -108,10 +108,11 @@ const PriceWidgetEditor = () => {
                 Label
               </Typography>
               <TextField
-                value={priceEditorOptions.label || 'Price'}
+                value={priceEditorOptions.label}
                 onChange={handleChange('label')}
                 size="small"
                 fullWidth
+                placeholder="Price"
               />
             </Box>
 
@@ -148,6 +149,7 @@ const PriceWidgetEditor = () => {
                   size="small"
                   placeholder="USD"
                   fullWidth
+                  disabled={priceEditorOptions.showCurrencyCode === false}
                 />
               </Box>
             </Box>
@@ -218,6 +220,18 @@ const PriceWidgetEditor = () => {
                   />
                 }
                 label={<Typography variant="body2">Show Symbol</Typography>}
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={priceEditorOptions.showCurrencyCode !== false}
+                    onChange={handleChange('showCurrencyCode')}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label={<Typography variant="body2">Show Currency Code</Typography>}
               />
             </Box>
           </Stack>

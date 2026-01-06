@@ -26,8 +26,10 @@ interface SocialIconsFieldComponentProps {
   blockId: string;
   columnIndex: number;
   onClick: (e: React.MouseEvent) => void;
+  onWidgetClick?: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const socialIcons = {
@@ -44,11 +46,11 @@ const socialIcons = {
   envelope: { icon: <MailIcon />, fallback: "e", color: "#0072C6" },
 } as const;
 
-const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ blockId, columnIndex, onClick, widgetIndex }) => {
+const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ blockId, columnIndex, onClick, onWidgetClick, widgetIndex, widgetData }) => {
   const dispatch = useDispatch();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const widgetContentData = useSelector((state: RootState) => {
+  const storeWidgetContentData = useSelector((state: RootState) => {
     const block = state.workspace.blocks.find((b) => b.id === blockId);
     if (block && block.columns[columnIndex] && block.columns[columnIndex].widgetContents[widgetIndex]) {
       return block.columns[columnIndex].widgetContents[widgetIndex].contentData;
@@ -56,8 +58,10 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
     return null;
   });
 
-  const socialIconsEditorOptions: SocialIconsEditorOptions = widgetContentData
-    ? JSON.parse(widgetContentData)
+  const finalContentData = widgetData ? widgetData.contentData : storeWidgetContentData;
+
+  const socialIconsEditorOptions: SocialIconsEditorOptions = finalContentData
+    ? { ...defaultSocialIconsEditorOptions, ...JSON.parse(finalContentData) }
     : { ...defaultSocialIconsEditorOptions };
 
   // Ensure padding exists
@@ -109,7 +113,12 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
     <Box
       ref={contentRef}
       onClick={(e) => {
-        // Allow bubbling
+        if (onWidgetClick) {
+          onWidgetClick(e);
+        } else if (onClick) {
+          e.stopPropagation();
+          onClick(e);
+        }
       }}
       sx={{
         width: '100%',

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, defaultCtaButtonEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
 interface CtaButtonFieldComponentProps {
     blockId: string;
@@ -12,6 +12,7 @@ interface CtaButtonFieldComponentProps {
     onWidgetClick: (e: React.MouseEvent) => void;
     widgetIndex: number;
     previewMode?: boolean;
+    widgetData?: any;
 }
 
 const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
@@ -21,7 +22,8 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
     onClick,
     onWidgetClick,
     widgetIndex,
-    previewMode = true
+    previewMode = true,
+    widgetData
 }) => {
     const dispatch = useDispatch();
 
@@ -31,16 +33,23 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
 
     // Parse the saved options
     const options = React.useMemo(() => {
+        if (widgetData && widgetData.contentData) {
+            try {
+                return { ...defaultCtaButtonEditorOptions, ...JSON.parse(widgetData.contentData) };
+            } catch (e) {
+            }
+        }
+
         const contentData = column?.widgetContents?.[widgetIndex]?.contentData;
         if (contentData) {
             try {
-                return JSON.parse(contentData);
+                return { ...defaultCtaButtonEditorOptions, ...JSON.parse(contentData) };
             } catch (e) {
                 // Fail silently
             }
         }
-        return column?.ctaButtonEditorOptions || {};
-    }, [column, widgetIndex]);
+        return defaultCtaButtonEditorOptions;
+    }, [column, widgetIndex, widgetData]);
 
     const ctaButtonEditorOptions = options;
 
@@ -56,7 +65,10 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
     return (
         <Box
             onClick={(e) => {
-                // Allow bubbling
+                e.stopPropagation();
+                onWidgetClick(e);
+                onClick();
+                dispatch(setSelectedBlockId(blockId));
             }}
             sx={{
                 width: '100%',

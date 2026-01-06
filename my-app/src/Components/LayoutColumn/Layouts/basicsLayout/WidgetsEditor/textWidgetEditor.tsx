@@ -32,52 +32,21 @@ import { RootState } from "../../../../../Store/store";
 import {
   deleteColumnContent,
   closeEditor,
-  updateWidgetContentData,
+  updateTextEditorOptions,
 } from "../../../../../Store/Slice/workspaceSlice";
-// CKEditor is now loaded via CDN in WordPress to avoid bundling conflicts
+
 // No imports needed here for ClassicEditor or plugins
 import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
+import { IconInsertSelect } from "../../../../utils/IconInsertSelect";
 import ColorPicker from "../../../../utils/ColorPicker";
+import { TextEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
+import { FONT_FAMILIES } from "../../../../../Constants/StyleConstants";
 
 const TextWidgetEditor = () => {
   const dispatch = useDispatch();
-  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
+  const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex, textEditorOptions } = useSelector(
     (state: RootState) => state.workspace
   );
-
-  const column = useSelector((state: RootState) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null) {
-      const block = state.workspace.blocks.find((block) => block.id === selectedBlockForEditor);
-      return block?.columns[selectedColumnIndex];
-    }
-    return null;
-  });
-
-  const widgetContent = column?.widgetContents[selectedWidgetIndex || 0] || null;
-
-  // Stable calculation of options
-  const textEditorOptions = useMemo(() => {
-    if (widgetContent?.contentData) {
-      try {
-        return JSON.parse(widgetContent.contentData);
-      } catch (e) {
-        console.error("Failed to parse widget content data", e);
-      }
-    }
-    return {
-      fontFamily: "global",
-      fontSize: 14,
-      fontWeight: 'normal',
-      fontStyle: 'normal',
-      color: "#d32f2f",
-      backgroundColor: "transparent",
-      textAlign: "left",
-      lineHeight: 140,
-      letterSpace: 1,
-      padding: { top: 0, left: 0, right: 0, bottom: 0 },
-      content: "<p>Click to edit text</p>",
-    };
-  }, [widgetContent?.contentData]);
 
   const {
     fontFamily,
@@ -116,7 +85,7 @@ const TextWidgetEditor = () => {
 
   // Handle Editor Initialization from Global CDN Object
   useEffect(() => {
-    let intervalId: NodeJS.Timer;
+    let intervalId: any;
 
     const initEditor = () => {
       const GlobalClassicEditor = (window as any).ClassicEditor;
@@ -127,7 +96,10 @@ const TextWidgetEditor = () => {
       isInitializingRef.current = true;
 
       GlobalClassicEditor.create(editorRef.current, {
-        toolbar: ["heading", "|", "bold", "italic", "underline", "|", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
+        toolbar: {
+          items: ["heading", "|", "bold", "italic", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
+          shouldNotGroupWhenFull: false
+        }
       })
         .then((editor: any) => {
           setEditorInstance(editor);
@@ -184,23 +156,13 @@ const TextWidgetEditor = () => {
     }
   }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
 
-  const updateData = useCallback((newData: any) => {
-    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
-      const updatedData = { ...optionsRef.current, ...newData };
-      dispatch(
-        updateWidgetContentData({
-          blockId: selectedBlockForEditor,
-          columnIndex: selectedColumnIndex,
-          widgetIndex: selectedWidgetIndex,
-          data: JSON.stringify(updatedData),
-        })
-      );
-    }
-  }, [dispatch, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex]);
+  const updateData = useCallback((newData: Partial<TextEditorOptions>) => {
+    dispatch(updateTextEditorOptions(newData));
+  }, [dispatch]);
 
   const debouncedUpdate = useMemo(() => {
     let timeoutId: any;
-    return (newData: any) => {
+    return (newData: Partial<TextEditorOptions>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => updateData(newData), 50);
     };
@@ -215,6 +177,15 @@ const TextWidgetEditor = () => {
       editorInstance.model.change((writer: any) => {
         const insertPosition = editorInstance.model.document.selection.getFirstPosition();
         writer.insertText(placeholder, insertPosition);
+      });
+    }
+  };
+
+  const handleIconSelect = (icon: string) => {
+    if (editorInstance) {
+      editorInstance.model.change((writer: any) => {
+        const insertPosition = editorInstance.model.document.selection.getFirstPosition();
+        writer.insertText(icon + ' ', insertPosition);
       });
     }
   };
@@ -280,11 +251,19 @@ const TextWidgetEditor = () => {
               Content
             </Typography>
             <Box className="ck-content">
-              <Box mb={2}>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Shortcodes
-                </Typography>
-                <PlaceholderSelect onSelect={handlePlaceholderSelect} />
+              <Box mb={2} display="flex" gap={1}>
+                <Box flex={1}>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                    Shortcodes
+                  </Typography>
+                  <PlaceholderSelect onSelect={handlePlaceholderSelect} />
+                </Box>
+                <Box flex={1}>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                    Icon
+                  </Typography>
+                  <IconInsertSelect onSelect={handleIconSelect} />
+                </Box>
               </Box>
               <div ref={editorRef} />
               <Box mt={1}>
@@ -313,18 +292,19 @@ const TextWidgetEditor = () => {
                 </Typography>
                 <FormControl fullWidth size="small">
                   <Select
-                    value={fontFamily}
-                    onChange={(e) => debouncedUpdate({ fontFamily: e.target.value })}
+                    value={fontFamily === 'inherit' || !fontFamily ? 'global' : (FONT_FAMILIES.includes(fontFamily) ? fontFamily : 'global')}
+                    onChange={(e) => debouncedUpdate({ fontFamily: e.target.value === 'global' ? '' : e.target.value })}
                     MenuProps={{
                       disablePortal: false,
                       sx: { zIndex: 1300001 },
                       style: { zIndex: 1300001 }
                     }}
                   >
-                    <MenuItem value="global">Global</MenuItem>
-                    <MenuItem value="Arial, sans-serif">Arial</MenuItem>
-                    <MenuItem value="Verdana, Geneva, sans-serif">Verdana</MenuItem>
-                    <MenuItem value="Times New Roman, serif">Times New Roman</MenuItem>
+                    {FONT_FAMILIES.map((font) => (
+                      <MenuItem key={font} value={font === 'Global' ? 'global' : font}>
+                        {font}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>
