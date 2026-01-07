@@ -252,7 +252,7 @@ const WorkspaceArea = ({
       onClickCapture={handleClickOutside}
       sx={{
         width: "100%",
-        backgroundColor: previewMode ? "#fff" : "#eaeaea",
+        backgroundColor: previewMode ? "#fff" : "#f5f7f9",
         padding: previewMode ? 0 : 2,
         paddingTop: 0,
         paddingX: 0,
@@ -652,12 +652,8 @@ const ColumnDropTarget = ({
         isSelected: isWidgetSelected,
         onClick: defaultOnClick,
         onWidgetClick: handleWidgetClick(widget.contentType, index),
-        // Pass widgetData only for specific components if needed, or spread all props
-        widgetData: widget // Basic prop for components that might interpret it
+        widgetData: widget
       };
-
-      // Special handling for components that require different props or onClick signatures
-      // However, to keep it simple and consistent with the wrapper logic:
 
       return (
         <DraggableWidgetWrapper
@@ -669,25 +665,16 @@ const ColumnDropTarget = ({
           previewMode={previewMode}
           onWidgetClick={handleWidgetClick(widget.contentType, index)}
         >
-          {/* We manually render the specific component with its specific props to match original logic precisely if needed, 
-                 OR we use the dynamic component approach. The original code had many switch cases returning components directly.
-                 Refactoring to Dynamic Component would be cleaner but might miss specific prop variations.
-                 Let's stick to the safest way: Wrapping the SWITCH statement result is hard because the return happens inside.
-                 So we have to Wrap inside each case? No, that's too much duplication. 
-                 
-                 Let's use the Dynamic Component variable approach which is standard practice.
-                 All widgets seem to accept the same base props: blockId, columnIndex, widgetIndex, isSelected, onClick, onWidgetClick.
-                 Some accept 'widgetData'.
-              */}
           {WidgetComponent && (
             <WidgetComponent
+
               blockId={block.id}
               columnIndex={columnIndex}
               widgetIndex={index}
               isSelected={isWidgetSelected}
               onClick={defaultOnClick}
               onWidgetClick={handleWidgetClick(widget.contentType, index)}
-              widgetData={widget /* Some components expect this, others ignore it */}
+              widgetData={widget}
             />
           )}
         </DraggableWidgetWrapper>

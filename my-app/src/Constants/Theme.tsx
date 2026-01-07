@@ -9,17 +9,16 @@ const theme = createTheme({
     secondary: {
       main: '#dc004e',
     },
-    grey: { // Define grey shades explicitly if you want to use them like theme.palette.grey[400]
+    grey: {
       50: '#fafafa',
       100: '#f5f5f5',
       200: '#eeeeee',
       300: '#e0e0e0',
       400: '#bdbdbd',
       500: '#9e9e9e',
-      // ... other shades
     },
-    common: { // Define common colors explicitly
-      white: '#ffffff', // This is what was undefined
+    common: {
+      white: '#ffffff',
       black: '#000000',
     }
   },

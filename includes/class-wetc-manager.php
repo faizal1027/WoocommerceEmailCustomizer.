@@ -60,9 +60,11 @@ class Posts_List_Table extends \WP_List_Table {
 
     protected function get_sortable_columns() {
         return [
-            'date' => ['created_at', false], // Sortable by date
+            'email_template_name' => ['email_template_name', false],
+            'date'                => ['created_at', false], // Sortable by date
         ];
     }
+
 
     public function column_default($item, $column_name) {
         switch ($column_name) {
@@ -79,19 +81,25 @@ class Posts_List_Table extends \WP_List_Table {
     }
 
     public function column_date($item) {
-        $status = !empty($item['status']) ? ucfirst($item['status']) : 'Published';
-        // Use created_at if available, otherwise current time fallback (or empty)
-        $date = !empty($item['created_at']) ? $item['created_at'] : current_time('mysql');
+        $status_raw = !empty($item['status']) ? $item['status'] : 'publish';
+        $status = ucfirst($status_raw);
         
-        $formatted_date = date_i18n(get_option('date_format') . ' \a\t ' . get_option('time_format'), strtotime($date));
+        // The DB 'created_at' is usually UTC. We need to convert it to local time.
+        $date_utc = !empty($item['created_at']) ? $item['created_at'] : current_time('mysql', 1);
+        $date_local = get_date_from_gmt($date_utc);
         
+        $formatted_date = date_i18n(get_option('date_format') . ' \a\t ' . get_option('time_format'), strtotime($date_local));
+        
+        $label = ($status_raw === 'draft') ? 'Last Modified' : 'Published';
+
         return sprintf(
             '%s<br><span title="%s">%s</span>',
-            esc_html($status),
+            esc_html($label),
             esc_attr($formatted_date),
             esc_html($formatted_date)
         );
     }
+
 
     public function column_cb($item) {
         return sprintf(
@@ -125,8 +133,13 @@ class Posts_List_Table extends \WP_List_Table {
             );
         }
 
+        $status_label = '';
+        if (isset($item['status']) && $item['status'] === 'draft') {
+            $status_label = ' — <span class="post-state">' . __('Draft', 'wc-email-template-customizer') . '</span>';
+        }
+
         return sprintf('%1$s %2$s',
-            '<strong><a class="row-title" href="' . admin_url('admin.php?page=email-customizer-add-new&id=' . $item['id']) . '">' . esc_html($item['email_template_name']) . '</a></strong>',
+            '<strong><a class="row-title" href="' . admin_url('admin.php?page=email-customizer-add-new&id=' . $item['id']) . '">' . esc_html($item['email_template_name']) . '</a></strong>' . $status_label,
             $this->row_actions($actions)
         );
     }
@@ -152,32 +165,28 @@ class Posts_List_Table extends \WP_List_Table {
         
         // Count statuses
         $stats = $wpdb->get_results("SELECT status, COUNT(*) as num FROM $table_name GROUP BY status", ARRAY_A);
-        $counts = ['publish' => 0, 'trash' => 0];
+        $counts = ['publish' => 0, 'draft' => 0, 'trash' => 0];
         foreach ($stats as $row) {
-             if (empty($row['status'])) $row['status'] = 'publish'; // Default
-             if (isset($counts[$row['status']])) {
-                 $counts[$row['status']] = $row['num'];
+             $s = !empty($row['status']) ? $row['status'] : 'publish';
+             if (isset($counts[$s])) {
+                 $counts[$s] += $row['num'];
              } else {
                  $counts['publish'] += $row['num']; // aggregate unknown as publish
              }
         }
         
-        $total_active = $counts['publish'];
+        $total_active = $counts['publish'] + $counts['draft'];
+        $total_published = $counts['publish'];
+        $total_drafts = $counts['draft'];
         $total_trash = $counts['trash'];
-        
+
         $current = !isset($_REQUEST['template_status']) ? 'all' : $_REQUEST['template_status'];
         
-        // All link
-        $class_all = ($current === 'all' || $current === '') ? 'class="current"' : '';
-        // Published link
-        $class_pub = ($current === 'publish') ? 'class="current"' : '';
-        // Trash link
-        $class_trash = ($current === 'trash') ? 'class="current"' : '';
-
         $views = [
-            'all' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', remove_query_arg(['template_status', 'filter_type']), $class_all, __('All', 'wc-email-template-customizer'), $total_active),
-            'publish' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', add_query_arg('template_status', 'publish'), $class_pub, __('Published', 'wc-email-template-customizer'), $total_active),
-            'trash' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', add_query_arg('template_status', 'trash'), $class_trash, __('Trash', 'wc-email-template-customizer'), $total_trash)
+            'all' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', remove_query_arg(['template_status', 'filter_type']), ($current === 'all' || $current === '') ? 'class="current"' : '', __('All', 'wc-email-template-customizer'), $total_active),
+            'publish' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', add_query_arg('template_status', 'publish'), ($current === 'publish') ? 'class="current"' : '', __('Published', 'wc-email-template-customizer'), $total_published),
+            'draft' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', add_query_arg('template_status', 'draft'), ($current === 'draft') ? 'class="current"' : '', __('Drafts', 'wc-email-template-customizer'), $total_drafts),
+            'trash' => sprintf('<a href="%s" %s>%s <span class="count">(%d)</span></a>', add_query_arg('template_status', 'trash'), ($current === 'trash') ? 'class="current"' : '', __('Trash', 'wc-email-template-customizer'), $total_trash)
         ];
 
         return $views;
@@ -251,15 +260,17 @@ class Posts_List_Table extends \WP_List_Table {
         }
 
         // Status Filter
-        // Default to 'publish' (aka not trash) if status not set or set to 'all' or 'publish'
-        // Actually, for WP logic: 'all' usually excludes trash. 'trash' includes only trash.
         $status_filter = isset($_REQUEST['template_status']) ? $_REQUEST['template_status'] : 'all';
         
         if ($status_filter === 'trash') {
             $where .= " AND status = 'trash'";
+        } elseif ($status_filter === 'publish') {
+            $where .= " AND (status = 'publish' OR status IS NULL OR status = '')";
+        } elseif ($status_filter === 'draft') {
+            $where .= " AND status = 'draft'";
         } else {
-            // All and Publish both show non-trashed items
-             $where .= " AND (status = 'publish' OR status IS NULL OR status = '')";
+            // All view: Show everything except trash
+            $where .= " AND (status != 'trash' OR status IS NULL OR status = '')";
         }
 
         // Get Total Count
@@ -284,15 +295,6 @@ class Posts_List_Table extends \WP_List_Table {
         $action = $this->current_action();
 
         if (!$action) return;
-
-        // Security check
-        // check_admin_referer('bulk-' . $this->_args['plural']); (Standard way, but using custom verification below)
-        
-        // Handle Single Row Actions that come via admin-post.php usually, but if they come here via GET:
-        // (Actually row actions like ?action=wetc_delete_template usually point to admin-post hook, not self page reload.
-        // But WP_List_Table often handles them if they point back to page. 
-        // My previous code used admin-post.php for single actions. 
-        // THIS method processes BULK actions from the top dropdown.)
 
         if (isset($_REQUEST['template']) && is_array($_REQUEST['template'])) {
             $ids = array_map('intval', $_REQUEST['template']);

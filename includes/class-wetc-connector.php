@@ -570,11 +570,12 @@ class WETC_Connector {
 
         // Include json_data - frontend needs it for template loading
         // Performance is still optimized via caching
-        $fields = "id, email_template_name, json_data, content_type" . ($has_priority ? ", priority" : "");
+        $fields = "id, email_template_name, json_data, content_type, status" . ($has_priority ? ", priority" : "");
         $results = $wpdb->get_results(
             "SELECT {$fields} FROM {$table_name}",
             ARRAY_A
         );
+
 
         if (!empty($results)) {
             // Cache for 5 minutes
@@ -604,6 +605,8 @@ class WETC_Connector {
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
         $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 0;
         $template_note = isset($_POST['template_note']) ? sanitize_textarea_field($_POST['template_note']) : '';
+        $requested_status = isset($_POST['template_status']) ? sanitize_text_field($_POST['template_status']) : 'publish';
+
 
         error_log('WETC Debug: Saving template note: ' . print_r($template_note, true));
         error_log('WETC Debug: POST data keys: ' . print_r(array_keys($_POST), true));
@@ -668,10 +671,12 @@ class WETC_Connector {
             'content_type' => $content_type,
             'recipient' => $recipient,
             'template_note' => $template_note,
-            'created_at' => $current_time // Update timestamp
+            'created_at' => $current_time, // Update timestamp
+            'status' => $requested_status
         ];
         
-        $formats = ['%s', '%s', '%s', '%s', '%s', '%s', '%s'];
+        $formats = ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'];
+
 
         if ($has_priority) {
             $data['priority'] = $priority;
@@ -686,7 +691,32 @@ class WETC_Connector {
 
         // Check if updating existing template or creating new one
         if ($template_id > 0) {
-            // Update existing template
+            // Check current status in DB
+            $current_template = $wpdb->get_row($wpdb->prepare("SELECT status FROM $table_name WHERE id = %d", $template_id));
+            $current_status = $current_template ? $current_template->status : '';
+
+            // If current is 'publish' and user wants to 'save draft', create a NEW record (clone)
+            if (($current_status === 'publish' || empty($current_status)) && $requested_status === 'draft') {
+                $result = $wpdb->insert(
+                    $table_name,
+                    $data,
+                    $formats
+                );
+
+                if ($result !== false) {
+                    delete_transient('wetc_template_names_list_v3');
+                    wp_send_json_success([
+                        'message' => 'Created draft of published template',
+                        'template_id' => $wpdb->insert_id,
+                        'is_new_draft' => true
+                    ]);
+                } else {
+                    wp_send_json_error(['message' => 'Failed to create draft']);
+                }
+                wp_die();
+            }
+
+            // Otherwise, update existing template
             $result = $wpdb->update(
                 $table_name,
                 $data,
@@ -724,6 +754,7 @@ class WETC_Connector {
                 wp_send_json_error(['message' => 'Failed to save template']);
             }
         }
+
     }
 
     public function send_test_email_callback() {

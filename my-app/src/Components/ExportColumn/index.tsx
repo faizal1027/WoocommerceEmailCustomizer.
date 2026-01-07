@@ -37,7 +37,9 @@ interface Template {
   json_data: string;
   content_type: string;
   priority?: string;
+  status: string;
 }
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -465,10 +467,126 @@ const ExportColumn = () => {
     return `${baseName} ${maxNumber + 1}`;
   };
 
-  // ==== EMAIL TEMPLATE FUNCTIONS ====
+  const handleSaveTemplate = async (status: 'publish' | 'draft') => {
+    if (!templateName.trim()) {
+      showSnackbar('Please enter a template name', 'warning');
+      return;
+    }
+    if (blocks.length === 0) {
+      showSnackbar('No content to save. Add some blocks first.', 'warning');
+      return;
+    }
+
+    setIsSending(true);
+
+    try {
+      // Determine effective template name & Recipient
+      let finalTemplateName = templateName;
+      // Find type info using the selected NAME for mapping and recipient settings
+      const typeInfo = EMAIL_TYPES.find(t => t.name === selectedTemplateId);
+      let recipient = window.emailTemplateAjax.admin_email || 'Admin'; // Default to admin email
+
+      if (typeInfo) {
+        // If category is admin, use admin email. Else use [CUSTOMER_EMAIL]
+        recipient = typeInfo.category === 'admin'
+          ? (window.emailTemplateAjax.admin_email || 'Admin')
+          : '[CUSTOMER_EMAIL]';
+      }
+
+      // If we are ADDING NEW (not editing), generate incremented name to avoid duplicates
+      if (!isEditMode) {
+        finalTemplateName = generateIncrementedName(templateName);
+      }
+
+      // Generate HTML content from blocks
+      const htmlContent = exportToHTML(blocks, {
+        templateName: finalTemplateName,
+        templateDescription: templateDescription || "",
+        minify: false,
+        generateIds: true,
+        responsive: true
+      });
+
+      const formData = new URLSearchParams();
+      formData.append("action", "save_email_template");
+      formData.append("_ajax_nonce", window.emailTemplateAjax.nonce);
+      formData.append("template_name", finalTemplateName);
+      formData.append("priority", String(priority));
+      formData.append("json_data", JSON.stringify(blocks));
+      formData.append("html_content", htmlContent);
+      formData.append("template_status", status);
+
+      // Use the SLUG (type) directly from the dropdown state
+      const selectedTypeSlug = typeInfo ? typeInfo.type : selectedTemplateId;
+      formData.append("content_type", selectedTypeSlug);
+
+      // Map Description UI field to template_note DB column
+      formData.append("template_note", templateDescription || "");
+      formData.append("recipient", recipient);
+
+      // ONLY send template_id if we are in EDIT mode
+      if (isEditMode && currentTemplateId) {
+        formData.append("template_id", currentTemplateId);
+      }
+
+      const response = await axios.post(
+        window.emailTemplateAjax.ajax_url,
+        formData,
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }
+      );
+
+      if (response.data.success) {
+        let message = '';
+        if (status === 'draft') {
+          message = response.data.data.is_new_draft ? 'Published version preserved. New draft created.' : 'Draft saved successfully';
+        } else {
+          message = isEditMode ? 'Template updated and published!' : `Template published: ${finalTemplateName}`;
+        }
+
+        showSnackbar(message, 'success');
+
+        // Refresh the list
+        const fetchResponse = await axios.post(
+          window.emailTemplateAjax.ajax_url,
+          new URLSearchParams({
+            action: "get_email_template_names",
+            _ajax_nonce: window.emailTemplateAjax.nonce
+          }),
+          {
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          }
+        );
+        if (fetchResponse.data.success && fetchResponse.data.data?.templates) {
+          setTemplates(fetchResponse.data.data.templates);
+        }
+
+        if (response.data.data && response.data.data.template_id) {
+          const newId = String(response.data.data.template_id);
+          setCurrentTemplateId(newId);
+          setIsEditMode(true);
+          setTemplateName(finalTemplateName);
+
+          // Update URL
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('id', newId);
+          window.history.pushState({ id: newId }, '', newUrl.toString());
+        }
+      } else {
+        showSnackbar(`Save failed: ${response.data.data?.message || 'Unknown error'}`, 'error');
+      }
+    } catch (error: any) {
+      console.error("Save error:", error);
+      showSnackbar(`Save error: ${error.message}`, 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
 
 
   return (
+
     <Box
       sx={{
         height: "100%",
@@ -613,122 +731,7 @@ const ExportColumn = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={async () => {
-            if (!templateName.trim()) {
-              showSnackbar('Please enter a template name', 'warning');
-              return;
-            }
-            if (blocks.length === 0) {
-              showSnackbar('No content to save. Add some blocks first.', 'warning');
-              return;
-            }
-
-            try {
-              // Determine effective template name & Recipient
-              let finalTemplateName = templateName;
-              // Find type info using the selected NAME for mapping and recipient settings
-              const typeInfo = EMAIL_TYPES.find(t => t.name === selectedTemplateId);
-              let recipient = window.emailTemplateAjax.admin_email || 'Admin'; // Default to admin email
-
-              if (typeInfo) {
-                // If category is admin, use admin email. Else use [CUSTOMER_EMAIL]
-                recipient = typeInfo.category === 'admin'
-                  ? (window.emailTemplateAjax.admin_email || 'Admin')
-                  : '[CUSTOMER_EMAIL]';
-              }
-
-              // If we are ADDING NEW (not editing), generate incremented name to avoid duplicates
-              if (!isEditMode) {
-                finalTemplateName = generateIncrementedName(templateName);
-              }
-
-              // Generate HTML content from blocks
-              const htmlContent = exportToHTML(blocks, {
-                templateName: finalTemplateName,
-                templateDescription: templateDescription || "",
-                minify: false,
-                generateIds: true,
-                responsive: true
-              });
-
-              const formData = new URLSearchParams();
-              formData.append("action", "save_email_template");
-              formData.append("_ajax_nonce", window.emailTemplateAjax.nonce);
-              formData.append("template_name", finalTemplateName);
-              formData.append("priority", String(priority));
-              formData.append("json_data", JSON.stringify(blocks));
-              formData.append("html_content", htmlContent);
-
-              // Use the SLUG (type) directly from the dropdown state
-              // Fix: Map the selected NAME back to the SLUG (type)
-              const selectedTypeSlug = typeInfo ? typeInfo.type : selectedTemplateId;
-              formData.append("content_type", selectedTypeSlug);
-
-              // Map Description UI field to template_note DB column
-              formData.append("template_note", templateDescription || "");
-
-              formData.append("recipient", recipient);
-
-              // ONLY send template_id if we are in EDIT mode
-              if (isEditMode && currentTemplateId) {
-                formData.append("template_id", currentTemplateId);
-              }
-
-              const response = await axios.post(
-                window.emailTemplateAjax.ajax_url,
-                formData,
-                {
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                }
-              );
-
-              if (response.data.success) {
-                const message = isEditMode
-                  ? 'Template updated successfully'
-                  : `Template created: ${finalTemplateName}`;
-
-                showSnackbar(message, 'success');
-
-                // Refresh the list and update state for the new template
-
-                const fetchResponse = await axios.post(
-                  window.emailTemplateAjax.ajax_url,
-                  new URLSearchParams({
-                    action: "get_email_template_names",
-                    _ajax_nonce: window.emailTemplateAjax.nonce
-                  }),
-                  {
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  }
-                );
-                if (fetchResponse.data.success && fetchResponse.data.data?.templates) {
-                  setTemplates(fetchResponse.data.data.templates);
-                }
-
-                if (response.data.data && response.data.data.template_id) {
-                  const newId = String(response.data.data.template_id);
-                  setCurrentTemplateId(newId);
-                  setIsEditMode(true);
-                  // Also fix the template name in state to match what was saved (with increments)
-                  setTemplateName(finalTemplateName);
-
-
-                  // CRITICAL: Update URL so refresh/re-refetch doesn't clear blocks
-                  const newUrl = new URL(window.location.href);
-                  newUrl.searchParams.set('id', newId);
-                  window.history.pushState({ id: newId }, '', newUrl.toString());
-                }
-
-                // Stay in Add New mode to allow creating multiple copies if needed
-
-              } else {
-                showSnackbar(`Save failed: ${response.data.data?.message || 'Unknown error'}`, 'error');
-              }
-            } catch (error: any) {
-              console.error("Save error:", error);
-              showSnackbar(`Save error: ${error.message}`, 'error');
-            }
-          }}
+          onClick={() => handleSaveTemplate('draft')}
           disabled={isSending}
           sx={{
             fontSize: "14px",
@@ -753,6 +756,8 @@ const ExportColumn = () => {
         <Button
           variant="contained"
           color="primary"
+          onClick={() => handleSaveTemplate('publish')}
+          disabled={isSending}
           sx={{
             fontSize: "14px",
             borderRadius: "3px",
@@ -765,11 +770,16 @@ const ExportColumn = () => {
               border: "1px solid",
               borderColor: "primary.main",
             },
+            "&:disabled": {
+              backgroundColor: "#cccccc",
+              color: "#666",
+            },
           }}
         >
-          Publish
+          {isEditMode && templates.find(t => t.id === currentTemplateId)?.status === 'publish' ? 'Update' : 'Publish'}
         </Button>
       </Box>
+
 
       <Divider />
 

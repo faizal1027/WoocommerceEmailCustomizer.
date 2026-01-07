@@ -11,7 +11,7 @@ const Workspace = () => {
         width: '90%',
         display: "flex",
         flexDirection: "column",
-        backgroundColor: '#eaeaea',
+        backgroundColor: '#f5f7f9',
         height: "100%",
         overflowY: "auto"
       }}

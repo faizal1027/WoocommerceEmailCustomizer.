@@ -209,7 +209,7 @@ private function get_order_id_from_object($email) {
         foreach ($search_types as $type_to_find) {
             // 1. Try exact match with highest priority
             $row = $wpdb->get_row($wpdb->prepare(
-                "SELECT * FROM $table_name WHERE content_type = %s ORDER BY priority DESC, id DESC LIMIT 1",
+                "SELECT * FROM $table_name WHERE content_type = %s AND (status = 'publish' OR status IS NULL OR status = '') ORDER BY priority DESC, id DESC LIMIT 1",
                 $type_to_find
             ));
 
@@ -220,7 +220,8 @@ private function get_order_id_from_object($email) {
         $normalized_input = str_replace(' ', '_', strtolower($content_type));
         if (empty($normalized_input)) return null;
 
-        $all_templates = $wpdb->get_results("SELECT * FROM $table_name WHERE content_type != '' AND content_type IS NOT NULL ORDER BY priority DESC, id DESC");
+        $all_templates = $wpdb->get_results("SELECT * FROM $table_name WHERE content_type != '' AND content_type IS NOT NULL AND (status = 'publish' OR status IS NULL OR status = '') ORDER BY priority DESC, id DESC");
+
         
         foreach ($all_templates as $template) {
             $t_slug = str_replace(' ', '_', strtolower(trim((string)$template->content_type)));
