@@ -103,10 +103,15 @@ const LayoutEditorWidget = () => {
   };
 
   const dispatchStyleUpdate = (blockAction: any, columnAction: any, payload: any) => {
+    const finalColumnPayload = { ...payload, columnIndex: selectedColumnIndex, blockId: selectedBlockForEditor };
+    const finalBlockPayload = { ...payload, blockId: selectedBlockForEditor };
+
+
+
     if (isColumnSelected && selectedColumnIndex !== null) {
-      dispatch(columnAction({ ...payload, columnIndex: selectedColumnIndex }));
+      dispatch(columnAction(finalColumnPayload));
     } else {
-      dispatch(blockAction(payload));
+      dispatch(blockAction(finalBlockPayload));
     }
   };
 
@@ -161,6 +166,7 @@ const LayoutEditorWidget = () => {
                 <Select
                   value={selectedColumnIndex !== null ? selectedColumnIndex : ""}
                   onChange={handleColumnSelectChange}
+                  MenuProps={{ disablePortal: true }}
                 >
                   {Array.from({ length: numberOfColumns }, (_, i) => (
                     <MenuItem key={i} value={i}>
@@ -208,12 +214,14 @@ const LayoutEditorWidget = () => {
                             updateColumnBorderStyle,
                             {
                               blockId: selectedBlockForEditor!,
+                              columnIndex: selectedColumnIndex!,
                               style: e.target.value as 'solid' | 'dashed' | 'dotted',
                             }
                           )
                         }
                         displayEmpty
                         inputProps={{ "aria-label": "Select border style" }}
+                        MenuProps={{ disablePortal: true }}
                       >
                         <MenuItem value="solid">Solid</MenuItem>
                         <MenuItem value="dashed">Dashed</MenuItem>
@@ -239,6 +247,7 @@ const LayoutEditorWidget = () => {
                           updateColumnBorderTopSize,
                           {
                             blockId: selectedBlockForEditor!,
+                            columnIndex: selectedColumnIndex!,
                             size: Math.min(Number(e.target.value), 40),
                           }
                         )
@@ -253,7 +262,7 @@ const LayoutEditorWidget = () => {
                         dispatchStyleUpdate(
                           () => { },
                           updateColumnBorderTopColor,
-                          { blockId: selectedBlockForEditor!, color: color }
+                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
                         )
                       }
                     />
@@ -272,6 +281,7 @@ const LayoutEditorWidget = () => {
                           updateColumnBorderBottomSize,
                           {
                             blockId: selectedBlockForEditor!,
+                            columnIndex: selectedColumnIndex!,
                             size: Math.min(Number(e.target.value), 40),
                           }
                         )
@@ -286,7 +296,7 @@ const LayoutEditorWidget = () => {
                         dispatchStyleUpdate(
                           () => { },
                           updateColumnBorderBottomColor,
-                          { blockId: selectedBlockForEditor!, color: color }
+                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
                         )
                       }
                     />
@@ -304,6 +314,7 @@ const LayoutEditorWidget = () => {
                           updateColumnBorderLeftSize,
                           {
                             blockId: selectedBlockForEditor!,
+                            columnIndex: selectedColumnIndex!,
                             size: Math.min(Number(e.target.value), 40),
                           }
                         )
@@ -318,7 +329,7 @@ const LayoutEditorWidget = () => {
                         dispatchStyleUpdate(
                           () => { },
                           updateColumnBorderLeftColor,
-                          { blockId: selectedBlockForEditor!, color: color }
+                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
                         )
                       }
                     />
@@ -336,6 +347,7 @@ const LayoutEditorWidget = () => {
                           updateColumnBorderRightSize,
                           {
                             blockId: selectedBlockForEditor!,
+                            columnIndex: selectedColumnIndex!,
                             size: Math.min(Number(e.target.value), 40),
                           }
                         )
@@ -350,7 +362,7 @@ const LayoutEditorWidget = () => {
                         dispatchStyleUpdate(
                           () => { },
                           updateColumnBorderRightColor,
-                          { blockId: selectedBlockForEditor!, color: color }
+                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
                         )
                       }
                     />

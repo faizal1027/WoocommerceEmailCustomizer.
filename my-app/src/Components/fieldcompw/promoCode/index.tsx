@@ -44,7 +44,7 @@ const PromoCodeFieldComponent: React.FC<PromoCodeFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        border: isSelected ? '2px dashed blue' : `2px dashed ${promoCodeEditorOptions.borderColor || '#ffeaa7'}`,
+        border: `2px solid ${promoCodeEditorOptions.borderColor || '#ffeaa7'}`,
         borderRadius: '8px',
         backgroundColor: promoCodeEditorOptions.backgroundColor || '#fff3cd',
         color: promoCodeEditorOptions.textColor || '#856404',
@@ -54,7 +54,7 @@ const PromoCodeFieldComponent: React.FC<PromoCodeFieldComponentProps> = ({
       }}
     >
       <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
-        Special Offer!
+        {promoCodeEditorOptions.title || 'Special Offer!'}
       </Typography>
       <Typography variant="body2" sx={{ mb: 2 }}>
         {promoCodeEditorOptions.description || 'Use this code to get 20% off your purchase!'}

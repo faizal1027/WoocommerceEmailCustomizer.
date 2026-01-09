@@ -57,7 +57,6 @@ import VideoWidgetEditor from './ExtraLayout/WidgetsEditor/videoWidgetEditor';
 
 import CountdownWidgetEditor from './ExtraLayout/WidgetsEditor/countdownWidgetEditor';
 // import ProgressBarWidgetEditor from './ExtraLayout/WidgetsEditor/progressBarWidgetEditor';
-import ProductWidgetEditor from './ExtraLayout/WidgetsEditor/productWidgetEditor';
 import PromoCodeWidgetEditor from './ExtraLayout/WidgetsEditor/promoCodeWidgetEditor';
 import PriceWidgetEditor from './ExtraLayout/WidgetsEditor/priceWidgetEditor';
 // import TestimonialWidgetEditor from './ExtraLayout/WidgetsEditor/testimonialWidgetEditor';
@@ -165,8 +164,6 @@ const OverallLayout = () => {
         return <CountdownWidgetEditor />;
       // case 'progressBar':
       //   return <ProgressBarWidgetEditor />;
-      case 'product':
-        return <ProductWidgetEditor />;
       case 'promoCode':
         return <PromoCodeWidgetEditor />;
       case 'price':

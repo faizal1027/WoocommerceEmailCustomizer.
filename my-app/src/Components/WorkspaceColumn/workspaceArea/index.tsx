@@ -77,6 +77,7 @@ const WorkspaceArea = ({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(
     null
   );
+  const [isLayoutSelectorOpen, setIsLayoutSelectorOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
 
   const [, dropLayout] = useDrop(() => ({
@@ -92,6 +93,7 @@ const WorkspaceArea = ({
   useEffect(() => {
     if (dropRef.current) dropLayout(dropRef.current);
   }, [dropLayout]);
+
 
   useEffect(() => {
     if (viewMode === "mobile") {
@@ -134,32 +136,24 @@ const WorkspaceArea = ({
           try {
             let parsedBlocks: DroppedBlock[] = JSON.parse(response.data.data.json_data);
 
-            // Smart Cleanup: Fix "Phantom Columns" issue
+
             if (parsedBlocks.length > 0) {
-              console.log("DEBUG: Starting Cleanup. Blocks:", parsedBlocks.length);
               parsedBlocks = parsedBlocks.map(block => {
-                // Check if the block has content in the first column
                 const firstCol = block.columns[0];
                 const firstColContent = firstCol?.widgetContents?.[0];
 
-                console.log(`Block ${block.id}: Cols=${block.columns.length}, FirstColType=${firstColContent?.contentType}`);
-
-                // If the first column contains a "Layout" widget that should be full-width (Section, Row, Container)
-                // And there are extra empty columns... delete the extra columns.
                 if (firstColContent && firstColContent.contentType && ['section', 'row', 'container'].includes(firstColContent.contentType) && block.columns.length > 1) {
                   const hasExtraEmptyCols = block.columns.slice(1).every(col => col.widgetContents.length === 0);
                   if (hasExtraEmptyCols) {
-                    console.log(`Fixing phantom columns for block ${block.id}`);
                     return {
                       ...block,
-                      columns: [firstCol] // Keep only the first column
+                      columns: [firstCol]
                     };
                   }
                 }
                 return block;
               });
 
-              // Also remove completely empty blocks (as before)
               parsedBlocks = parsedBlocks.filter(block => {
                 return !block.columns.every(col => col.widgetContents.length === 0);
               });
@@ -234,7 +228,7 @@ const WorkspaceArea = ({
   };
 
   const handleDelete = (id: string) => {
-    console.log('UI: handleDelete clicked for ID:', id);
+
     if (previewMode) return;
     dispatch(deleteBlock(id));
   };
@@ -244,6 +238,11 @@ const WorkspaceArea = ({
   const handleCopy = (id: string) => {
     if (previewMode) return;
     dispatch(copyBlock(id));
+  };
+
+  const handleAddLayout = (columns: number) => {
+    dispatch(addBlock({ columns }));
+    setIsLayoutSelectorOpen(false);
   };
 
   return (
@@ -261,7 +260,7 @@ const WorkspaceArea = ({
         overflowY: "auto",
       }}
     >
-      {blocks.length === 0 && !previewMode && (
+      {blocks.length === 0 && !previewMode && !isLayoutSelectorOpen && (
         <Box
           sx={{
             border: "2px dashed #3ba0f3ff",
@@ -277,6 +276,7 @@ const WorkspaceArea = ({
             justifyItems: "center",
             background: "#e8e8e8ff",
           }}
+          onClick={() => setIsLayoutSelectorOpen(true)}
         >
           <AddCircleOutlineIcon
             sx={{
@@ -292,10 +292,11 @@ const WorkspaceArea = ({
             }}
           />
           <Typography>
-            Drag a layout from the general layout to get started
+            Click or drag a layout to get started
           </Typography>
         </Box>
       )}
+
       {blocks.map((block, index) => (
         <Block
           key={block.id}
@@ -310,6 +311,95 @@ const WorkspaceArea = ({
         />
       ))}
 
+      {isLayoutSelectorOpen && !previewMode && (
+        <Box
+          sx={{
+            width: "fit-content",
+            margin: "15px auto",
+            padding: "16px 24px",
+            backgroundColor: "#fff",
+            borderRadius: "8px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 1.5,
+              mb: 1,
+            }}
+          >
+            {[1, 2, 3, 4].map((cols) => (
+              <Box
+                key={cols}
+                onClick={() => handleAddLayout(cols)}
+                sx={{
+                  width: 70,
+                  height: 35,
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "3px",
+                  display: "flex",
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    borderColor: "#3ba0f3",
+                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                  },
+                }}
+              >
+                {Array.from({ length: cols }).map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      flex: 1,
+                      backgroundColor: "#6c757d",
+                      borderRight: i < cols - 1 ? "1px solid #fff" : "none",
+                    }}
+                  />
+                ))}
+              </Box>
+            ))}
+          </Box>
+          <Typography
+            onClick={() => setIsLayoutSelectorOpen(false)}
+            sx={{
+              fontSize: "12px",
+              color: "#1976d2",
+              cursor: "pointer",
+              "&:hover": { textDecoration: "underline" }
+            }}
+          >
+            Cancel
+          </Typography>
+        </Box>
+      )}
+
+      {blocks.length > 0 && !previewMode && !isLayoutSelectorOpen && (
+        <Box sx={{ textAlign: "center", my: 3 }}>
+          <Tooltip title="Add Layout">
+            <AddCircleOutlineIcon
+              onClick={() => setIsLayoutSelectorOpen(true)}
+              sx={{
+                fontSize: 40,
+                color: "#1275c6ff",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  color: "#42a5f5",
+                  transform: "scale(1.1)",
+                },
+              }}
+            />
+          </Tooltip>
+        </Box>
+      )}
     </Box>
   );
 };
@@ -375,9 +465,7 @@ const Block = ({
       // Get pixels to the top
       const hoverClientY = (clientOffset as any).y - hoverBoundingRect.top;
 
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
+
 
       // Dragging downwards
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
@@ -416,20 +504,39 @@ const Block = ({
         }
       }}
       sx={{
+        display: isMobileView ? "flex" : "table",
+        tableLayout: "fixed",
+        flexDirection: isMobileView ? "column" : "row",
         maxWidth: isMobileView ? "100%" : previewMode ? "100%" : "80%",
         margin: previewMode ? "0" : "0 auto",
-        position: "relative",
-        display: isMobileView ? "flex" : "table",
-        flexDirection: isMobileView ? "column" : undefined,
         width: "100%",
-        tableLayout: isMobileView ? undefined : "fixed",
         boxSizing: "border-box",
         cursor: previewMode ? "default" : "pointer",
         opacity: isDragging ? 0.5 : 1,
-        border: isOver ? "2px dashed #3ba0f3" : "none",
-        ".action-btn": {
-          display:
-            !previewMode && selectedBlockId === block.id ? "block" : "none",
+        zIndex: (selectedBlockId === block.id || isDragging) ? 2 : 1,
+        // Using pseudo-element overlay for guaranteed visibility
+        position: "relative",
+        boxShadow: "none",
+        outline: "none",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: "none",
+          zIndex: 10,
+          border: (isOver || (selectedBlockId === block.id && !previewMode)) ? "1px solid #2196F3" : "none",
+        },
+        "&:hover": {
+          zIndex: 2,
+          "&::after": {
+            border: !previewMode ? "1px solid #2196F3" : undefined,
+          },
+          ".action-btn": {
+            display: !previewMode ? "block" : "none",
+          },
         },
       }}
     >
@@ -444,64 +551,68 @@ const Block = ({
         />
       ))}
 
-      {!previewMode && selectedBlockId === block.id && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: -70,
-            display: "flex",
-            justifyContent: "right",
-            width: 70,
-          }}
-        >
-          <Tooltip title="duplicate" placement="bottom">
-            <ContentCopyTwoToneIcon
-              sx={{
-                padding: "4px 8px",
-                fontSize: 34,
-                background: "transparent",
-                borderRadius: "50%",
-                transition: "0.2s ease",
-                "&:hover": {
-                  background: "#3d3d3d",
-                  color: "#fff",
-                },
-              }}
-              className="action-btn"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopy(block.id);
-              }}
-            />
-          </Tooltip>
+      {
+        !previewMode && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: -70,
+              display: "flex",
+              justifyContent: "right",
+              width: 70,
+            }}
+          >
+            <Tooltip title="duplicate" placement="bottom">
+              <ContentCopyTwoToneIcon
+                sx={{
+                  padding: "4px 8px",
+                  fontSize: 34,
+                  background: "transparent",
+                  borderRadius: "50%",
+                  transition: "0.2s ease",
+                  "&:hover": {
+                    background: "#3d3d3d",
+                    color: "#fff",
+                  },
+                  display: selectedBlockId === block.id ? "block" : "none",
+                }}
+                className="action-btn"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(block.id);
+                }}
+              />
+            </Tooltip>
 
-          <Tooltip title="delete" placement="bottom">
-            <DeleteOutlineTwoToneIcon
-              fontSize="medium"
-              className="action-btn"
-              sx={{
-                padding: "3px 6px",
-                fontSize: 34,
-                background: "transparent",
-                transition: "0.2s ease",
-                borderRadius: "50%",
-                "&:hover": {
-                  background: "#e12c05",
-                  color: "#fff",
-                },
-              }}
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(block.id);
-              }}
-            />
-          </Tooltip>
-        </Box>
-      )}
-    </Box>
+            <Tooltip title="delete" placement="bottom">
+              <DeleteOutlineTwoToneIcon
+                fontSize="medium"
+                className="action-btn"
+                sx={{
+                  padding: "3px 6px",
+                  fontSize: 34,
+                  background: "transparent",
+                  transition: "0.2s ease",
+                  borderRadius: "50%",
+                  "&:hover": {
+                    background: "#e12c05",
+                    color: "#fff",
+                  },
+                  display: selectedBlockId === block.id ? "block" : "none",
+                }}
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(block.id);
+                }}
+              />
+            </Tooltip>
+          </Box>
+        )
+      }
+    </Box >
   );
 };
 
@@ -693,23 +804,27 @@ const ColumnDropTarget = ({
   const columnWidth = 100 / block.columns.length;
 
   // Build inline styles object
+  if (!previewMode) {
+
+  }
   const columnStyle: React.CSSProperties = {
-    width: `${columnWidth}%`,
-    minWidth: `${columnWidth}%`,
-    maxWidth: `${columnWidth}%`,
-    display: 'table-cell',
+    display: isMobileView ? 'block' : 'table-cell',
     verticalAlign: 'top',
+    width: isMobileView ? '100%' : `${columnWidth}%`,
     boxSizing: 'border-box',
     backgroundColor: column.style.bgColor,
-    borderTop: `${column.style.borderTopSize}px ${column.style.borderStyle} ${column.style.borderTopColor}`,
-    borderBottom: `${column.style.borderBottomSize}px ${column.style.borderStyle} ${column.style.borderBottomColor}`,
-    borderLeft: `${column.style.borderLeftSize}px ${column.style.borderStyle} ${column.style.borderLeftColor}`,
-    borderRight: `${column.style.borderRightSize}px ${column.style.borderStyle} ${column.style.borderRightColor}`,
-    padding: column.style.padding
-      ? `${column.style.padding.top}px ${column.style.padding.right}px ${column.style.padding.bottom}px ${column.style.padding.left}px`
-      : `${(column.style as any).paddingTop || 0}px ${(column.style as any).paddingRight || 0}px ${(column.style as any).paddingBottom || 0}px ${(column.style as any).paddingLeft || 0}px`,
+    borderTop: `${column.style.borderTopSize || 0}px ${column.style.borderStyle || 'solid'} ${column.style.borderTopColor || 'transparent'}`,
+    borderBottom: `${column.style.borderBottomSize || 0}px ${column.style.borderStyle || 'solid'} ${column.style.borderBottomColor || 'transparent'}`,
+    borderLeft: `${column.style.borderLeftSize || 0}px ${column.style.borderStyle || 'solid'} ${column.style.borderLeftColor || 'transparent'}`,
+    borderRight: `${column.style.borderRightSize || 0}px ${column.style.borderStyle || 'solid'} ${column.style.borderRightColor || 'transparent'}`,
+    paddingTop: `${column.style.padding?.top ?? 10}px`,
+    paddingRight: `${column.style.padding?.right ?? 10}px`,
+    paddingBottom: `${column.style.padding?.bottom ?? 10}px`,
+    paddingLeft: `${column.style.padding?.left ?? 10}px`,
+    textAlign: (column.style.textAlign as any) || 'left',
     minHeight: `${columnDisplayHeight}px`,
     position: 'relative',
+    height: column.style.height === 'auto' ? 'auto' : `${column.style.height}px`,
   };
 
   // Map textAlign to flex alignItems
@@ -722,7 +837,7 @@ const ColumnDropTarget = ({
   const alignItems = alignItemsMap[column.style.textAlign || 'left'] || 'flex-start';
 
   return (
-    <div
+    <Box
       ref={columnRef}
       className="droppable-column"
       onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -732,9 +847,9 @@ const ColumnDropTarget = ({
           openEditor({ blockId: block.id, columnIndex, contentType: null })
         );
       }}
-      style={columnStyle}
+      sx={columnStyle}
     >
-      <div style={{
+      <Box sx={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: alignItems,
@@ -744,7 +859,7 @@ const ColumnDropTarget = ({
         width: '100%',
       }}>
         {renderContent()}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

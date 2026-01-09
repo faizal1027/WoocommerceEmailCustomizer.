@@ -135,6 +135,31 @@ const HeadingWidgetEditor = () => {
 
         <Divider />
 
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Heading Text
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            variant="outlined"
+            size="small"
+            value={headingEditorOptions.content || ""}
+            onChange={(e) => debouncedUpdate({ content: e.target.value })}
+            placeholder="Type your heading here..."
+            sx={{
+              '& .MuiInputBase-input': {
+                border: 'none !important',
+                boxShadow: 'none !important',
+                outline: 'none !important',
+              }
+            }}
+          />
+        </Box>
+
+        <Divider />
+
         {/* Section: Heading Type */}
         <Box>
           <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>

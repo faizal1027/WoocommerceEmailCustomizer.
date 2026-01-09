@@ -89,6 +89,58 @@ const OrderSubtotalWidgetEditor = () => {
                     />
                 </Box>
 
+                <Divider />
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Translations</Typography>
+
+                <Stack spacing={2}>
+                    <Box>
+                        {renderLabel("Subtotal Label")}
+                        <TextField
+                            value={orderSubtotalEditorOptions.subtotalLabel || 'Subtotal'}
+                            onChange={handleChange('subtotalLabel' as any)}
+                            size="small"
+                            fullWidth
+                        />
+                    </Box>
+                    <Box>
+                        {renderLabel("Discount Label")}
+                        <TextField
+                            value={orderSubtotalEditorOptions.discountLabel || 'Discount'}
+                            onChange={handleChange('discountLabel' as any)}
+                            size="small"
+                            fullWidth
+                        />
+                    </Box>
+                    <Box>
+                        {renderLabel("Shipping Label")}
+                        <TextField
+                            value={orderSubtotalEditorOptions.shippingLabel || 'Shipping'}
+                            onChange={handleChange('shippingLabel' as any)}
+                            size="small"
+                            fullWidth
+                        />
+                    </Box>
+                    <Box>
+                        {renderLabel("Refunded Fully Label")}
+                        <TextField
+                            value={orderSubtotalEditorOptions.refundedFullyLabel || 'Order fully refunded'}
+                            onChange={handleChange('refundedFullyLabel' as any)}
+                            size="small"
+                            fullWidth
+                        />
+                    </Box>
+                    <Box>
+                        {renderLabel("Refunded Partial Label")}
+                        <TextField
+                            value={orderSubtotalEditorOptions.refundedPartialLabel || 'Refund'}
+                            onChange={handleChange('refundedPartialLabel' as any)}
+                            size="small"
+                            fullWidth
+                        />
+                    </Box>
+                </Stack>
+                <Divider />
+
                 <CommonStylingControls
                     options={orderSubtotalEditorOptions}
                     onUpdate={(updatedOptions) => dispatch(updateOrderSubtotalEditorOptions(updatedOptions))}

@@ -28,7 +28,7 @@ export type WidgetContentType = 'text' | 'heading' | 'socialIcons' | 'button' | 
   // Layout Block
   'row' | 'container' | 'group' |
   // Extra Block
-  'socialFollow' | 'video' | 'countdown' | 'progressBar' | 'product' | 'promoCode' | 'price' | 'testimonial' | 'navbar' | 'card' | 'alert' | 'progress' |
+  'socialFollow' | 'video' | 'countdown' | 'progressBar' | 'promoCode' | 'price' | 'testimonial' | 'navbar' | 'card' | 'alert' | 'progress' |
   // Forms
   'form' | 'survey' | 'input' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'label' |
   // WooCommerce Layout
@@ -103,7 +103,6 @@ interface Column {
 
   countdownEditorOptions: CountdownEditorOptions;
   progressBarEditorOptions: ProgressBarEditorOptions;
-  productEditorOptions: ProductEditorOptions;
   promoCodeEditorOptions: PromoCodeEditorOptions;
   priceEditorOptions: PriceEditorOptions;
   testimonialEditorOptions: TestimonialEditorOptions;
@@ -301,6 +300,7 @@ export interface HeadingEditorOptions {
     right: number;
     bottom: number;
   };
+  content: string;
 }
 
 export type SocialIconKey = 'facebook' | 'twitter' | 'linkedin' | 'instagram' | 'pinterest' | 'youtube' | 'whatsapp' | 'reddit' | 'github' | 'telegram' | 'envelope';
@@ -434,19 +434,8 @@ export interface ProgressBarEditorOptions {
   barColor?: string;
 }
 
-export interface ProductEditorOptions {
-  name: string;
-  price: string | number;
-  image: string;
-  description: string;
-  buttonText: string;
-  buttonUrl: string;
-  buttonLink?: string;
-  imageUrl?: string;
-  currency?: string;
-}
-
 export interface PromoCodeEditorOptions {
+  title: string;
   code: string;
   description: string;
   validUntil: string;
@@ -702,7 +691,7 @@ export interface ShippingAddressEditorOptions {
   textColor: string;
   textAlign: string;
   backgroundColor: string;
-  padding: string; // Standardized
+  padding: string;
 }
 
 export interface BillingAddressEditorOptions {
@@ -723,7 +712,7 @@ export interface BillingAddressEditorOptions {
   backgroundColor: string;
   lineHeight: string;
   letterSpacing: string;
-  padding: string; // Standardized
+  padding: string;
 }
 
 export interface TaxBillingEditorOptions {
@@ -762,6 +751,11 @@ export interface OrderSubtotalEditorOptions {
   padding?: string;
   labelAlign?: string;
   valueAlign?: string;
+  subtotalLabel?: string;
+  discountLabel?: string;
+  shippingLabel?: string;
+  refundedFullyLabel?: string;
+  refundedPartialLabel?: string;
 }
 
 export interface OrderTotalEditorOptions {
@@ -973,7 +967,6 @@ export interface WorkspaceState {
 
   countdownEditorOptions: CountdownEditorOptions;
   progressBarEditorOptions: ProgressBarEditorOptions;
-  productEditorOptions: ProductEditorOptions;
   promoCodeEditorOptions: PromoCodeEditorOptions;
   priceEditorOptions: PriceEditorOptions;
   testimonialEditorOptions: TestimonialEditorOptions;
@@ -1103,7 +1096,8 @@ export const defaultHeadingEditorOptions: HeadingEditorOptions = {
   lineHeight: 110,
   letterSpace: 1,
   padding: { top: 0, left: 0, right: 0, bottom: 0 },
-  headingType: 'h1'
+  headingType: 'h1',
+  content: 'Type your heading here...'
 };
 
 export const defaultSocialIconsEditorOptions: SocialIconsEditorOptions = {
@@ -1135,9 +1129,9 @@ export const defaultDividerEditorOptions: DividerEditorOptions = {
 export const defaultImageEditorOptions: ImageEditorOptions = {
   src: 'https://cdn.tools.unlayer.com/image/placeholder.png',
   altText: '',
-  width: '100%',
+  width: '300px',
   align: 'center',
-  autoWidth: true,
+  autoWidth: false,
   padding: {
     top: 0,
     left: 0,
@@ -1283,16 +1277,8 @@ const defaultProgressBarEditorOptions: ProgressBarEditorOptions = {
   showPercentage: true
 };
 
-const defaultProductEditorOptions: ProductEditorOptions = {
-  name: 'Product Name',
-  price: '$19.99',
-  image: 'https://cdn.tools.unlayer.com/image/placeholder.png',
-  description: 'Product description here',
-  buttonText: 'Buy Now',
-  buttonUrl: '#'
-};
-
 const defaultPromoCodeEditorOptions: PromoCodeEditorOptions = {
+  title: 'Special Offer!',
   code: 'SAVE20',
   description: '20% off on all items',
   validUntil: '2024-12-31',
@@ -1405,7 +1391,7 @@ export const defaultSelectEditorOptions: SelectEditorOptions = {
   borderWidth: 1,
   borderStyle: 'solid',
   width: '100%',
-  height: 'auto'
+  height: 'auto',
 };
 
 const defaultCheckboxEditorOptions: CheckboxEditorOptions = {
@@ -1448,7 +1434,7 @@ const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
   textColor: "#333333",
   textAlign: "left",
   backgroundColor: "transparent",
-  padding: "16px", // Standardized
+  padding: "16px",
 };
 
 const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
@@ -1469,7 +1455,7 @@ const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
   backgroundColor: "transparent",
   lineHeight: "1.5",
   letterSpacing: "0px",
-  padding: "16px", // Standardized
+  padding: "16px",
 };
 
 export const defaultTaxBillingEditorOptions: TaxBillingEditorOptions = {
@@ -1606,7 +1592,12 @@ export const defaultOrderSubtotalEditorOptions: OrderSubtotalEditorOptions = {
   spacing: 12,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
-  valueAlign: 'right'
+  valueAlign: 'right',
+  subtotalLabel: 'Subtotal',
+  discountLabel: 'Discount',
+  shippingLabel: 'Shipping',
+  refundedFullyLabel: 'Order fully refunded',
+  refundedPartialLabel: 'Refund',
 };
 
 export const defaultOrderTotalEditorOptions: OrderTotalEditorOptions = {
@@ -1699,7 +1690,6 @@ const initialState: WorkspaceState = {
 
   countdownEditorOptions: defaultCountdownEditorOptions,
   progressBarEditorOptions: defaultProgressBarEditorOptions,
-  productEditorOptions: defaultProductEditorOptions,
   promoCodeEditorOptions: defaultPromoCodeEditorOptions,
   priceEditorOptions: defaultPriceEditorOptions,
   testimonialEditorOptions: defaultTestimonialEditorOptions,
@@ -1796,7 +1786,6 @@ const workspaceSlice = createSlice({
 
           countdownEditorOptions: { ...defaultCountdownEditorOptions },
           progressBarEditorOptions: { ...defaultProgressBarEditorOptions },
-          productEditorOptions: { ...defaultProductEditorOptions },
           promoCodeEditorOptions: { ...defaultPromoCodeEditorOptions },
           priceEditorOptions: { ...defaultPriceEditorOptions },
           testimonialEditorOptions: { ...defaultTestimonialEditorOptions },
@@ -1840,13 +1829,13 @@ const workspaceSlice = createSlice({
     },
 
     copyBlock: (state, action: PayloadAction<string | null>) => {
-      console.log('REDUCER: copyBlock called with ID:', action.payload);
+
       state.past = [...state.past, current(state.blocks)];
       state.future = [];
       const blockToCopy = state.blocks.find((block) => block.id === action.payload);
       if (blockToCopy && action.payload) {
         const newBlockId = `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`;
-        console.log('REDUCER: Creating new block with ID:', newBlockId);
+
 
         const newColumns = blockToCopy.columns.map((col) => ({
           id: `${Date.now().toString()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -1880,7 +1869,6 @@ const workspaceSlice = createSlice({
           videoEditorOptions: { ...col.videoEditorOptions },
           countdownEditorOptions: { ...col.countdownEditorOptions },
           progressBarEditorOptions: { ...col.progressBarEditorOptions },
-          productEditorOptions: { ...col.productEditorOptions },
           promoCodeEditorOptions: { ...col.promoCodeEditorOptions },
           priceEditorOptions: { ...col.priceEditorOptions },
           testimonialEditorOptions: { ...col.testimonialEditorOptions },
@@ -1919,18 +1907,18 @@ const workspaceSlice = createSlice({
           columns: newColumns,
           style: { ...blockToCopy.style },
         });
-        console.log('REDUCER: Block copied successfully');
+
       }
     },
 
     deleteBlock: (state, action: PayloadAction<string | null>) => {
-      console.log('REDUCER: deleteBlock called with ID:', action.payload);
+
       if (action.payload) {
         state.past = [...state.past, current(state.blocks)];
         state.future = [];
         const originalLength = state.blocks.length;
         state.blocks = state.blocks.filter((block) => block.id !== action.payload);
-        console.log(`REDUCER: Block deleted. Count before: ${originalLength}, after: ${state.blocks.length}`);
+
 
         if (state.selectedBlockId === action.payload) {
           state.selectedBlockId = null;
@@ -1944,14 +1932,14 @@ const workspaceSlice = createSlice({
     },
 
     deleteColumnContent: (state, action: PayloadAction<{ blockId: string | null; columnIndex: number; widgetIndex: number }>) => {
-      console.log('REDUCER: deleteColumnContent called', action.payload);
+
       state.past = [...state.past, current(state.blocks)];
       state.future = [];
       const { blockId, columnIndex, widgetIndex } = action.payload;
       if (blockId) {
         const block = state.blocks.find((b) => b.id === blockId);
         if (block && block.columns[columnIndex] && widgetIndex !== null) {
-          console.log(`REDUCER: Deleting widget at index ${widgetIndex} in col ${columnIndex} of block ${blockId}`);
+
           block.columns[columnIndex].widgetContents.splice(widgetIndex, 1);
           if (block.columns[columnIndex].widgetContents.length === 0) {
             block.columns[columnIndex].contentType = null;
@@ -2107,18 +2095,6 @@ const workspaceSlice = createSlice({
               }
             } else {
               state.selectEditorOptions = column.selectEditorOptions || defaultSelectEditorOptions;
-            }
-          }
-          // Handle Product Component
-          else if (state.selectedContentType === 'product') {
-            if (targetContentData) {
-              try {
-                state.productEditorOptions = JSON.parse(targetContentData);
-              } catch (e) {
-                state.productEditorOptions = column.productEditorOptions || defaultProductEditorOptions;
-              }
-            } else {
-              state.productEditorOptions = column.productEditorOptions || defaultProductEditorOptions;
             }
           }
           // Handle WooCommerce Components
@@ -2874,6 +2850,7 @@ const workspaceSlice = createSlice({
       state,
       action: PayloadAction<{ blockId: string | null; columnIndex: number; style: 'solid' | 'dashed' | 'dotted' }>
     ) => {
+
       if (action.payload.blockId) {
         const block = state.blocks.find((b) => b.id === action.payload.blockId);
         if (block && block.columns[action.payload.columnIndex]) {
@@ -3047,10 +3024,6 @@ const workspaceSlice = createSlice({
             case 'progressBar':
               column.progressBarEditorOptions = { ...defaultProgressBarEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.progressBarEditorOptions);
-              break;
-            case 'product':
-              column.productEditorOptions = { ...defaultProductEditorOptions };
-              column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.productEditorOptions);
               break;
             case 'promoCode':
               column.promoCodeEditorOptions = { ...defaultPromoCodeEditorOptions };
@@ -3513,24 +3486,6 @@ const workspaceSlice = createSlice({
       }
     },
 
-    updateProductEditorOptions: (state, action: PayloadAction<Partial<ProductEditorOptions>>) => {
-      state.productEditorOptions = { ...state.productEditorOptions, ...action.payload };
-      if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
-        const block = state.blocks.find(b => b.id === state.selectedBlockForEditor);
-        const column = block?.columns[state.selectedColumnIndex];
-        const widget = column?.widgetContents[state.selectedWidgetIndex];
-
-        if (state.selectedNestedPath && state.selectedNestedPath.length > 0) {
-          if (widget && (widget.contentType === 'row' || widget.contentType === 'container' || widget.contentType === 'section')) {
-            widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
-          }
-        } else if (widget && widget.contentType === 'product') {
-          column.productEditorOptions = { ...column.productEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.productEditorOptions);
-        }
-      }
-    },
-
     updatePromoCodeEditorOptions: (state, action: PayloadAction<Partial<PromoCodeEditorOptions>>) => {
       state.promoCodeEditorOptions = { ...state.promoCodeEditorOptions, ...action.payload };
       if (state.selectedBlockForEditor && state.selectedColumnIndex !== null && state.selectedWidgetIndex !== null) {
@@ -3557,7 +3512,7 @@ const workspaceSlice = createSlice({
           }
         } else if (widget && widget.contentType === 'price') {
           // Log before saving
-          console.log('Reducer: Saving price options to contentData:', state.priceEditorOptions);
+
           widget.contentData = JSON.stringify(state.priceEditorOptions);
         }
       }
@@ -4063,7 +4018,6 @@ export const {
 
   updateCountdownEditorOptions,
   updateProgressBarEditorOptions,
-  updateProductEditorOptions,
   updatePromoCodeEditorOptions,
   updatePriceEditorOptions,
   updateTestimonialEditorOptions,

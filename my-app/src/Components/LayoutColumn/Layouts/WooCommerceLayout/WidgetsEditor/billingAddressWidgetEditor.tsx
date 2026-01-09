@@ -62,7 +62,7 @@ const BillingAddressWidgetEditor = () => {
     textAlign,
     lineHeight,
     letterSpacing,
-    padding, // Standardized
+    padding,
   } = billingAddressEditorOptions;
 
   const renderLabel = (text: string) => (

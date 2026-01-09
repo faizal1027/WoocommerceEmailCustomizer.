@@ -109,10 +109,21 @@ const PromoCodeWidgetEditor = () => {
           <Stack spacing={2}>
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                Title
+              </Typography>
+              <TextField
+                value={promoCodeEditorOptions.title ?? ''}
+                onChange={handleChange('title')}
+                size="small"
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                 Promo Code
               </Typography>
               <TextField
-                value={promoCodeEditorOptions.code || 'SAVE20'}
+                value={promoCodeEditorOptions.code ?? ''}
                 onChange={handleChange('code')}
                 size="small"
                 fullWidth
@@ -125,7 +136,7 @@ const PromoCodeWidgetEditor = () => {
               <TextField
                 multiline
                 rows={2}
-                value={promoCodeEditorOptions.description || 'Use this code to get 20% off your purchase!'}
+                value={promoCodeEditorOptions.description ?? ''}
                 onChange={handleChange('description')}
                 size="small"
                 fullWidth
@@ -136,7 +147,7 @@ const PromoCodeWidgetEditor = () => {
                 Valid Until
               </Typography>
               <TextField
-                value={promoCodeEditorOptions.validUntil || 'December 31, 2024'}
+                value={promoCodeEditorOptions.validUntil ?? ''}
                 onChange={handleChange('validUntil')}
                 size="small"
                 fullWidth

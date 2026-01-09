@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import SocialFollowWidget from './Widgets/socialFollowWidget';
 import VideoWidget from './Widgets/videoWidget';
 import CountdownWidget from './Widgets/countdownWidget';
-import ProductWidget from './Widgets/productWidget';
 import PromoCodeWidget from './Widgets/promoCodeWidget';
 import PriceWidget from './Widgets/priceWidget';
 
@@ -11,7 +10,6 @@ export const extraWidgets = [
   { Component: SocialFollowWidget, name: 'Social Follow' },
   { Component: VideoWidget, name: 'Video' },
   { Component: CountdownWidget, name: 'Countdown' },
-  { Component: ProductWidget, name: 'Product' },
   { Component: PromoCodeWidget, name: 'Promo Code' },
   { Component: PriceWidget, name: 'Price' },
 ];

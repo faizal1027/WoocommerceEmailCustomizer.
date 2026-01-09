@@ -74,7 +74,6 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
                 width: '100%',
                 padding: ctaButtonEditorOptions?.padding || '20px',
                 textAlign: ctaButtonEditorOptions?.textAlign || ctaButtonEditorOptions?.alignment || 'center',
-                border: isSelected ? '2px dashed blue' : 'none',
                 cursor: 'pointer',
             }}
         >
@@ -98,7 +97,7 @@ const CtaButtonFieldComponent: React.FC<CtaButtonFieldComponentProps> = ({
             >
                 {fallback(ctaButtonEditorOptions?.buttonText, previewMode ? 'View Your Order' : '{{button_text}}')}
             </Button>
-        </Box>
+        </Box >
     );
 };
 

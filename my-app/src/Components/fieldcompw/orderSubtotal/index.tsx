@@ -45,11 +45,11 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
             {orderSubtotalEditorOptions.value === '{{order_subtotal}}' || orderSubtotalEditorOptions.value === '{{order_totals_table}}' ? (
                 <Box width="100%">
                     {[
-                        { label: 'Subtotal', value: '₹50.00' },
-                        { label: 'Discount', value: '-₹5.00', color: '#e53e3e' },
-                        { label: 'Shipping', value: '₹10.00' },
-                        { label: 'Order fully refunded', value: '-₹0.00', weight: 'bold', border: true },
-                        { label: 'Refund', value: '-₹0.00' },
+                        { label: orderSubtotalEditorOptions.subtotalLabel || 'Subtotal', value: '₹50.00' },
+                        { label: orderSubtotalEditorOptions.discountLabel || 'Discount', value: '-₹5.00', color: '#e53e3e' },
+                        { label: orderSubtotalEditorOptions.shippingLabel || 'Shipping', value: '₹10.00' },
+                        { label: orderSubtotalEditorOptions.refundedFullyLabel || 'Order fully refunded', value: '-₹0.00', weight: 'bold', border: true },
+                        { label: orderSubtotalEditorOptions.refundedPartialLabel || 'Refund', value: '-₹0.00' },
                     ].map((item, index) => (
                         <Box
                             key={index}

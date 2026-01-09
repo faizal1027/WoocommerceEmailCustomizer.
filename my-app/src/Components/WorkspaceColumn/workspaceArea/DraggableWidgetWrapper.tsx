@@ -86,22 +86,22 @@ const DraggableWidgetWrapper: React.FC<DraggableWidgetWrapperProps> = ({
                 width: '100%',
                 opacity: isDragging ? 0.5 : 1,
                 cursor: previewMode ? 'default' : 'grab',
-                '&:hover .widget-actions': {
-                    display: !previewMode ? 'flex' : 'none',
+                outline: isSelected ? '2px solid #2196F3' : 'none',
+                outlineOffset: '-1px',
+                '&:hover': {
+                    outline: isSelected ? '2px solid #2196F3' : '1px dashed #2196F3',
+                    '& .widget-actions': {
+                        display: !previewMode ? 'flex' : 'none',
+                    }
                 },
-                boxShadow: isSelected ? 'inset 0 0 0 2px #2196F3' : 'none',
+                zIndex: isSelected ? 2 : 1,
             }}
             onClick={(e) => {
-                // Ensure click selects the widget
-                // We don't stop propagation immediately if we want children to handle it first?
-                // Actually, we WANT to stop propagation so it doesn't go to Column.
-                // If a child handled it and stopped propagation, this won't run.
-                // If a child didn't handle it, this runs.
                 e.stopPropagation();
                 onWidgetClick(e);
             }}
         >
-            {isSelected && !previewMode && (
+            {!previewMode && (
                 <Box
                     className="widget-actions"
                     sx={{
@@ -109,8 +109,8 @@ const DraggableWidgetWrapper: React.FC<DraggableWidgetWrapperProps> = ({
                         top: 0,
                         right: 0,
                         backgroundColor: '#2196F3',
-                        borderRadius: '4px',
-                        display: 'flex',
+                        borderRadius: '0 0 0 4px',
+                        display: isSelected ? 'flex' : 'none',
                         zIndex: 10,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     }}

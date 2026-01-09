@@ -54,7 +54,10 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       data.fontWeight && `font-weight: ${data.fontWeight}`,
       data.lineHeight && `line-height: ${data.lineHeight}%`,
       data.letterSpace && `letter-spacing: ${data.letterSpace}px`,
-      data.padding?.top !== undefined ? `padding: ${data.padding.top}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px` : ''
+      data.padding?.top !== undefined ? `padding: ${data.padding.top}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px` : '',
+      'margin: 0',
+      'word-break: break-word',
+      'white-space: pre-wrap'
     ].filter(Boolean).join('; ');
 
     return `<${headingType}${styles ? ` style="${styles}"` : ''}>${content}</${headingType}>`;
@@ -335,19 +338,32 @@ const widgetRenderers: Record<string, (data: any) => string> = {
   // ========== 8. IMAGE WIDGET ==========
   'image': (d) => {
     const data = d || {};
-    const styles = [
+
+    // Wrapper styles for alignment and padding (matching ImageFieldComponent)
+    const containerStyles = [
+      `text-align: ${data.align || 'left'}`,
+      data.padding ? `padding: ${data.padding.top || 0}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px` : '',
+      'width: 100%'
+    ].filter(Boolean).join('; ');
+
+    // Image styles
+    const imgStyles = [
       data.width ? `width: ${String(data.width).match(/%|px/) ? data.width : data.width + 'px'}` : '',
-      data.align === 'center' ? 'display: block; margin-left: auto; margin-right: auto' : '',
-      data.align === 'right' ? 'display: block; margin-left: auto' : '',
+      data.autoWidth ? 'width: 100%' : '',
       data.borderRadius ? `border-radius: ${data.borderRadius}` : '',
       `max-width: 100%`,
-      `height: auto`
+      `height: auto`,
+      'display: inline-block'
     ].filter(Boolean).join('; ');
 
     const altText = data.altText || 'Image';
     const src = data.src || 'https://via.placeholder.com/600x400?text=Image+Placeholder';
 
-    return `<img src="${escapeHtml(src)}" alt="${escapeHtml(altText)}"${styles ? ` style="${styles}"` : ''} />`;
+    return `
+      <div style="${containerStyles}">
+        <img src="${escapeHtml(src)}" alt="${escapeHtml(altText)}"${imgStyles ? ` style="${imgStyles}"` : ''} />
+      </div>
+    `;
   },
 
   // ========== 9. DIVIDER WIDGET ==========
@@ -761,49 +777,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     `;
   },
 
-
-
-  // ========== 26. PRODUCT WIDGET ==========
-  'product': (d) => {
-    const data = d || {};
-    const styles = [
-      'border: 1px solid #dee2e6',
-      'border-radius: 8px',
-      'overflow: hidden',
-      'background-color: #ffffff'
-    ].filter(Boolean).join('; ');
-
-    const imageUrl = data.imageUrl || data.image || 'https://cdn.tools.unlayer.com/image/placeholder.png';
-    const buttonUrl = data.buttonLink || data.buttonUrl || '#';
-
-    return `
-      <div style="${styles}">
-        <div style="position: relative; overflow: hidden;">
-          <img src="${escapeHtml(imageUrl)}" 
-               alt="${escapeHtml(data.name || 'Product')}" 
-               style="width: 100%; height: 200px; object-fit: cover; display: block;" />
-        </div>
-        <div style="padding: 16px;">
-          <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #2d3748;">
-            ${escapeHtml(data.name || 'Product Name')}
-          </div>
-          <div style="font-size: 14px; color: #6c757d; margin-bottom: 12px; line-height: 1.5;">
-            ${escapeHtml(data.description || 'Product description goes here')}
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 20px; font-weight: bold; color: #28a745;">
-              ${escapeHtml(data.currency || '$')}${escapeHtml(data.price || '0.00')}
-            </div>
-            <a href="${escapeHtml(buttonUrl)}" 
-               style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500;">
-              ${escapeHtml(data.buttonText || 'Buy Now')}
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
-  },
-
   // ========== 27. PROMO CODE WIDGET ==========
   'promoCode': (d) => {
     const data = d || {};
@@ -819,9 +792,9 @@ const widgetRenderers: Record<string, (data: any) => string> = {
 
     return `
       <div style="${styles}">
-        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Promo Code</div>
+        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">${escapeHtml(data.title || 'SPECIAL OFFER!')}</div>
         <div style="font-size: 28px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px;">${escapeHtml(data.code || 'SAVE20')}</div>
-        <div style="font-size: 14px; margin-bottom: 8px;">${escapeHtml(data.description || 'Use this code for discount')}</div>
+        <div style="font-size: 14px; margin-bottom: 8px;">${escapeHtml(data.description || 'Use this code to get 20% off your purchase!')}</div>
         ${data.validUntil ? `<div style="font-size: 12px; opacity: 0.8;">Valid until: ${escapeHtml(data.validUntil)}</div>` : ''}
       </div>
     `;
@@ -1127,11 +1100,11 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const innerContent = (data.value === '{{order_totals_table}}' || data.value === '{{order_subtotal}}' || !data.value) ? `
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse: collapse; font-family: inherit; font-size: inherit; color: inherit;">
           ${[
-        { label: 'Subtotal', value: '{{order_subtotal}}' },
-        { label: 'Discount', value: '-{{order_discount}}', color: '#e53e3e' },
-        { label: 'Shipping', value: '{{order_shipping}}' },
-        { label: 'Order fully refunded', value: '-{{order_total}}', weight: 'bold', border: true },
-        { label: 'Refund', value: '-{{refund_amount}}' },
+        { label: escapeHtml(data.subtotalLabel || 'Subtotal'), value: '{{order_subtotal}}' },
+        { label: escapeHtml(data.discountLabel || 'Discount'), value: '-{{order_discount}}', color: '#e53e3e' },
+        { label: escapeHtml(data.shippingLabel || 'Shipping'), value: '{{order_shipping}}' },
+        { label: escapeHtml(data.refundedFullyLabel || 'Order fully refunded'), value: '-{{order_total}}', weight: 'bold', border: true },
+        { label: escapeHtml(data.refundedPartialLabel || 'Refund'), value: '-{{refund_amount}}' },
       ].map((row) => `
             <tr>
               <td align="${labelAlign}" width="50%" style="padding: ${cellPadding}; ${row.weight ? `font-weight: ${row.weight};` : ''} ${row.border ? 'border-top: 1px solid #eee;' : ''} ${row.color ? `color: ${row.color};` : ''}">

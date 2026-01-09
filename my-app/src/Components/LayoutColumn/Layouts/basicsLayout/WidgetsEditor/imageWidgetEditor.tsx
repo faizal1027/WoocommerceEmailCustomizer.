@@ -120,14 +120,14 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
     const newAuto = e.target.checked;
     dispatch(updateImageEditorOptions({
       autoWidth: newAuto,
-      width: newAuto ? "100%" : imageOptions.width,
+      width: newAuto ? "100%" : (imageOptions.width && imageOptions.width.endsWith('px') ? imageOptions.width : "300px"),
     }));
   };
 
-  const handleWidthChange = (event: Event, newValue: number | number[]) => {
-    const widthValue = typeof newValue === "number" ? newValue : newValue[0];
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const widthValue = e.target.value;
     dispatch(updateImageEditorOptions({
-      width: `${widthValue}%`,
+      width: `${widthValue}px`,
       autoWidth: false,
     }));
   };
@@ -165,7 +165,7 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
     }
   };
 
-  const currentWidthValue = parseInt(imageOptions.width) || 100;
+  const currentWidthValue = parseInt(imageOptions.width) || 300;
 
   return (
     <Box sx={{ p: 2 }}>
@@ -328,10 +328,10 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
           </Typography>
           <Stack spacing={2}>
             <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Width
-              </Typography>
-              <Stack spacing={2} direction="row" alignItems="center">
+              <Stack spacing={2} direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', color: '#666' }}>
+                  Width
+                </Typography>
                 <FormControlLabel
                   control={
                     <Switch
@@ -342,30 +342,24 @@ const ImageWidgetEditor: React.FC<ImageWidgetEditorProps> = ({
                   }
                   label={<Typography variant="body2">Auto</Typography>}
                   labelPlacement="start"
-                  sx={{ mr: 0, minWidth: 80, m: 0 }}
+                  sx={{ mr: 0, m: 0 }}
                 />
-                {!imageOptions.autoWidth && (
-                  <>
-                    <Slider
-                      value={currentWidthValue}
-                      onChange={handleWidthChange}
-                      min={10}
-                      max={100}
-                      step={5}
-                      sx={{ flexGrow: 1 }}
-                      valueLabelDisplay="auto"
-                      valueLabelFormat={(value) => `${value}%`}
-                      size="small"
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{ minWidth: 40, textAlign: "right", fontSize: '12px' }}
-                    >
-                      {currentWidthValue}%
-                    </Typography>
-                  </>
-                )}
               </Stack>
+              {!imageOptions.autoWidth && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                    Width (px)
+                  </Typography>
+                  <TextField
+                    type="number"
+                    fullWidth
+                    size="small"
+                    value={currentWidthValue}
+                    onChange={handleWidthChange}
+                    inputProps={{ min: 10, step: 5 }}
+                  />
+                </Box>
+              )}
             </Box>
 
             <Box>

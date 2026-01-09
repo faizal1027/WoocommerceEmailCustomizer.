@@ -22,7 +22,6 @@ import GroupFieldComponent from "../fieldcompw/group";
 import SocialFollowFieldComponent from "../fieldcompw/socialFollow";
 import VideoFieldComponent from "../fieldcompw/video";
 import CountdownFieldComponent from "../fieldcompw/countdown";
-import ProductFieldComponent from "../fieldcompw/product";
 import PromoCodeFieldComponent from "../fieldcompw/promoCode";
 import PriceFieldComponent from "../fieldcompw/price";
 
@@ -66,7 +65,6 @@ export const getWidgetComponent = (widgetType: string) => {
         case "socialFollow": return SocialFollowFieldComponent;
         case "video": return VideoFieldComponent;
         case "countdown": return CountdownFieldComponent;
-        case "product": return ProductFieldComponent;
         case "promoCode": return PromoCodeFieldComponent;
         case "price": return PriceFieldComponent;
 

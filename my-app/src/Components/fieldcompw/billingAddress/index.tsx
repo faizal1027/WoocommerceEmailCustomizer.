@@ -59,7 +59,7 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
       }}
       sx={{
         textAlign: billingAddressEditorOptions.textAlign || 'left',
-        padding: billingAddressEditorOptions.padding || '16px', // Standardized
+        padding: billingAddressEditorOptions.padding || '16px',
         border: isSelected ? '2px dashed blue' : '',
         borderRadius: 1,
         backgroundColor: billingAddressEditorOptions.backgroundColor && billingAddressEditorOptions.backgroundColor !== 'transparent' ? billingAddressEditorOptions.backgroundColor : '#fff',

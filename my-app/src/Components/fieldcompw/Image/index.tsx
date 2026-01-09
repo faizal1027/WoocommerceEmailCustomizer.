@@ -98,9 +98,6 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
         paddingBottom: `${imageOptions.padding.bottom}px`,
         paddingLeft: `${imageOptions.padding.left}px`,
         paddingRight: `${imageOptions.padding.right}px`,
-        "&:hover": {
-          border: "1px solid green",
-        },
       }}
     >
       <Box
