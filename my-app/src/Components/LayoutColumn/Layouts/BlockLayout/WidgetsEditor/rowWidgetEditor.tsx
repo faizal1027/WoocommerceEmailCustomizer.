@@ -146,15 +146,16 @@ const RowWidgetEditor = () => {
             Style
           </Typography>
           <Stack spacing={2}>
-            <TextField
-              label="Background Color"
-              type="color"
-              value={rowEditorOptions.backgroundColor === 'transparent' ? '#ffffff' : (rowEditorOptions.backgroundColor || '#ffffff')}
-              onChange={handleChange('backgroundColor')}
-              size="small"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
+            <Box>
+              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>Background Color</Typography>
+              <TextField
+                type="color"
+                value={rowEditorOptions.backgroundColor === 'transparent' ? '#ffffff' : (rowEditorOptions.backgroundColor || '#ffffff')}
+                onChange={handleChange('backgroundColor')}
+                size="small"
+                fullWidth
+              />
+            </Box>
           </Stack>
         </Box>
       </Stack>

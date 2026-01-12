@@ -159,11 +159,16 @@ const SectionWidgetEditor = () => {
             Background
           </Typography>
           <Stack spacing={2}>
-            <ColorPicker
-              label="Background Color"
-              value={sectionEditorOptions.backgroundColor || '#f5f5f5'}
-              onChange={(color) => handleColorChange('backgroundColor', color)}
-            />
+            <Box>
+              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>Background Color</Typography>
+              <TextField
+                type="color"
+                value={sectionEditorOptions.backgroundColor === 'transparent' ? '#ffffff' : (sectionEditorOptions.backgroundColor || '#ffffff')}
+                onChange={handleChange('backgroundColor')}
+                size="small"
+                fullWidth
+              />
+            </Box>
           </Stack>
         </Box>
 
@@ -274,11 +279,18 @@ const SectionWidgetEditor = () => {
             </Box>
 
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <ColorPicker
-                label="Color"
-                value={sectionEditorOptions.border?.color || '#ddd'}
-                onChange={(color) => handleColorChange('border.color', color)}
-              />
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Color
+                </Typography>
+                <TextField
+                  type="color"
+                  value={sectionEditorOptions.border?.color === 'transparent' ? '#ddd' : (sectionEditorOptions.border?.color || '#ddd')}
+                  onChange={handleChange('border.color')}
+                  size="small"
+                  fullWidth
+                />
+              </Box>
 
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>

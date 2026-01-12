@@ -145,6 +145,21 @@ const DividerWidgetEditor = () => {
                   onChange={(e) => handleOptionChange("style", e.target.value)}
                   fullWidth
                   size="small"
+                  SelectProps={{
+                    MenuProps: {
+                      disablePortal: false,
+                      anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      },
+                      transformOrigin: {
+                        vertical: 'top',
+                        horizontal: 'left',
+                      },
+                      sx: { zIndex: 1300001 },
+                      style: { zIndex: 1300001 }
+                    }
+                  }}
                 >
                   <MenuItem value="solid">Solid</MenuItem>
                   <MenuItem value="dashed">Dashed</MenuItem>

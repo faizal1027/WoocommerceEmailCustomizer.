@@ -356,7 +356,12 @@ export interface RowEditorOptions {
 export interface ContainerEditorOptions {
   maxWidth: string;
   backgroundColor: string;
-  padding: number;
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
   border: {
     width: number;
     style: 'solid' | 'dashed' | 'dotted' | 'none';
@@ -1233,7 +1238,12 @@ const defaultRowEditorOptions: RowEditorOptions = {
 const defaultContainerEditorOptions: ContainerEditorOptions = {
   maxWidth: '800px',
   backgroundColor: '#ffffff',
-  padding: 20,
+  padding: {
+    top: 20,
+    right: 20,
+    bottom: 20,
+    left: 20
+  },
   border: { width: 1, style: 'solid', color: '#ddd' },
   children: [],
 };

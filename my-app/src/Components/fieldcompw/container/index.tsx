@@ -60,7 +60,7 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [containerOptions, blockId, columnIndex, widgetIndex, dispatch]);
 
   drop(dropRef);
 
@@ -111,6 +111,13 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
     return lastPart.colIdx === -1 && lastPart.childIdx === childIdx;
   };
 
+  const normalizedPadding = typeof containerOptions.padding === 'object' ? containerOptions.padding : {
+    top: containerOptions.padding || 20,
+    right: containerOptions.padding || 20,
+    bottom: containerOptions.padding || 20,
+    left: containerOptions.padding || 20
+  };
+
   return (
     <Box
       ref={dropRef}
@@ -125,7 +132,10 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
         maxWidth: containerOptions.maxWidth || '800px',
         margin: '0 auto',
         backgroundColor: containerOptions.backgroundColor || '#ffffff',
-        padding: `${containerOptions.padding || 20}px`,
+        paddingTop: `${normalizedPadding.top}px`,
+        paddingRight: `${normalizedPadding.right}px`,
+        paddingBottom: `${normalizedPadding.bottom}px`,
+        paddingLeft: `${normalizedPadding.left}px`,
         border: isSelected ? '2px dashed blue' :
           containerOptions.border?.style === 'none' ? (isOver ? '2px dashed green' : '1px solid #ddd') :
             `${containerOptions.border?.width || 1}px ${containerOptions.border?.style || 'solid'} ${containerOptions.border?.color || '#ddd'}`,

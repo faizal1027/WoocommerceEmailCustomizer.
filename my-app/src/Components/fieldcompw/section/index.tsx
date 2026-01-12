@@ -87,7 +87,7 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [sectionOptions, blockId, columnIndex, widgetIndex, dispatch]);
 
   drop(dropRef);
 

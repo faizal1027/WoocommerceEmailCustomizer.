@@ -565,7 +565,9 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const styles = [
       `max-width: ${data.maxWidth || '800px'}`,
       `background-color: ${data.backgroundColor || '#ffffff'}`,
-      `padding: ${data.padding || 20}px`,
+      typeof data.padding === 'object'
+        ? `padding: ${data.padding.top || 0}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px`
+        : `padding: ${data.padding || 20}px`,
       data.border?.width ? `border: ${data.border.width}px ${data.border.style || 'solid'} ${data.border.color || '#ddd'}` : '',
       'margin: 0 auto',
       'box-sizing: border-box'
