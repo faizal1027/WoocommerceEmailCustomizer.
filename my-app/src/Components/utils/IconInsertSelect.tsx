@@ -61,7 +61,7 @@ export const IconInsertSelect: React.FC<IconInsertSelectProps> = ({
                     return value;
                 },
                 MenuProps: {
-                    disablePortal: false,
+                    disablePortal: true,
                     sx: { zIndex: 1300001 },
                     style: { zIndex: 1300001 },
                     PaperProps: {

@@ -38,6 +38,7 @@ import {
 // No imports needed here for ClassicEditor or plugins
 import { PlaceholderSelect } from "../../../../utils/PlaceholderSelect";
 import { IconInsertSelect } from "../../../../utils/IconInsertSelect";
+import { SocialIconInsertSelect } from "../../../../utils/SocialIconInsertSelect";
 import ColorPicker from "../../../../utils/ColorPicker";
 import { TextEditorOptions } from "../../../../../Store/Slice/workspaceSlice";
 import { FONT_FAMILIES } from "../../../../../Constants/StyleConstants";
@@ -190,6 +191,15 @@ const TextWidgetEditor = () => {
     }
   };
 
+  const handleSocialIconSelect = (iconHtml: string) => {
+    if (editorInstance) {
+      // CKEditor 5 HTML insertion
+      const viewFragment = editorInstance.data.processor.toView(iconHtml);
+      const modelFragment = editorInstance.data.toModel(viewFragment);
+      editorInstance.model.insertContent(modelFragment, editorInstance.model.document.selection);
+    }
+  };
+
   const handleEditorChange = (event: any, editor: any) => {
     const data = editor.getData();
     setEditorContent(data);
@@ -251,20 +261,24 @@ const TextWidgetEditor = () => {
               Content
             </Typography>
             <Box className="ck-content">
-              <Box mb={2} display="flex" gap={1}>
+              {/* Shortcodes Row - Full Width */}
+              <Box mb={2}>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Shortcodes
+                </Typography>
+                <PlaceholderSelect onSelect={handlePlaceholderSelect} />
+              </Box>
+
+              {/* Icons Row - Side by Side */}
+              <Box mb={2} display="flex" gap={1} alignItems="flex-end">
                 <Box flex={1}>
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                    Shortcodes
-                  </Typography>
-                  <PlaceholderSelect onSelect={handlePlaceholderSelect} />
+                  <IconInsertSelect onSelect={handleIconSelect} label="Normal" />
                 </Box>
                 <Box flex={1}>
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                    Icon
-                  </Typography>
-                  <IconInsertSelect onSelect={handleIconSelect} />
+                  <SocialIconInsertSelect onSelect={handleSocialIconSelect} label="Social" />
                 </Box>
               </Box>
+
               <div ref={editorRef} />
               <Box mt={1}>
                 <Button

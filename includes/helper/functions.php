@@ -601,6 +601,19 @@ private function get_order_id_from_object($email) {
             '{{order_items}}' => $order_items_rows, // Alias for compatibility
             '{{order_details_table_basic}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows . '</tbody></table>',
             '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;" colspan="2">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
+            
+            // New Placeholders Support
+            '{{checkout_url}}' => function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : site_url('/checkout'),
+            '{{my_account_url}}' => function_exists('wc_get_page_permalink') ? wc_get_page_permalink('myaccount') : site_url('/my-account'),
+            '{{home_url}}' => home_url(),
+            '{{order_status}}' => ($order instanceof \WC_Order) ? wc_get_order_status_name($order->get_status()) : '',
+            '{{currency}}' => ($order instanceof \WC_Order) ? $order->get_currency() : '',
+            '{{transaction_id}}' => ($order instanceof \WC_Order) ? $order->get_transaction_id() : '',
+            '{{admin_email}}' => get_option('admin_email'),
+            '{{user_email}}' => $billing_email,
+            '{{customer_email}}' => $billing_email,
+            '{{order_number}}' => ($order instanceof \WC_Order) ? $order->get_order_number() : '', // Explicitly ensure this matches order_id often but user expects "number"
+
 
             '{{order_subtotal}}' => $subtotal,
             '{{order_shipping}}' => $order_shipping,
