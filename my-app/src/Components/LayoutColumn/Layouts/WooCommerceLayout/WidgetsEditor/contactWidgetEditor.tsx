@@ -111,6 +111,8 @@ const ContactWidgetEditor = () => {
                 showTextAlign={true}
                 showTypography={true}
                 showPadding={true}
+                showFontWeight={true}
+                showLineHeight={true}
             />
         </Box>
     );

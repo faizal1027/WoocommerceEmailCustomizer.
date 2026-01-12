@@ -1,13 +1,22 @@
 export const FONT_FAMILIES = [
     'Global',
+    'Andale Mono',
     'Arial',
-    'Helvetica',
-    'Times New Roman',
+    'Arial Black',
+    'Book Antiqua',
+    'Comic Sans MS',
     'Courier New',
     'Georgia',
+    'Helvetica',
+    'Impact',
+    'Symbol',
+    'Tahoma',
+    'Terminal',
+    'Times New Roman',
+    'Trebuchet MS',
     'Verdana',
-    'Roboto',
-    'Inter'
+    'Webdings',
+    'Wingdings'
 ];
 
 export const DEFAULT_FONT_SIZE = '14px';

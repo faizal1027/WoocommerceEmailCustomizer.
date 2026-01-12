@@ -141,37 +141,38 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
             {/* Contact Info */}
             {emailFooterEditorOptions?.showContact !== false && (
                 <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit' }}>
-                    Email: {emailFooterEditorOptions?.contactEmail || '{{store_email}}'} |
-                    Phone: {emailFooterEditorOptions?.contactPhone || '{{store_phone}}'}
+                    {emailFooterEditorOptions?.emailLabel || 'Email:'} {emailFooterEditorOptions?.contactEmail || '{{store_email}}'} |
+                    {emailFooterEditorOptions?.phoneLabel || 'Phone:'} {emailFooterEditorOptions?.contactPhone || '{{store_phone}}'}
                 </Typography>
             )}
 
-            {/* Legal Section: Links & Copyright */}
+            {/* Legal Section: Links */}
             {emailFooterEditorOptions?.showLegal !== false && (
-                <Box>
-                    <Box sx={{ marginBottom: '10px' }}>
-                        {emailFooterEditorOptions?.privacyLinkUrl && (
-                            <Link href={emailFooterEditorOptions.privacyLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
-                                {emailFooterEditorOptions.privacyLinkText || 'Privacy Policy'}
-                            </Link>
-                        )}
-                        {emailFooterEditorOptions?.termsLinkUrl && (
-                            <Link href={emailFooterEditorOptions.termsLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
-                                Terms & Conditions
-                            </Link>
-                        )}
-
-                    </Box>
-                    <Typography variant="body2" sx={{ fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit', opacity: 0.8 }}
-                        dangerouslySetInnerHTML={{
-                            __html: emailFooterEditorOptions?.copyrightText
-                                ? emailFooterEditorOptions.copyrightText
-                                    .replace('{{year}}', currentYear.toString())
-                                    .replace('{{current_year}}', currentYear.toString())
-                                : `© ${currentYear} ${emailFooterEditorOptions?.storeName || '{{store_name}}'}. All rights reserved.`
-                        }}
-                    />
+                <Box sx={{ marginBottom: '10px' }}>
+                    {emailFooterEditorOptions?.privacyLinkUrl && (
+                        <Link href={emailFooterEditorOptions.privacyLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
+                            {emailFooterEditorOptions.privacyLinkText || 'Privacy Policy'}
+                        </Link>
+                    )}
+                    {emailFooterEditorOptions?.termsLinkUrl && (
+                        <Link href={emailFooterEditorOptions.termsLinkUrl} sx={{ color: emailFooterEditorOptions?.linkColor || '#4CAF50', marginX: '10px', fontSize: 'inherit', fontFamily: 'inherit' }}>
+                            {emailFooterEditorOptions.termsLinkText || 'Terms & Conditions'}
+                        </Link>
+                    )}
                 </Box>
+            )}
+
+            {/* Copyright Section */}
+            {emailFooterEditorOptions?.showCopyright !== false && (
+                <Typography variant="body2" sx={{ fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit', opacity: 0.8 }}
+                    dangerouslySetInnerHTML={{
+                        __html: emailFooterEditorOptions?.copyrightText
+                            ? emailFooterEditorOptions.copyrightText
+                                .replace('{{year}}', currentYear.toString())
+                                .replace('{{current_year}}', currentYear.toString())
+                            : `© ${currentYear} ${emailFooterEditorOptions?.storeName || '{{store_name}}'}. All rights reserved.`
+                    }}
+                />
             )}
         </Box>
     );

@@ -75,6 +75,9 @@ const ShippingAddressWidgetEditor = () => {
           options={shippingAddressEditorOptions}
           onUpdate={(updatedOptions) => dispatch(updateShippingAddressEditorOptions(updatedOptions))}
           showPadding={true} // Enable standard padding control
+          showFontWeight={true}
+          showLineHeight={true}
+          showTypography={true}
         />
 
         <Divider />

@@ -70,7 +70,9 @@ const ContactFieldComponent: React.FC<ContactFieldComponentProps> = ({
                 fontFamily: options.fontFamily,
                 color: options.textColor,
                 textAlign: options.textAlign as any,
-                fontSize: options.fontSize
+                fontSize: options.fontSize,
+                fontWeight: options.fontWeight,
+                lineHeight: options.lineHeight ? `${options.lineHeight}px` : undefined
             }}
         >
             {options.showUrl && (

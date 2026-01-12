@@ -104,6 +104,9 @@ const BillingAddressWidgetEditor = () => {
           options={billingAddressEditorOptions}
           onUpdate={(updatedOptions) => dispatch(updateBillingAddressEditorOptions(updatedOptions))}
           showPadding={true} // Enable standard padding control
+          showFontWeight={true}
+          showLineHeight={true}
+          showTypography={true}
         />
 
         <Divider />

@@ -103,12 +103,14 @@ export const PLACEHOLDERS = [
 interface PlaceholderSelectProps {
     onSelect: (placeholder: string) => void;
     label?: string;
+    placeholder?: string;
     size?: 'small' | 'medium';
 }
 
 export const PlaceholderSelect: React.FC<PlaceholderSelectProps> = ({
     onSelect,
-    label = "Insert Placeholder",
+    label,
+    placeholder = "Shortcode",
     size = "small"
 }) => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,12 +135,12 @@ export const PlaceholderSelect: React.FC<PlaceholderSelectProps> = ({
                 displayEmpty: true,
                 renderValue: (value: any) => {
                     if (value === "") {
-                        return <span style={{ color: "rgba(0, 0, 0, 0.6)" }}>Select Variable...</span>;
+                        return <span style={{ color: "rgba(0, 0, 0, 0.6)" }}>{placeholder}</span>;
                     }
                     return value;
                 },
                 MenuProps: {
-                    disablePortal: true, // Keep inside the sidebar DOM to ensure it stays "inside" logic visually and follows scroll if needed, or false but sized right. User explicitly asked "inside sidebar".
+                    disablePortal: true, // Keep inside the sidebar DOM
                     anchorOrigin: {
                         vertical: "bottom",
                         horizontal: "left"
@@ -159,7 +161,7 @@ export const PlaceholderSelect: React.FC<PlaceholderSelectProps> = ({
             }}
         >
             <MenuItem value="" disabled>
-                Select Variable...
+                {placeholder}
             </MenuItem>
             {PLACEHOLDERS.map((ph) => (
                 <MenuItem key={ph.value} value={ph.value} sx={{ whiteSpace: 'normal' }}>

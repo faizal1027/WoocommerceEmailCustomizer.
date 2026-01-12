@@ -225,21 +225,46 @@ const ButtonWidgetEditor = () => {
               </Box>
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+                  Line height (px)
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  value={buttonData.lineHeight || 24}
+                  onChange={(e) => handleChange("lineHeight", Number(e.target.value))}
+                  size="small"
+                  inputProps={{ step: 1, min: 0 }}
+                />
+              </Box>
+            </Box>
+
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
                   Font Weight
                 </Typography>
                 <FormControl fullWidth size="small">
                   <Select
                     fullWidth
-                    value={buttonData.fontWeight}
+                    value={buttonData.fontWeight || '400'}
                     onChange={(e) => handleChange("fontWeight", e.target.value)}
                     MenuProps={{
                       disablePortal: false,
+                      anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      },
+                      transformOrigin: {
+                        vertical: 'top',
+                        horizontal: 'left',
+                      },
                       sx: { zIndex: 1300001 },
                       style: { zIndex: 1300001 }
                     }}
                   >
-                    <MenuItem value="normal" >Normal</MenuItem>
-                    <MenuItem value="bold">Bold</MenuItem>
+                    {['100', '200', '300', '400', '500', '600', '700', '800', '900'].map((weight) => (
+                      <MenuItem key={weight} value={weight}>{weight}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>

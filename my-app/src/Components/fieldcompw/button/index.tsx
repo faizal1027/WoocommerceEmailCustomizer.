@@ -43,6 +43,7 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
   const fontWeight = buttonData?.fontWeight || '400';
   const textAlign = buttonData?.textAlign || 'center';
   const fontStyle = buttonData?.fontStyle || 'normal';
+  const lineHeight = buttonData?.lineHeight;
   const width = buttonData?.widthAuto === false && buttonData?.width ? `${buttonData.width}%` : undefined;
 
   // Ensure padding exists
@@ -131,6 +132,7 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
           color: textColor,
           fontSize: `${fontSize}px`,
           fontWeight: fontWeight,
+          lineHeight: lineHeight ? `${lineHeight}px` : undefined,
           fontStyle: fontStyle,
           textAlign: textAlign,
           width: width,

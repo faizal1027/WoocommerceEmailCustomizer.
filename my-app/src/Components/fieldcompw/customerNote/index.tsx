@@ -31,12 +31,14 @@ const CustomerNoteFieldComponent: React.FC<Props> = ({
                 dispatch(setSelectedBlockId(blockId));
             }}
             sx={{
-                border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: customerNoteEditorOptions.padding || '10px',
+                outline: 'none',
+                boxShadow: isSelected ? '0 0 0 2px #2196f3' : 'none',
+                border: `${customerNoteEditorOptions.borderWidth || 0}px solid ${customerNoteEditorOptions.borderColor || '#eeeeee'}`,
+                padding: (customerNoteEditorOptions.borderWidth || 0) > 0 ? '0' : (customerNoteEditorOptions.padding || '10px'),
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
+                alignItems: (customerNoteEditorOptions.borderWidth || 0) > 0 ? 'stretch' : 'center',
                 textAlign: customerNoteEditorOptions.textAlign as any,
                 width: '100%',
                 backgroundColor: customerNoteEditorOptions.backgroundColor && customerNoteEditorOptions.backgroundColor !== 'transparent' ? customerNoteEditorOptions.backgroundColor : 'transparent',
@@ -45,23 +47,33 @@ const CustomerNoteFieldComponent: React.FC<Props> = ({
             <Box sx={{
                 fontFamily: customerNoteEditorOptions.fontFamily || 'Arial, sans-serif',
                 fontSize: customerNoteEditorOptions.fontSize || '14px',
+                fontWeight: customerNoteEditorOptions.fontWeight,
+                lineHeight: customerNoteEditorOptions.lineHeight ? `${customerNoteEditorOptions.lineHeight}px` : undefined,
                 color: customerNoteEditorOptions.textColor || '#333333',
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%'
             }}>
                 <Box sx={{
-                    fontWeight: 'bold',
                     textAlign: customerNoteEditorOptions.labelAlign as any || 'left',
-                    flex: 1,
-                    width: '50%'
+                    justifyContent: (customerNoteEditorOptions.labelAlign === 'center') ? 'center' : (customerNoteEditorOptions.labelAlign === 'right' ? 'flex-end' : 'flex-start'),
+                    width: `${100 - (customerNoteEditorOptions.lastColumnWidth || 30)}%`,
+                    borderRight: customerNoteEditorOptions.borderWidth ? `${customerNoteEditorOptions.borderWidth}px solid ${customerNoteEditorOptions.borderColor || '#eeeeee'}` : 'none',
+                    padding: customerNoteEditorOptions.borderWidth ? (customerNoteEditorOptions.padding || '10px') : 0,
+                    boxSizing: 'border-box',
+                    display: customerNoteEditorOptions.borderWidth ? 'flex' : 'block',
+                    alignItems: 'center'
                 }}>
                     {customerNoteEditorOptions.label}
                 </Box>
                 <Box sx={{
                     textAlign: customerNoteEditorOptions.valueAlign as any || 'right',
-                    flex: 1,
-                    width: '50%'
+                    justifyContent: (customerNoteEditorOptions.valueAlign === 'center') ? 'center' : (customerNoteEditorOptions.valueAlign === 'left' ? 'flex-start' : 'flex-end'),
+                    width: `${customerNoteEditorOptions.lastColumnWidth || 30}%`,
+                    padding: customerNoteEditorOptions.borderWidth ? (customerNoteEditorOptions.padding || '10px') : 0,
+                    boxSizing: 'border-box',
+                    display: customerNoteEditorOptions.borderWidth ? 'flex' : 'block',
+                    alignItems: 'center'
                 }}>
                     {customerNoteEditorOptions.value === '{{customer_note}}' ? 'Please deliver between 9 AM and 5 PM.' : customerNoteEditorOptions.value}
                 </Box>

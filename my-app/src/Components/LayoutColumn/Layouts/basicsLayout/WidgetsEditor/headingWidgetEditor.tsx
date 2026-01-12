@@ -205,6 +205,14 @@ const HeadingWidgetEditor = () => {
                   onChange={(e) => debouncedUpdate({ fontFamily: e.target.value as string })}
                   MenuProps={{
                     disablePortal: false,
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
                     sx: { zIndex: 1300001 },
                     style: { zIndex: 1300001 }
                   }}
@@ -224,18 +232,25 @@ const HeadingWidgetEditor = () => {
                 </Typography>
                 <FormControl fullWidth size="small">
                   <Select
-                    value={fontWeight}
+                    value={fontWeight || '400'}
                     onChange={(e) => debouncedUpdate({ fontWeight: e.target.value as string })}
                     MenuProps={{
                       disablePortal: false,
+                      anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      },
+                      transformOrigin: {
+                        vertical: 'top',
+                        horizontal: 'left',
+                      },
                       sx: { zIndex: 1300001 },
                       style: { zIndex: 1300001 }
                     }}
                   >
-                    <MenuItem value="normal">Normal</MenuItem>
-                    <MenuItem value="bold">Bold</MenuItem>
-                    <MenuItem value="lighter">Lighter</MenuItem>
-                    <MenuItem value="bolder">Bolder</MenuItem>
+                    {['100', '200', '300', '400', '500', '600', '700', '800', '900'].map((weight) => (
+                      <MenuItem key={weight} value={weight}>{weight}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Box>
@@ -256,14 +271,15 @@ const HeadingWidgetEditor = () => {
             <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
               <Box>
                 <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Line Height (%)
+                  Line height (px)
                 </Typography>
                 <TextField
                   type="number"
-                  value={lineHeight}
+                  value={lineHeight || ''}
                   onChange={(e) => debouncedUpdate({ lineHeight: Number(e.target.value) })}
                   size="small"
                   fullWidth
+                  placeholder="24"
                 />
               </Box>
               <Box>

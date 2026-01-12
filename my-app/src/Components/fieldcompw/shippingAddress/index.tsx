@@ -139,6 +139,8 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
             fontSize: shippingAddressEditorOptions.fontSize,
             color: shippingAddressEditorOptions.textColor,
+            fontWeight: shippingAddressEditorOptions.fontWeight,
+            lineHeight: shippingAddressEditorOptions.lineHeight ? `${shippingAddressEditorOptions.lineHeight}px` : undefined,
           }}>
             <strong>Name:</strong> {shippingAddressEditorOptions.fullName || (previewMode ? 'Jane Smith' : '{{shipping_name}}')}
           </Typography>

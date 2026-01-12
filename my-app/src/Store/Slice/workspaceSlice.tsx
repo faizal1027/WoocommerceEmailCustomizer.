@@ -281,6 +281,7 @@ export interface ButtonEditorOptions {
     bottomRight: number;
     bottomLeft: number;
   };
+  lineHeight?: number;
 }
 
 export interface HeadingEditorOptions {
@@ -572,6 +573,8 @@ export interface ContactEditorOptions {
   textAlign: string;
   iconColor: string;
   iconSize: number;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 // Product Details Widget Options
@@ -602,7 +605,9 @@ export const defaultContactEditorOptions: ContactEditorOptions = {
   padding: '10px',
   textAlign: 'center',
   iconColor: '#333333',
-  iconSize: 20
+  iconSize: 20,
+  fontWeight: 'normal',
+  lineHeight: 1.5
 };
 
 export const defaultProductDetailsEditorOptions: ProductDetailsEditorOptions = {
@@ -692,6 +697,9 @@ export interface ShippingAddressEditorOptions {
   textAlign: string;
   backgroundColor: string;
   padding: string;
+  fontWeight?: string;
+  lineHeight?: number;
+  letterSpacing?: number;
 }
 
 export interface BillingAddressEditorOptions {
@@ -756,6 +764,11 @@ export interface OrderSubtotalEditorOptions {
   shippingLabel?: string;
   refundedFullyLabel?: string;
   refundedPartialLabel?: string;
+  lastColumnWidth?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 export interface OrderTotalEditorOptions {
@@ -770,6 +783,11 @@ export interface OrderTotalEditorOptions {
   padding?: string;
   labelAlign?: string;
   valueAlign?: string;
+  lastColumnWidth?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 export interface ShippingMethodEditorOptions {
@@ -784,6 +802,11 @@ export interface ShippingMethodEditorOptions {
   padding?: string;
   labelAlign?: string;
   valueAlign?: string;
+  lastColumnWidth?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 export interface PaymentMethodEditorOptions {
@@ -798,6 +821,11 @@ export interface PaymentMethodEditorOptions {
   padding?: string;
   labelAlign?: string;
   valueAlign?: string;
+  lastColumnWidth?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 export interface CustomerNoteEditorOptions {
@@ -812,6 +840,11 @@ export interface CustomerNoteEditorOptions {
   padding?: string;
   labelAlign?: string;
   valueAlign?: string;
+  lastColumnWidth?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  fontWeight?: string;
+  lineHeight?: number;
 }
 
 export interface OrderItem {
@@ -870,11 +903,15 @@ export interface EmailFooterEditorOptions {
   fontFamily: string;
   fontSize: string;
   copyrightText?: string;
+  showCopyright?: boolean; // New toggle
   showLegal?: boolean;
   privacyLinkText?: string;
   privacyLinkUrl?: string;
+  termsLinkText?: string;
   termsLinkUrl?: string;
   storeUrl?: string;
+  emailLabel?: string;
+  phoneLabel?: string;
   socialIcons?: {
     icons: string[];
     urls: string[];
@@ -1063,7 +1100,7 @@ export const defaultTextEditorOptions: TextEditorOptions = {
   color: '#d32f2f',
   backgroundColor: 'transparent',
   textAlign: 'left',
-  lineHeight: 140,
+  lineHeight: 24,
   letterSpace: 1,
   padding: { top: 0, left: 0, right: 0, bottom: 0 },
   content: 'Click to edit text',
@@ -1093,7 +1130,7 @@ export const defaultHeadingEditorOptions: HeadingEditorOptions = {
   color: '#000000',
   backgroundColor: 'transparent',
   textAlign: 'left',
-  lineHeight: 110,
+  lineHeight: 32,
   letterSpace: 1,
   padding: { top: 0, left: 0, right: 0, bottom: 0 },
   headingType: 'h1',
@@ -1435,6 +1472,9 @@ const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
   textAlign: "left",
   backgroundColor: "transparent",
   padding: "16px",
+  fontWeight: "normal",
+  lineHeight: 1.5,
+  letterSpacing: 0,
 };
 
 const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
@@ -1531,10 +1571,14 @@ export const defaultEmailFooterEditorOptions: EmailFooterEditorOptions = {
   fontFamily: 'Arial, sans-serif',
   fontSize: '14px',
   copyrightText: '© {{current_year}} {{store_name}}. All rights reserved.',
+  showCopyright: true,
   showLegal: true,
   privacyLinkText: 'Privacy Policy',
   privacyLinkUrl: '#',
+  termsLinkText: 'Terms & Conditions',
   termsLinkUrl: '#',
+  emailLabel: 'Email:',
+  phoneLabel: 'Phone:',
   storeUrl: '{{store_url}}',
   socialIcons: {
     icons: ['facebook', 'twitter', 'instagram'],
@@ -1589,7 +1633,7 @@ export const defaultOrderSubtotalEditorOptions: OrderSubtotalEditorOptions = {
   textColor: '#333333',
   textAlign: 'left',
   backgroundColor: 'transparent',
-  spacing: 12,
+  spacing: 10,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
   valueAlign: 'right',
@@ -1598,6 +1642,11 @@ export const defaultOrderSubtotalEditorOptions: OrderSubtotalEditorOptions = {
   shippingLabel: 'Shipping',
   refundedFullyLabel: 'Order fully refunded',
   refundedPartialLabel: 'Refund',
+  lastColumnWidth: 30,
+  borderWidth: 0,
+  borderColor: '#eeeeee',
+  fontWeight: 'bold',
+  lineHeight: 1.5
 };
 
 export const defaultOrderTotalEditorOptions: OrderTotalEditorOptions = {
@@ -1611,7 +1660,12 @@ export const defaultOrderTotalEditorOptions: OrderTotalEditorOptions = {
   spacing: 12,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
-  valueAlign: 'right'
+  valueAlign: 'right',
+  lastColumnWidth: 30,
+  borderWidth: 0,
+  borderColor: '#eeeeee',
+  fontWeight: 'bold',
+  lineHeight: 1.5
 };
 
 export const defaultShippingMethodEditorOptions: ShippingMethodEditorOptions = {
@@ -1625,7 +1679,12 @@ export const defaultShippingMethodEditorOptions: ShippingMethodEditorOptions = {
   spacing: 12,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
-  valueAlign: 'right'
+  valueAlign: 'right',
+  lastColumnWidth: 30,
+  borderWidth: 0,
+  borderColor: '#eeeeee',
+  fontWeight: 'normal',
+  lineHeight: 1.5
 };
 
 export const defaultPaymentMethodEditorOptions: PaymentMethodEditorOptions = {
@@ -1639,7 +1698,12 @@ export const defaultPaymentMethodEditorOptions: PaymentMethodEditorOptions = {
   spacing: 12,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
-  valueAlign: 'right'
+  valueAlign: 'right',
+  lastColumnWidth: 30,
+  borderWidth: 0,
+  borderColor: '#eeeeee',
+  fontWeight: 'normal',
+  lineHeight: 1.5
 };
 
 export const defaultCustomerNoteEditorOptions: CustomerNoteEditorOptions = {
@@ -1653,7 +1717,12 @@ export const defaultCustomerNoteEditorOptions: CustomerNoteEditorOptions = {
   spacing: 12,
   padding: '10px 10px 10px 10px',
   labelAlign: 'left',
-  valueAlign: 'right'
+  valueAlign: 'right',
+  lastColumnWidth: 30,
+  borderWidth: 0,
+  borderColor: '#eeeeee',
+  fontWeight: 'normal',
+  lineHeight: 1.5
 };
 
 
@@ -1671,7 +1740,7 @@ const initialState: WorkspaceState = {
   textEditorOptions: defaultTextEditorOptions,
   headingEditorOptions: defaultHeadingEditorOptions,
   socialIconsEditorOptions: defaultSocialIconsEditorOptions,
-  buttonEditorOptions: defaultButtonEditorOptions,
+  buttonEditorOptions: { ...defaultButtonEditorOptions, lineHeight: 24 },
   dividerEditorOptions: defaultDividerEditorOptions,
   imageEditorOptions: defaultImageEditorOptions,
   sectionEditorOptions: defaultSectionEditorOptions,
@@ -3116,6 +3185,7 @@ const workspaceSlice = createSlice({
             case 'emailFooter':
               column.emailFooterEditorOptions = { ...defaultEmailFooterEditorOptions };
               column.widgetContents[newWidgetIndex].contentData = JSON.stringify(column.emailFooterEditorOptions);
+              state.emailFooterEditorOptions = column.emailFooterEditorOptions;
               break;
           }
 

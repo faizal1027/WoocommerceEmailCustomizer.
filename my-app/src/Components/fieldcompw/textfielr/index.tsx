@@ -42,7 +42,7 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
         color: content.color,
         textAlign: content.textAlign,
         backgroundColor: content.backgroundColor,
-        lineHeight: content.lineHeight ? `${content.lineHeight}%` : undefined,
+        lineHeight: content.lineHeight ? `${content.lineHeight}px` : undefined,
         letterSpacing: content.letterSpace ? `${content.letterSpace}px` : undefined,
         paddingTop: content.padding?.top,
         paddingRight: content.padding?.right,

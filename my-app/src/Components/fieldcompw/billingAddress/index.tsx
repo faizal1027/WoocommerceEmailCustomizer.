@@ -122,6 +122,8 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
             fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
             fontSize: billingAddressEditorOptions.fontSize,
             color: billingAddressEditorOptions.textColor,
+            fontWeight: billingAddressEditorOptions.fontWeight,
+            lineHeight: billingAddressEditorOptions.lineHeight ? `${billingAddressEditorOptions.lineHeight}px` : undefined,
           }}><strong>Name:</strong> {fallback(billingAddressEditorOptions.fullName, previewMode ? 'John Doe' : '{{billing_name}}')}</Typography>
           <Typography sx={{
             fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,

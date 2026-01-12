@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, TextField, Typography, Switch, FormControlLabel, Stack, Divider, InputLabel, IconButton, Tooltip } from '@mui/material';
+import { Box, TextField, Typography, Switch, FormControlLabel, Stack, Divider, InputLabel, IconButton, Tooltip, Paper } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { updateEmailFooterEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -70,6 +70,7 @@ const EmailFooterWidgetEditor: React.FC = () => {
 
     // CKEditor Logic
     const [editorInstance, setEditorInstance] = useState<any>(null);
+    const editorInstanceRef = useRef<any>(null); // Use ref for cleanup access
     const editorRef = useRef<HTMLDivElement>(null);
     const isInitializingRef = useRef(false);
 
@@ -82,11 +83,16 @@ const EmailFooterWidgetEditor: React.FC = () => {
     }, [copyrightText]);
 
     useEffect(() => {
+        // Don't initialize if hidden to avoid 0-height rendering issues
+        if (emailFooterEditorOptions?.showCopyright === false) {
+            return;
+        }
+
         let intervalId: NodeJS.Timer;
 
         const initEditor = () => {
             const GlobalClassicEditor = (window as any).ClassicEditor;
-            if (!GlobalClassicEditor || !editorRef.current || isInitializingRef.current || editorInstance) {
+            if (!GlobalClassicEditor || !editorRef.current || isInitializingRef.current || editorInstanceRef.current) {
                 return;
             }
 
@@ -95,10 +101,11 @@ const EmailFooterWidgetEditor: React.FC = () => {
             GlobalClassicEditor.create(editorRef.current, {
                 toolbar: {
                     items: ["heading", "|", "bold", "italic", "link", "bulletedList", "numberedList", "|", "undo", "redo"],
-                    shouldNotGroupWhenFull: true
+                    shouldNotGroupWhenFull: false
                 }
             })
                 .then((editor: any) => {
+                    editorInstanceRef.current = editor;
                     setEditorInstance(editor);
                     editor.setData(copyrightRef.current || "");
 
@@ -128,17 +135,17 @@ const EmailFooterWidgetEditor: React.FC = () => {
 
         return () => {
             if (intervalId) clearInterval(intervalId);
-            if (editorInstance) {
-                editorInstance.destroy().catch((err: any) => console.error("Editor destroy error", err));
+            if (editorInstanceRef.current) {
+                editorInstanceRef.current.destroy().catch((err: any) => console.error("Editor destroy error", err));
+                editorInstanceRef.current = null;
+                setEditorInstance(null);
             }
         };
-    }, []); // Run once on mount
+    }, [emailFooterEditorOptions?.showCopyright]); // Re-run when visibility changes
 
     // Update editor content if redux state changes externally (e.g. undo/redo)
     useEffect(() => {
         if (editorInstance && editorInstance.getData() !== copyrightText) {
-            // Only update if significantly different to avoid cursor jumps
-            // For simple undo/redo this might be fine.
             editorInstance.setData(copyrightText);
         }
     }, [copyrightText, editorInstance]);
@@ -182,28 +189,7 @@ const EmailFooterWidgetEditor: React.FC = () => {
 
                 <Divider />
 
-                {/* Section: General */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        General
-                    </Typography>
-                    <Stack spacing={2}>
-                        <Box>
-                            {renderLabel("Store Name")}
-                            <TextField
-                                fullWidth
-                                size="small"
-                                value={emailFooterEditorOptions?.storeName || ''}
-                                onChange={(e) => handleChange('storeName', e.target.value)}
-                                variant="outlined"
-                                sx={{ mb: 2 }}
-                            />
-                            <PlaceholderSelect onSelect={handlePlaceholderSelect('storeName')} label="Insert Store Name Var" />
-                        </Box>
-                    </Stack>
-                </Box>
 
-                <Divider />
 
                 {/* Section: Visibility */}
                 <Box>
@@ -301,81 +287,168 @@ const EmailFooterWidgetEditor: React.FC = () => {
                             }
                             label={<Typography variant="body2">Show Legal Section</Typography>}
                         />
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    size="small"
+                                    checked={emailFooterEditorOptions?.showCopyright !== false}
+                                    onChange={(e) => handleChange('showCopyright', e.target.checked)}
+                                />
+                            }
+                            label={<Typography variant="body2">Show Copyright Text</Typography>}
+                        />
                     </Stack>
                 </Box>
 
                 <Divider />
 
                 {/* Section: Content Details */}
-                {(emailFooterEditorOptions?.showAddress !== false || emailFooterEditorOptions?.showContact !== false || emailFooterEditorOptions?.showLegal !== false) && (
+                {(emailFooterEditorOptions?.showAddress !== false || emailFooterEditorOptions?.showContact !== false || emailFooterEditorOptions?.showLegal !== false || emailFooterEditorOptions?.showCopyright !== false) && (
                     <Box>
                         <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                             Content Details
                         </Typography>
                         <Stack spacing={3}>
                             {emailFooterEditorOptions?.showAddress !== false && (
-                                <Box>
-                                    {renderLabel("Store Address")}
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        value={emailFooterEditorOptions?.storeAddress || ''}
-                                        onChange={(e) => handleChange('storeAddress', e.target.value)}
-                                        multiline
-                                        rows={2}
-                                        sx={{ mb: 2 }}
-                                    />
-                                    <PlaceholderSelect onSelect={handlePlaceholderSelect('storeAddress')} label="Insert Address Var" />
-                                </Box>
+                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Store Address</Typography>
+                                    <Box>
+                                        {renderLabel("Address Text")}
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            value={emailFooterEditorOptions?.storeAddress || ''}
+                                            onChange={(e) => handleChange('storeAddress', e.target.value)}
+                                            multiline
+                                            rows={2}
+                                            InputProps={{ style: { fontSize: '12px' } }}
+                                            sx={{ mb: 2 }}
+                                        />
+                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('storeAddress')} />
+                                    </Box>
+                                </Paper>
                             )}
+
                             {emailFooterEditorOptions?.showContact !== false && (
                                 <>
-                                    <Box>
-                                        {renderLabel("Contact Email")}
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={emailFooterEditorOptions?.contactEmail || ''}
-                                            onChange={(e) => handleChange('contactEmail', e.target.value)}
-                                            sx={{ mb: 2 }}
-                                        />
-                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('contactEmail')} label="Insert Email Var" />
-                                    </Box>
-                                    <Box>
-                                        {renderLabel("Contact Phone")}
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={emailFooterEditorOptions?.contactPhone || ''}
-                                            onChange={(e) => handleChange('contactPhone', e.target.value)}
-                                            sx={{ mb: 2 }}
-                                        />
-                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('contactPhone')} label="Insert Phone Var" />
-                                    </Box>
+                                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Contact Email</Typography>
+                                        <Box sx={{ mb: 2 }}>
+                                            {renderLabel("Label")}
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                value={emailFooterEditorOptions?.emailLabel || ''}
+                                                onChange={(e) => handleChange('emailLabel', e.target.value)}
+                                                placeholder="e.g. Email:"
+                                                InputProps={{ style: { fontSize: '12px' } }}
+                                            />
+                                        </Box>
+                                        <Box>
+                                            {renderLabel("Value")}
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                value={emailFooterEditorOptions?.contactEmail || ''}
+                                                onChange={(e) => handleChange('contactEmail', e.target.value)}
+                                                InputProps={{ style: { fontSize: '12px' } }}
+                                                sx={{ mb: 2 }}
+                                            />
+                                            <PlaceholderSelect onSelect={handlePlaceholderSelect('contactEmail')} />
+                                        </Box>
+                                    </Paper>
+
+                                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Contact Phone</Typography>
+                                        <Box sx={{ mb: 2 }}>
+                                            {renderLabel("Label")}
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                value={emailFooterEditorOptions?.phoneLabel || ''}
+                                                onChange={(e) => handleChange('phoneLabel', e.target.value)}
+                                                placeholder="e.g. Phone:"
+                                                InputProps={{ style: { fontSize: '12px' } }}
+                                            />
+                                        </Box>
+                                        <Box>
+                                            {renderLabel("Value")}
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                value={emailFooterEditorOptions?.contactPhone || ''}
+                                                onChange={(e) => handleChange('contactPhone', e.target.value)}
+                                                InputProps={{ style: { fontSize: '12px' } }}
+                                                sx={{ mb: 2 }}
+                                            />
+                                            <PlaceholderSelect onSelect={handlePlaceholderSelect('contactPhone')} />
+                                        </Box>
+                                    </Paper>
                                 </>
                             )}
+
                             {emailFooterEditorOptions?.showLegal !== false && (
-                                <>
-                                    <Box>
-                                        {renderLabel("Privacy Policy URL")}
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={emailFooterEditorOptions?.privacyLinkUrl || ''}
-                                            onChange={(e) => handleChange('privacyLinkUrl', e.target.value)}
-                                            placeholder="https://example.com/privacy"
-                                        />
-                                    </Box>
-                                    <Box>
-                                        {renderLabel("Terms & Conditions URL")}
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={emailFooterEditorOptions?.termsLinkUrl || ''}
-                                            onChange={(e) => handleChange('termsLinkUrl', e.target.value)}
-                                            placeholder="https://example.com/terms"
-                                        />
-                                    </Box>
+                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Legal Links</Typography>
+                                    <Stack spacing={2}>
+                                        <Box>
+                                            {renderLabel("Privacy Policy")}
+                                            <Stack spacing={1}>
+                                                <Box>
+                                                    {renderLabel("Label")}
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={emailFooterEditorOptions?.privacyLinkText || ''}
+                                                        onChange={(e) => handleChange('privacyLinkText', e.target.value)}
+                                                        InputProps={{ style: { fontSize: '12px' } }}
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    {renderLabel("URL")}
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={emailFooterEditorOptions?.privacyLinkUrl || ''}
+                                                        onChange={(e) => handleChange('privacyLinkUrl', e.target.value)}
+                                                        InputProps={{ style: { fontSize: '12px' } }}
+                                                    />
+                                                </Box>
+                                            </Stack>
+                                        </Box>
+                                        <Divider />
+                                        <Box>
+                                            {renderLabel("Terms & Conditions")}
+                                            <Stack spacing={1}>
+                                                <Box>
+                                                    {renderLabel("Label")}
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={emailFooterEditorOptions?.termsLinkText || ''}
+                                                        onChange={(e) => handleChange('termsLinkText', e.target.value)}
+                                                        InputProps={{ style: { fontSize: '12px' } }}
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    {renderLabel("URL")}
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={emailFooterEditorOptions?.termsLinkUrl || ''}
+                                                        onChange={(e) => handleChange('termsLinkUrl', e.target.value)}
+                                                        InputProps={{ style: { fontSize: '12px' } }}
+                                                    />
+                                                </Box>
+                                            </Stack>
+                                        </Box>
+                                    </Stack>
+                                </Paper>
+                            )}
+
+                            <Box sx={{ display: emailFooterEditorOptions?.showCopyright !== false ? 'block' : 'none' }}>
+                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Copyright</Typography>
                                     <Box>
                                         {renderLabel("Copyright Text")}
                                         <Box sx={{
@@ -383,6 +456,7 @@ const EmailFooterWidgetEditor: React.FC = () => {
                                             borderRadius: '4px',
                                             mt: 1,
                                             mb: 2,
+                                            bgcolor: '#fff',
                                             '& .ck-editor__editable': {
                                                 minHeight: '150px',
                                                 padding: '10px'
@@ -390,10 +464,10 @@ const EmailFooterWidgetEditor: React.FC = () => {
                                         }}>
                                             <div ref={editorRef} />
                                         </Box>
-                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('copyrightText')} label="Insert Var" />
+                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('copyrightText')} />
                                     </Box>
-                                </>
-                            )}
+                                </Paper>
+                            </Box>
                         </Stack>
                     </Box>
                 )}

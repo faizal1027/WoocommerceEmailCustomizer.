@@ -29,6 +29,8 @@ interface CommonStylingControlsProps {
     showLabelAlign?: boolean;
     showValueAlign?: boolean;
     showPadding?: boolean;
+    showFontWeight?: boolean;
+    showLineHeight?: boolean;
 }
 
 const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
@@ -42,6 +44,8 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
     showLabelAlign = false,
     showValueAlign = false,
     showPadding = true,
+    showFontWeight = false,
+    showLineHeight = false,
 }) => {
     const handleChange = (field: string, value: any) => {
         onUpdate({ [field]: value });
@@ -66,6 +70,14 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                                 onChange={(e) => handleChange('fontFamily', e.target.value)}
                                 MenuProps={{
                                     disablePortal: false,
+                                    anchorOrigin: {
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    },
+                                    transformOrigin: {
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    },
                                     sx: { zIndex: 1300001 },
                                     style: { zIndex: 1300001 },
                                     PaperProps: {
@@ -101,6 +113,59 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                             InputProps={{
                                 inputProps: { min: 1 }
                             }}
+                        />
+                    </Box>
+                )}
+
+                {/* Font Weight */}
+                {showTypography && showFontWeight && (
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                            Font Weight
+                        </Typography>
+                        <FormControl size="small" fullWidth>
+                            <Select
+                                value={options.fontWeight || '400'}
+                                onChange={(e) => handleChange('fontWeight', e.target.value)}
+                                style={{ fontSize: '14px' }}
+                                MenuProps={{
+                                    disablePortal: false,
+                                    anchorOrigin: {
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    },
+                                    transformOrigin: {
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    },
+                                    sx: { zIndex: 1300001 },
+                                    style: { zIndex: 1300001 }
+                                }}
+                            >
+                                {['100', '200', '300', '400', '500', '600', '700', '800', '900'].map((weight) => (
+                                    <MenuItem key={weight} value={weight} style={{ fontSize: '14px' }}>
+                                        {weight}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                )}
+
+                {/* Line Height */}
+                {showTypography && showLineHeight && (
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                            Line height (px)
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={options.lineHeight || ''}
+                            onChange={(e) => handleChange('lineHeight', parseFloat(e.target.value))}
+                            size="small"
+                            fullWidth
+                            placeholder="24"
+                            inputProps={{ step: 1, min: 0 }}
                         />
                     </Box>
                 )}

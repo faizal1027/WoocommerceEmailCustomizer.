@@ -22,6 +22,9 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
     const { orderSubtotalEditorOptions } = useSelector((state: RootState) => state.workspace);
     const dispatch = useDispatch();
 
+    const lastColumnWidth = orderSubtotalEditorOptions.lastColumnWidth || 30;
+    const labelColumnWidth = 100 - lastColumnWidth;
+
     return (
         <Box
             onClick={(e) => {
@@ -31,8 +34,10 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
                 dispatch(setSelectedBlockId(blockId));
             }}
             sx={{
-                border: isSelected ? '2px dashed blue' : '1px transparent',
-                padding: orderSubtotalEditorOptions.padding || '10px',
+                outline: 'none',
+                boxShadow: isSelected ? '0 0 0 2px #2196f3' : 'none',
+                border: `${orderSubtotalEditorOptions.borderWidth || 0}px solid ${orderSubtotalEditorOptions.borderColor || '#eeeeee'}`,
+                padding: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? '0' : (orderSubtotalEditorOptions.padding || '10px'),
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -42,7 +47,7 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
                 backgroundColor: orderSubtotalEditorOptions.backgroundColor && orderSubtotalEditorOptions.backgroundColor !== 'transparent' ? orderSubtotalEditorOptions.backgroundColor : 'transparent',
             }}
         >
-            {orderSubtotalEditorOptions.value === '{{order_subtotal}}' || orderSubtotalEditorOptions.value === '{{order_totals_table}}' ? (
+            {orderSubtotalEditorOptions.value === '{{order_subtotal}}' || orderSubtotalEditorOptions.value === '{{order_totals_table}}' || !orderSubtotalEditorOptions.value ? (
                 <Box width="100%">
                     {[
                         { label: orderSubtotalEditorOptions.subtotalLabel || 'Subtotal', value: '₹50.00' },
@@ -55,28 +60,39 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
                             key={index}
                             sx={{
                                 display: 'flex',
-                                alignItems: "center",
-                                paddingTop: `${orderSubtotalEditorOptions.spacing || 0}px`,
-                                paddingBottom: `${orderSubtotalEditorOptions.spacing || 0}px`,
-                                borderTop: item.border ? '1px solid #eee' : 'none',
+                                alignItems: "stretch",
+                                borderBottom: (index < 4 && (orderSubtotalEditorOptions.borderWidth || 0) > 0) ? `${orderSubtotalEditorOptions.borderWidth}px solid ${orderSubtotalEditorOptions.borderColor || '#eeeeee'}` : 'none',
+                                borderTop: (item.border && !(orderSubtotalEditorOptions.borderWidth || 0)) ? `1px solid ${orderSubtotalEditorOptions.borderColor || '#eee'}` : 'none',
                                 fontFamily: orderSubtotalEditorOptions.fontFamily === 'inherit' || !orderSubtotalEditorOptions.fontFamily ? 'inherit' : orderSubtotalEditorOptions.fontFamily,
                                 fontSize: orderSubtotalEditorOptions.fontSize,
+                                lineHeight: orderSubtotalEditorOptions.lineHeight ? `${orderSubtotalEditorOptions.lineHeight}px` : undefined,
                                 color: item.color || orderSubtotalEditorOptions.textColor,
                             }}
                         >
                             <Box sx={{
-                                fontWeight: item.weight || 'bold',
-                                textAlign: orderSubtotalEditorOptions.labelAlign as any || 'left',
-                                flex: 1,
-                                width: '50%'
+                                fontWeight: item.weight || orderSubtotalEditorOptions.fontWeight || 'bold',
+                                justifyContent: (orderSubtotalEditorOptions.labelAlign === 'center') ? 'center' : (orderSubtotalEditorOptions.labelAlign === 'right' ? 'flex-end' : 'flex-start'),
+                                width: `${labelColumnWidth}%`,
+                                borderRight: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? `${orderSubtotalEditorOptions.borderWidth}px solid ${orderSubtotalEditorOptions.borderColor || '#eeeeee'}` : 'none',
+                                paddingRight: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? '10px' : '0',
+                                paddingLeft: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? '10px' : '0',
+                                paddingTop: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                                paddingBottom: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                                display: 'flex',
+                                alignItems: 'center'
                             }}>
                                 {item.label}:
                             </Box>
                             <Box sx={{
                                 fontWeight: item.weight || 'normal',
-                                textAlign: orderSubtotalEditorOptions.valueAlign as any || 'right',
-                                flex: 1,
-                                width: '50%'
+                                justifyContent: (orderSubtotalEditorOptions.valueAlign === 'center') ? 'center' : (orderSubtotalEditorOptions.valueAlign === 'left' ? 'flex-start' : 'flex-end'),
+                                width: `${lastColumnWidth}%`,
+                                paddingLeft: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? '10px' : '0',
+                                paddingRight: (orderSubtotalEditorOptions.borderWidth || 0) > 0 ? '10px' : '0',
+                                paddingTop: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                                paddingBottom: `${orderSubtotalEditorOptions.spacing || 0}px`,
+                                display: 'flex',
+                                alignItems: 'center'
                             }}>
                                 {item.value}
                             </Box>
@@ -98,15 +114,13 @@ const OrderSubtotalFieldComponent: React.FC<Props> = ({
                     <Box sx={{
                         fontWeight: 'bold',
                         textAlign: orderSubtotalEditorOptions.labelAlign as any || 'left',
-                        flex: 1,
-                        width: '50%'
+                        width: `${labelColumnWidth}%`
                     }}>
                         {orderSubtotalEditorOptions.label}
                     </Box>
                     <Box sx={{
                         textAlign: orderSubtotalEditorOptions.valueAlign as any || 'right',
-                        flex: 1,
-                        width: '50%'
+                        width: `${lastColumnWidth}%`
                     }}>
                         {orderSubtotalEditorOptions.value}
                     </Box>
