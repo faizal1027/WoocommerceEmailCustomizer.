@@ -591,19 +591,30 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const styles = [
       `text-align: ${data.alignment || 'left'}`,
       'display: flex',
-      'flex-direction: column',
-      `gap: ${data.spacing || 10}px`
+      `flex-direction: ${data.direction || 'row'}`,
+      `gap: ${data.spacing || 10}px`,
+      'flex-wrap: wrap',
+      data.alignment === 'space-between' ? 'justify-content: space-between' :
+        data.alignment === 'center' ? 'justify-content: center' :
+          data.alignment === 'right' ? 'justify-content: flex-end' : 'justify-content: flex-start',
+      data.direction === 'column' ? 'align-items: stretch' : 'align-items: center'
     ].filter(Boolean).join('; ');
 
     const elements = data.elements || [];
-    const elementsHtml = elements.map((element: string, index: number) => `
-      <div style="background-color: #f8f9fa; padding: 12px; border-radius: 4px;">
-        <div style="color: #495057; font-weight: 500;">Element ${index + 1}</div>
-        <div style="font-size: 13px; color: #6c757d;">${escapeHtml(element)}</div>
-      </div>
-    `).join('');
+    const elementsHtml = elements.map((element: any, index: number) => {
+      const text = typeof element === 'string' ? element : element.text;
+      const url = typeof element === 'string' ? '#' : element.url;
 
-    return `<div style="${styles}">${elementsHtml || '<div style="text-align: center; color: #6c757d; padding: 20px;">No elements in group</div>'}</div>`;
+      return `
+      <a href="${url}" style="text-decoration: none; color: inherit; display: block;" target="_blank" rel="noopener">
+        <div style="background-color: #fff; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; color: #333; font-size: 14px; min-width: 80px; text-align: center;">
+          ${escapeHtml(text)}
+        </div>
+      </a>
+    `;
+    }).join('');
+
+    return `<div style="${styles}">${elementsHtml || '<div style="text-align: center; color: #6c757d; padding: 20px; width: 100%;">No elements in group</div>'}</div>`;
   },
 
   // ========== 21. SECTION WIDGET ==========

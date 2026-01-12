@@ -375,7 +375,7 @@ export interface ContainerEditorOptions {
 }
 
 export interface GroupEditorOptions {
-  elements: string[];
+  elements: Array<{ text: string; url: string }>;
   spacing: number;
   alignment: 'left' | 'center' | 'right' | 'space-between';
   direction: 'row' | 'column';

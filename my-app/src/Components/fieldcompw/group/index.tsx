@@ -90,27 +90,32 @@ const GroupFieldComponent: React.FC<GroupFieldComponentProps> = ({
       <Box
         sx={getContainerStyles()}
       >
-        {(content.elements || []).map((element: string, index: number) => (
-          <Box
-            key={index}
-            sx={{
-              backgroundColor: '#fff',
-              border: '1px solid #e0e0e0',
-              borderRadius: '4px',
-              padding: '8px 16px',
-              minWidth: '80px',
-              textAlign: 'center',
-              fontSize: '14px',
-              color: '#333',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            }}
-          >
-            <Typography variant="body2">{element}</Typography>
-          </Box>
-        ))}
+        {(content.elements || []).map((element: any, index: number) => {
+          const text = typeof element === 'string' ? element : element.text;
+          // We don't make it clickable in editor usually, but we can visualize it
+          return (
+            <Box
+              key={index}
+              sx={{
+                backgroundColor: '#fff',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                padding: '8px 16px',
+                minWidth: '80px',
+                textAlign: 'center',
+                fontSize: '14px',
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                cursor: 'pointer'
+              }}
+            >
+              <Typography variant="body2">{text}</Typography>
+            </Box>
+          )
+        })}
 
       </Box>
     </Box>
