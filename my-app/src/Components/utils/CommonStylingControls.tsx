@@ -53,7 +53,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
     return (
         <Box sx={{ mt: 2, mb: 2, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold', color: '#555' }}>
+            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold', color: '#555555' }}>
                 {title}
             </Typography>
 
@@ -61,7 +61,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Family */}
                 {showTypography && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
                             Font Family
                         </Typography>
                         <FormControl size="small" fullWidth>
@@ -100,7 +100,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Size */}
                 {showTypography && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
                             Font Size
                         </Typography>
                         <TextField
@@ -120,7 +120,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Weight */}
                 {showTypography && showFontWeight && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
                             Font Weight
                         </Typography>
                         <FormControl size="small" fullWidth>
@@ -155,7 +155,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Line Height */}
                 {showTypography && showLineHeight && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
                             Line height (px)
                         </Typography>
                         <TextField
@@ -173,7 +173,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Text Color */}
                 {showTextColor && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
                             Text Color
                         </Typography>
                         <input
@@ -214,7 +214,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {showTextAlign && (
                     <Box>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
                             {textAlignLabel}
                         </Typography>
                         <ToggleButtonGroup
@@ -244,7 +244,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                         {showLabelAlign && (
                             <Box>
-                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
                                     Label Align
                                 </Typography>
                                 <ToggleButtonGroup
@@ -268,7 +268,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                         )}
                         {showValueAlign && (
                             <Box>
-                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
                                     Value Align
                                 </Typography>
                                 <ToggleButtonGroup
@@ -295,7 +295,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
                 {showPadding && (
                     <Box>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666' }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
                             Padding (px)
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -322,7 +322,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
                                 return (
                                     <Box key={side} sx={{ minWidth: 0 }}>
-                                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '13px' }}>
+                                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '13px' }}>
                                             {side}
                                         </Typography>
                                         <TextField

@@ -80,7 +80,7 @@ const GroupFieldComponent: React.FC<GroupFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        border: isSelected ? '2px dashed blue' : '1px solid #ddd',
+        border: '1px solid #ddd',
         borderRadius: '4px',
         padding: '16px',
         position: 'relative',

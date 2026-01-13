@@ -568,7 +568,7 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       typeof data.padding === 'object'
         ? `padding: ${data.padding.top || 0}px ${data.padding.right || 0}px ${data.padding.bottom || 0}px ${data.padding.left || 0}px`
         : `padding: ${data.padding || 20}px`,
-      data.border?.width ? `border: ${data.border.width}px ${data.border.style || 'solid'} ${data.border.color || '#ddd'}` : '',
+      data.border?.width ? `border: ${data.border.width}px ${data.border.style || 'solid'} ${data.border.color || '#dddddd'}` : '',
       'margin: 0 auto',
       'box-sizing: border-box'
     ].filter(Boolean).join('; ');
@@ -623,7 +623,7 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const styles = [
       `background-color: ${data.backgroundColor || '#f5f5f5'}`,
       data.padding ? `padding: ${data.padding.top || 20}px ${data.padding.right || 20}px ${data.padding.bottom || 20}px ${data.padding.left || 20}px` : 'padding: 20px',
-      data.border ? `border: ${data.border.width || 1}px ${data.border.style || 'solid'} ${data.border.color || '#ddd'}` : 'border: 1px solid #ddd',
+      data.border ? `border: ${data.border.width || 1}px ${data.border.style || 'solid'} ${data.border.color || '#dddddd'}` : 'border: 1px solid #dddddd',
       data.border?.radius ? `border-radius: ${data.border.radius}px` : '',
       'width: 100%',
       'box-sizing: border-box'
@@ -800,7 +800,7 @@ const widgetRenderers: Record<string, (data: any) => string> = {
     const data = d || {};
     const styles = [
       `background-color: ${data.backgroundColor || '#ffeb3b'}`,
-      `color: ${data.textColor || '#333'}`,
+      `color: ${data.textColor || '#333333'}`,
       'border: 2px dashed #ffc107',
       'border-radius: 8px',
       'padding: 20px',
@@ -1038,7 +1038,7 @@ const widgetRenderers: Record<string, (data: any) => string> = {
       `text-align: center`,
       `margin-bottom: 20px`,
       `font-weight: ${data.titleFontWeight || 'bold'}`,
-      `color: ${data.titleColor || '#333'}`,
+      `color: ${data.titleColor || '#333333'}`,
       `font-size: 24px` // Approx h5
     ].filter(Boolean).join('; ');
 

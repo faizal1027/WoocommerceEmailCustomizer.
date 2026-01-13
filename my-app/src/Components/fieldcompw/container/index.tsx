@@ -13,6 +13,7 @@ import {
   defaultDividerEditorOptions,
 } from '../../../Store/Slice/workspaceSlice';
 
+
 interface ContainerFieldComponentProps {
   blockId: string;
   columnIndex: number;
@@ -44,6 +45,10 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
 
   const widgetContent = widgetData || storeWidgetContent;
 
+
+
+
+
   const containerOptions = widgetContent?.contentData
     ? JSON.parse(widgetContent.contentData)
     : {
@@ -52,6 +57,7 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
       padding: 20,
       children: []
     };
+
 
   const dropRef = React.useRef<HTMLDivElement>(null);
   const [{ isOver }, drop] = useDrop(() => ({
@@ -138,7 +144,7 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
         paddingLeft: `${normalizedPadding.left}px`,
         border: isSelected ? '2px dashed blue' :
           containerOptions.border?.style === 'none' ? (isOver ? '2px dashed green' : '1px solid #ddd') :
-            `${containerOptions.border?.width || 1}px ${containerOptions.border?.style || 'solid'} ${containerOptions.border?.color || '#ddd'}`,
+            `${containerOptions.border?.width || 1}px ${containerOptions.border?.style || 'solid'} ${containerOptions.border?.color || '#dddddd'}`,
         borderRadius: '4px',
         position: 'relative',
         minHeight: '100px',

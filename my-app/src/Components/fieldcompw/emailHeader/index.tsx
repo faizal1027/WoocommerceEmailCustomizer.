@@ -72,7 +72,7 @@ const EmailHeaderFieldComponent: React.FC<EmailHeaderFieldComponentProps> = ({
                 backgroundColor: emailHeaderEditorOptions?.backgroundColor || '#4CAF50',
                 color: emailHeaderEditorOptions?.textColor || '#ffffff',
                 padding: emailHeaderEditorOptions?.padding || '0px',
-                border: isSelected ? '2px dashed blue' : 'none',
+                border: 'none',
                 cursor: 'pointer',
                 position: 'relative',
                 fontFamily: emailHeaderEditorOptions?.fontFamily === 'inherit' || !emailHeaderEditorOptions?.fontFamily ? 'inherit' : emailHeaderEditorOptions?.fontFamily,

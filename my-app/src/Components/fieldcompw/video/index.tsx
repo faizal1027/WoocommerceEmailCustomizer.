@@ -43,7 +43,7 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
       }}
       sx={{
         width: videoEditorOptions.width || '100%',
-        border: isSelected ? '2px dashed blue' : '1px solid #ddd',
+        border: '1px solid #ddd',
         borderRadius: '4px',
         overflow: 'hidden',
         backgroundColor: '#000',

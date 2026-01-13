@@ -42,13 +42,62 @@ interface WidgetContent {
 
 const deepUpdateWidgetData = (contentData: string | null, path: Array<{ colIdx: number; childIdx: number }>, payload: any): string => {
   const data = JSON.parse(contentData || '{}');
+
+  // INTEGRITY MONITOR: Pre-update state
+  const prevChildrenCount = data.children ? data.children.length : (data.columnsData ? data.columnsData.reduce((acc: number, col: any) => acc + (col.children ? col.children.length : 0), 0) : 0);
+
   if (!path || path.length === 0) {
-    // If payload is meant to strictly replace, we might need a flag. 
-    // But usually standard merge is fine for options. 
-    // However, for structure updates (Row/Container), we pass the FULL structure.
-    // So spreading ...payload over ...data overrides keys. 
-    // If payload is the full options object, it works.
-    return JSON.stringify({ ...data, ...payload });
+    // Standard merge
+    // [Integrity Monitor] Paranoid Safety Check
+
+
+    // Check for children loss
+    if (data.children && data.children.length > 0 && (!payload.children || payload.children.length === 0)) {
+      console.error("CRITICAL: WIDGET LOSS DETECTED - ATTEMPTING RESCUE", {
+        currentChildren: data.children.length,
+        payloadChildren: payload.children ? payload.children.length : 'undefined'
+      });
+      // Force preserve children if they are missing in payload
+      if (!payload.children) {
+        payload.children = data.children;
+        // console.log("RESCUED CHILDREN (Re-assigned from currentData)");
+      }
+    }
+
+    // Check for columnsData loss (for Rows)
+    if (data.columnsData && data.columnsData.length > 0 && (!payload.columnsData || payload.columnsData.length === 0)) {
+      console.error("CRITICAL: COLUMN LOSS DETECTED - ATTEMPTING RESCUE", {
+        currentColumns: data.columnsData.length,
+        payloadColumns: payload.columnsData ? payload.columnsData.length : 'undefined'
+      });
+      if (!payload.columnsData) {
+        payload.columnsData = data.columnsData;
+        // console.log("RESCUED COLUMNS (Re-assigned from currentData)");
+      }
+    }
+
+    const merged = { ...data, ...payload };
+
+    // SAFETY CHECK: Explicitly preserve children/columnsData if not in payload
+    if (data.children && !payload.children) {
+      merged.children = data.children;
+    }
+    if (data.columnsData && !payload.columnsData) {
+      merged.columnsData = data.columnsData;
+    }
+
+    // INTEGRITY MONITOR: Post-update check
+    const newChildrenCount = merged.children ? merged.children.length : (merged.columnsData ? merged.columnsData.reduce((acc: number, col: any) => acc + (col.children ? col.children.length : 0), 0) : 0);
+
+    if (prevChildrenCount > 0 && newChildrenCount === 0) {
+      console.error("CRITICAL: WIDGET LOSS DETECTED during Top-Level Update!", {
+        before: data,
+        payload: payload,
+        after: merged
+      });
+    }
+
+    return JSON.stringify(merged);
   }
 
   const [head, ...tail] = path;
@@ -1185,7 +1234,7 @@ export const defaultImageEditorOptions: ImageEditorOptions = {
 export const defaultSectionEditorOptions: SectionEditorOptions = {
   backgroundColor: '#f5f5f5',
   padding: { top: 20, right: 20, bottom: 20, left: 20 },
-  border: { width: 1, style: 'solid', color: '#ddd', radius: 4 },
+  border: { width: 1, style: 'solid', color: '#dddddd', radius: 4 },
   children: [],
 };
 
@@ -1244,7 +1293,7 @@ const defaultContainerEditorOptions: ContainerEditorOptions = {
     bottom: 20,
     left: 20
   },
-  border: { width: 1, style: 'solid', color: '#ddd' },
+  border: { width: 1, style: 'solid', color: '#dddddd' },
   children: [],
 };
 
@@ -1330,7 +1379,7 @@ const defaultPromoCodeEditorOptions: PromoCodeEditorOptions = {
   description: '20% off on all items',
   validUntil: '2024-12-31',
   backgroundColor: '#ffeb3b',
-  textColor: '#333'
+  textColor: '#333333'
 };
 
 
@@ -1350,15 +1399,15 @@ const defaultNavbarEditorOptions: NavbarEditorOptions = {
     { text: 'Contact', url: '#' }
   ],
   logo: '',
-  backgroundColor: '#333',
-  textColor: '#fff'
+  backgroundColor: '#333333',
+  textColor: '#ffffff'
 };
 
 const defaultCardEditorOptions: CardEditorOptions = {
   title: 'Card Title',
   content: 'Card content goes here',
   image: 'https://cdn.tools.unlayer.com/image/placeholder.png',
-  backgroundColor: '#fff',
+  backgroundColor: '#ffffff',
   shadow: true,
   border: false
 };
@@ -1462,7 +1511,7 @@ const defaultLabelEditorOptions: LabelEditorOptions = {
   for: 'input_id',
   fontSize: 14,
   fontWeight: 'normal',
-  color: '#333'
+  color: '#333333'
 };
 
 // WooCommerce Layout Defaults
@@ -1618,7 +1667,7 @@ export const defaultRelatedProductsEditorOptions: RelatedProductsEditorOptions =
   showImages: true,
   buttonText: 'View Product',
   backgroundColor: '#f9f9f9',
-  titleColor: '#333',
+  titleColor: '#333333',
   titleFontWeight: 'bold',
   priceColor: '#4CAF50',
   buttonColor: '#4CAF50',
@@ -3278,8 +3327,9 @@ const workspaceSlice = createSlice({
             widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
           }
         } else if (widget && widget.contentType === 'section' && column) {
-          column.sectionEditorOptions = { ...column.sectionEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.sectionEditorOptions);
+          // Unified logic: Use deepUpdateWidgetData for top-level too
+          widget.contentData = deepUpdateWidgetData(widget.contentData, [], action.payload);
+          column.sectionEditorOptions = JSON.parse(widget.contentData);
         }
       }
     },
@@ -3459,8 +3509,9 @@ const workspaceSlice = createSlice({
             widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
           }
         } else if (widget && widget.contentType === 'row' && column) {
-          column.rowEditorOptions = { ...column.rowEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.rowEditorOptions);
+          // Unified logic: Use deepUpdateWidgetData for top-level too
+          widget.contentData = deepUpdateWidgetData(widget.contentData, [], action.payload);
+          column.rowEditorOptions = JSON.parse(widget.contentData);
         }
       }
     },
@@ -3477,8 +3528,9 @@ const workspaceSlice = createSlice({
             widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
           }
         } else if (widget && widget.contentType === 'container' && column) {
-          column.containerEditorOptions = { ...column.containerEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.containerEditorOptions);
+          // Unified logic: Use deepUpdateWidgetData for top-level too
+          widget.contentData = deepUpdateWidgetData(widget.contentData, [], action.payload);
+          column.containerEditorOptions = JSON.parse(widget.contentData);
         }
       }
     },
@@ -3495,8 +3547,9 @@ const workspaceSlice = createSlice({
             widget.contentData = deepUpdateWidgetData(widget.contentData, state.selectedNestedPath, action.payload);
           }
         } else if (widget && widget.contentType === 'group' && column) {
-          column.groupEditorOptions = { ...column.groupEditorOptions, ...action.payload };
-          widget.contentData = JSON.stringify(column.groupEditorOptions);
+          // Unified logic: Use deepUpdateWidgetData for top-level too
+          widget.contentData = deepUpdateWidgetData(widget.contentData, [], action.payload);
+          column.groupEditorOptions = JSON.parse(widget.contentData);
         }
       }
     },

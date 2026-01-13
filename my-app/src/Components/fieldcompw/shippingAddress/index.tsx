@@ -51,7 +51,7 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
       sx={{
         textAlign: shippingAddressEditorOptions.textAlign || 'left',
         padding: shippingAddressEditorOptions.padding || '16px',
-        border: isSelected ? '2px dashed blue' : '',
+        border: '',
         borderRadius: 1,
         backgroundColor: shippingAddressEditorOptions.backgroundColor && shippingAddressEditorOptions.backgroundColor !== 'transparent' ? shippingAddressEditorOptions.backgroundColor : '#fff',
         position: 'relative',

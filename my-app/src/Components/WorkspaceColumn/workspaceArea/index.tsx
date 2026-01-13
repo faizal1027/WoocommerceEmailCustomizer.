@@ -722,11 +722,12 @@ const ColumnDropTarget = ({
     if (column.widgetContents.length === 0) {
       return (
         <Typography
-          sx={{ fontSize: "12px", color: "#1976d2", textAlign: "center" }}
+          sx={{ fontSize: "14px", color: "#999", textAlign: "center", width: "100%" }}
         >
-          No content here. Drag content from right.
+          Drag Content Here
         </Typography>
       );
+
     }
 
     return column.widgetContents.map((widget, index) => {

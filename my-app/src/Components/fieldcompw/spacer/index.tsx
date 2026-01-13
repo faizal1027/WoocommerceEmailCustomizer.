@@ -45,7 +45,7 @@ const SpacerFieldComponent: React.FC<SpacerFieldComponentProps> = ({
         width: '100%',
         height: `${spacerEditorOptions.height || 20}px`,
         backgroundColor: spacerEditorOptions.backgroundColor || 'transparent',
-        border: isSelected ? '2px dashed blue' : 'none',
+        border: 'none',
         position: 'relative',
         cursor: 'pointer',
       }}

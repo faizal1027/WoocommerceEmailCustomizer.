@@ -72,14 +72,14 @@ const CountdownFieldComponent: React.FC<CountdownFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        border: isSelected ? '2px dashed blue' : '1px solid transparent',
+        border: '1px solid transparent',
         borderRadius: '8px',
         padding: '20px',
         backgroundColor: countdownEditorOptions.containerBgColor || 'transparent',
         position: 'relative',
         textAlign: 'center',
         '&:hover': {
-          border: isSelected ? '2px dashed blue' : '1px dashed #ccc',
+          border: '1px dashed #ccc',
         }
       }}
     >

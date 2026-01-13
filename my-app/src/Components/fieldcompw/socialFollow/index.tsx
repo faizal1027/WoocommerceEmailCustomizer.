@@ -75,7 +75,7 @@ const SocialFollowFieldComponent: React.FC<SocialFollowFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        border: isSelected ? '2px dashed blue' : 'none',
+        border: 'none',
         borderRadius: '4px',
         padding: '16px',
         position: 'relative',

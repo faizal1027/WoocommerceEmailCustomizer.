@@ -127,7 +127,7 @@ const IconFieldComponent: React.FC<IconFieldComponentProps> = ({
           iconEditorOptions.alignment === 'center' ? 'center' :
             iconEditorOptions.alignment === 'right' ? 'flex-end' :
               iconEditorOptions.alignment === 'justify' ? 'space-between' : 'flex-start',
-        border: isSelected ? '2px dashed blue' : 'none',
+        border: 'none',
         borderRadius: '4px',
         paddingTop: `${iconEditorOptions.paddingTop || 0}px`,
         paddingRight: `${iconEditorOptions.paddingRight || 0}px`,

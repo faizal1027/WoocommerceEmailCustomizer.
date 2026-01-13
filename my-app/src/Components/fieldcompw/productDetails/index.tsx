@@ -64,7 +64,7 @@ const ProductDetailsFieldComponent: React.FC<ProductDetailsFieldComponentProps> 
                 fontFamily: options.fontFamily || 'inherit',
                 fontSize: options.fontSize || '14px',
                 textAlign: options.textAlign as any || 'left',
-                border: isSelected ? '2px dashed #2196f3' : '1px solid transparent',
+                border: '1px solid transparent',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 color: options.textColor,

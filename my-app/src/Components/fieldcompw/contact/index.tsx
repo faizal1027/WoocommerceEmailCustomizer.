@@ -64,7 +64,7 @@ const ContactFieldComponent: React.FC<ContactFieldComponentProps> = ({
                 width: '100%',
                 padding: options.padding,
                 backgroundColor: options.backgroundColor,
-                border: isSelected ? '2px dashed #2196f3' : '1px solid transparent',
+                border: '1px solid transparent',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontFamily: options.fontFamily,

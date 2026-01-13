@@ -66,7 +66,7 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
       sx={{
         width: getResponsiveWidth(),
         padding: orderItemsEditorOptions.padding || '0px 0px 0px 0px',
-        border: isSelected ? '2px dashed blue' : '',
+        border: '',
         borderRadius: 1,
         backgroundColor: orderItemsEditorOptions.backgroundColor && orderItemsEditorOptions.backgroundColor !== 'transparent' ? orderItemsEditorOptions.backgroundColor : '#fff',
         position: 'relative',

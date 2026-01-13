@@ -13,6 +13,11 @@ import {
   defaultDividerEditorOptions,
 } from '../../../Store/Slice/workspaceSlice';
 
+// DEBUG LOGGER
+
+
+
+
 
 interface SectionFieldComponentProps {
   blockId: string;
@@ -35,6 +40,9 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
   widgetData,
   path = []
 }) => {
+  // ESCALATION LOG: Verify Entry
+
+
   const dispatch = useDispatch();
   const selectedNestedPath = useSelector((state: RootState) => state.workspace.selectedNestedPath);
 
@@ -45,12 +53,14 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
 
   const widgetContent = widgetData || storeWidgetContent;
 
+
+
   const sectionOptions = widgetContent?.contentData
     ? JSON.parse(widgetContent.contentData)
     : {
       backgroundColor: '#f5f5f5',
       padding: { top: 20, right: 20, bottom: 20, left: 20 },
-      border: { width: 1, style: 'solid', color: '#ddd', radius: 0 },
+      border: { width: 1, style: 'solid', color: '#dddddd', radius: 0 },
       children: []
     };
 
@@ -129,7 +139,7 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
         paddingRight: `${sectionOptions.padding?.right || 20}px`,
         paddingBottom: `${sectionOptions.padding?.bottom || 20}px`,
         paddingLeft: `${sectionOptions.padding?.left || 20}px`,
-        border: isSelected ? '2px dashed blue' : `${sectionOptions.border?.width || 1}px ${sectionOptions.border?.style || 'solid'} ${sectionOptions.border?.color || '#ddd'}`,
+        border: isSelected ? '2px dashed blue' : `${sectionOptions.border?.width || 1}px ${sectionOptions.border?.style || 'solid'} ${sectionOptions.border?.color || '#dddddd'}`,
         borderRadius: `${sectionOptions.border?.radius || 0}px`,
         position: 'relative',
         minHeight: '100px',
