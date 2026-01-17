@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
 import {
-  updateColumnHeight,
   setSelectedBlockId,
   updateWidgetContentData,
   defaultSocialIconsEditorOptions,
@@ -72,42 +71,7 @@ const SocialIconsFieldComponent: React.FC<SocialIconsFieldComponentProps> = ({ b
   const { iconAlign, padding, iconColor, iconSize, iconSpace, addedIcons } = socialIconsEditorOptions;
   const hasContent = addedIcons.icons.length > 0;
 
-  const measureHeight = useCallback(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      dispatch(updateColumnHeight({
-        blockId,
-        columnIndex,
-        height: contentHeight,
-      }));
-    }
-  }, [blockId, columnIndex, dispatch]);
 
-  useEffect(() => {
-    let resizeObserver: ResizeObserver;
-
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: NodeJS.Timeout;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(func, delay);
-      };
-    };
-
-    const debouncedMeasureHeight = debounce(measureHeight, 100);
-
-    if (contentRef.current) {
-      resizeObserver = new ResizeObserver(debouncedMeasureHeight);
-      resizeObserver.observe(contentRef.current);
-    }
-
-    measureHeight();
-    window.addEventListener('resize', debouncedMeasureHeight);
-    return () => {
-      if (resizeObserver) resizeObserver.disconnect();
-      window.removeEventListener('resize', debouncedMeasureHeight);
-    };
-  }, [measureHeight]);
 
   return (
     <Box

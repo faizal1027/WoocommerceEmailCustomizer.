@@ -67,7 +67,7 @@ function TabPanel(props: TabPanelProps) {
 
 const ExportColumn = () => {
   const dispatch = useDispatch();
-  const { blocks } = useSelector((state: RootState) => state.workspace) as WorkspaceState;
+  const { blocks, bodyStyle } = useSelector((state: RootState) => state.workspace) as WorkspaceState;
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
@@ -243,7 +243,8 @@ const ExportColumn = () => {
           templateDescription: templateDescription || "",
           minify: false,
           generateIds: true,
-          responsive: true
+          responsive: true,
+          backgroundColor: bodyStyle?.backgroundColor || "#ffffff"
         });
       }
 
@@ -380,7 +381,8 @@ const ExportColumn = () => {
       // Generate HTML directly
       htmlContent = exportToHTML(blocks, {
         templateName: templateName || "Test Template",
-        templateDescription: templateDescription || ""
+        templateDescription: templateDescription || "",
+        backgroundColor: bodyStyle?.backgroundColor || "#ffffff"
       });
     } catch (e) {
       console.error("HTML Generation failed", e);
@@ -504,7 +506,8 @@ const ExportColumn = () => {
         templateDescription: templateDescription || "",
         minify: false,
         generateIds: true,
-        responsive: true
+        responsive: true,
+        backgroundColor: bodyStyle?.backgroundColor || "#ffffff"
       });
 
       const formData = new URLSearchParams();

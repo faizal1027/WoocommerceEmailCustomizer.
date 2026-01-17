@@ -61,7 +61,7 @@ const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
     };
 
     return (
-        <div onClick={handleClick} style={{ cursor: "pointer" }}>
+        <div onClick={handleClick} style={{ cursor: "pointer", width: "100%" }}>
             <Typography
                 sx={sxStyles}
                 dangerouslySetInnerHTML={{ __html: content.content }}

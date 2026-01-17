@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId, updateColumnHeight, defaultImageEditorOptions } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, defaultImageEditorOptions } from '../../../Store/Slice/workspaceSlice';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface ImageFieldComponentProps {
@@ -41,44 +41,7 @@ const ImageFieldComponent: React.FC<ImageFieldComponentProps> = ({
     imageOptions.padding = { top: 0, bottom: 0, left: 0, right: 0 };
   }
 
-  const measureHeight = useCallback(() => {
-    if (contentRef.current) {
-      const imageElement = contentRef.current.querySelector('img');
-      if (imageElement) {
-        const contentHeight = imageElement.clientHeight + imageOptions.padding.top + imageOptions.padding.bottom;
-        dispatch(updateColumnHeight({
-          blockId,
-          columnIndex,
-          height: contentHeight,
-        }));
-      }
-    }
-  }, [blockId, columnIndex, dispatch, imageOptions.padding.top, imageOptions.padding.bottom]);
 
-  useEffect(() => {
-    let resizeObserver: ResizeObserver;
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: NodeJS.Timeout;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(func, delay);
-      };
-    };
-
-    const debouncedMeasureHeight = debounce(measureHeight, 100);
-
-    if (contentRef.current) {
-      resizeObserver = new ResizeObserver(debouncedMeasureHeight);
-      resizeObserver.observe(contentRef.current);
-    }
-
-    measureHeight();
-    window.addEventListener('resize', debouncedMeasureHeight);
-    return () => {
-      if (resizeObserver) resizeObserver.disconnect();
-      window.removeEventListener('resize', debouncedMeasureHeight);
-    };
-  }, [measureHeight]);
 
   return (
     <Box

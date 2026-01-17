@@ -135,8 +135,7 @@ const ContainerFieldComponent: React.FC<ContainerFieldComponentProps> = ({
       }}
       sx={{
         width: '100%',
-        maxWidth: containerOptions.maxWidth || '800px',
-        margin: '0 auto',
+        boxSizing: 'border-box',
         backgroundColor: containerOptions.backgroundColor || '#ffffff',
         paddingTop: `${normalizedPadding.top}px`,
         paddingRight: `${normalizedPadding.right}px`,

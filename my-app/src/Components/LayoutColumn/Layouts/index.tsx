@@ -83,138 +83,7 @@ import ContactWidgetEditor from './WooCommerceLayout/WidgetsEditor/contactWidget
 import ProductDetailsWidgetEditor from './WooCommerceLayout/WidgetsEditor/productDetailsWidgetEditor';
 
 const OverallLayout = () => {
-  const {
-    editorOpen,
-    selectedContentType,
-    selectedBlockForEditor,
-    selectedColumnIndex
-  } = useSelector((state: RootState) => state.workspace);
-
   const [searchTerm, setSearchTerm] = useState('');
-
-  const renderEditorContent = () => {
-    if (!editorOpen) {
-      return null;
-    }
-
-    switch (selectedContentType) {
-      // Basics Layout Editors
-      case 'text':
-        return <TextWidgetEditor />;
-      case 'button':
-        return <ButtonWidgetEditor />;
-      case 'heading':
-        return <HeadingWidgetEditor />;
-      case 'socialIcons':
-        return <SocialIconsWidgetEditor />;
-      case 'divider':
-        return <DividerWidgetEditor />;
-      case 'image':
-        return selectedBlockForEditor && selectedColumnIndex !== null ? (
-          <ImageWidgetEditor blockId={selectedBlockForEditor} columnIndex={selectedColumnIndex} />
-        ) : null;
-      case 'section':
-        return <SectionWidgetEditor />;
-      case 'spacer':
-        return <SpacerWidgetEditor />;
-      case 'link':
-        return <LinkWidgetEditor />;
-      // case 'linkBox':
-      //   return <LinkBoxWidgetEditor />;
-      // case 'imageBox':
-      //   return <ImageBoxWidgetEditor />;
-      // case 'map':
-      //   return <MapWidgetEditor />;
-      case 'icon':
-        return <IconWidgetEditor />;
-
-      // Layout Block Editors
-      case 'row':
-        return <RowWidgetEditor />;
-      case 'container':
-        return <ContainerWidgetEditor />;
-      case 'group':
-        return <GroupWidgetEditor />;
-
-      // Forms Editors
-      // case 'form':
-      //   return <FormWidgetEditor />;
-      // case 'survey':
-      //   return <SurveyWidgetEditor />;
-      // case 'input':
-      //   return <InputWidgetEditor />;
-      // case 'textarea':
-      //   return <TextareaWidgetEditor />;
-      // case 'select':
-      //   return <SelectWidgetEditor />;
-      // case 'checkbox':
-      //   return <CheckboxWidgetEditor />;
-      // case 'radio':
-      //   return <RadioWidgetEditor />;
-      // case 'label':
-      //   return <LabelWidgetEditor />;
-
-      // Extra Block Editors 
-      case 'socialFollow':
-        return <SocialFollowWidgetEditor />;
-      case 'video':
-        return <VideoWidgetEditor />;
-
-      case 'countdown':
-        return <CountdownWidgetEditor />;
-      // case 'progressBar':
-      //   return <ProgressBarWidgetEditor />;
-      case 'promoCode':
-        return <PromoCodeWidgetEditor />;
-      case 'price':
-        return <PriceWidgetEditor />;
-      // case 'testimonial':
-      //   return <TestimonialWidgetEditor />;
-      // case 'navbar':
-      //   return <NavbarWidgetEditor />;
-      // case 'card':
-      //   return <CardWidgetEditor />;
-      // case 'alert':
-      //   return <AlertWidgetEditor />;
-      // case 'progress':
-      //   return <ProgressWidgetEditor />;
-
-      // Woocommerce Editors
-      case 'shippingAddress':
-        return <ShippingAddressWidgetEditor />;
-      case 'billingAddress':
-        return <BillingAddressWidgetEditor />;
-      case 'orderItems':
-        return <OrderItemsWidgetEditor />;
-      case 'taxBilling':
-        return <TaxBillingWidgetEditor />;
-      case 'emailHeader':
-        return <EmailHeaderWidgetEditor />;
-      case 'emailFooter':
-        return <EmailFooterWidgetEditor />;
-      case 'ctaButton':
-        return <CtaButtonWidgetEditor />;
-      case 'relatedProducts':
-        return <RelatedProductsWidgetEditor />;
-      case 'orderSubtotal':
-        return <OrderSubtotalWidgetEditor />;
-      case 'orderTotal':
-        return <OrderTotalWidgetEditor />;
-      case 'shippingMethod':
-        return <ShippingMethodWidgetEditor />;
-      case 'paymentMethod':
-        return <PaymentMethodWidgetEditor />;
-      case 'customerNote':
-        return <CustomerNoteWidgetEditor />;
-      case 'contact':
-        return <ContactWidgetEditor />;
-      case 'productDetails':
-        return <ProductDetailsWidgetEditor />;
-
-      default:
-        return <LayoutEditorWidget />;
-    }
-  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -248,26 +117,10 @@ const OverallLayout = () => {
         display: 'flex', flexDirection: 'column'
       }}
     >
-      <Slide direction="right" in={editorOpen} mountOnEnter unmountOnExit>
-        <Box
-          sx={{
-            position: 'absolute', width: '100%',
-            height: '100%',
-            zIndex: 2,
-            bgcolor: 'background.paper',
-            overflow: 'auto',
-          }}
-          className="layout-editor-widget"
-        >
-          {renderEditorContent()}
-        </Box>
-      </Slide>
+
 
       <Box
         sx={{
-          transition: 'opacity 0.3s ease',
-          opacity: editorOpen ? 0 : 1,
-          pointerEvents: editorOpen ? 'none' : 'auto',
           flex: 1,
           overflow: 'auto',
           display: 'flex',

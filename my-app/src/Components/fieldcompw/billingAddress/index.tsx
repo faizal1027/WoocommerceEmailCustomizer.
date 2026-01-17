@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { updateBillingAddressEditorOptions } from '../../../Store/Slice/workspaceSlice';
+import { updateBillingAddressEditorOptions, setSelectedBlockId, defaultBillingAddressEditorOptions, BillingAddressEditorOptions } from '../../../Store/Slice/workspaceSlice';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 
@@ -20,6 +20,7 @@ interface BillingAddressFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const fallback = (value: string, placeholder: string) => value?.trim() || placeholder;
@@ -31,16 +32,26 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
   blockId,
   columnIndex,
   widgetIndex,
-  previewMode = true
+  previewMode = true,
+  widgetData
 }) => {
+  const { blocks } = useSelector((state: RootState) => state.workspace);
   const dispatch = useDispatch();
-  const { billingAddressEditorOptions } = useSelector(
-    (state: RootState) => state.workspace
-  );
+
+  const storeBlock = blocks.find((b) => b.id === blockId);
+  const storeColumn = storeBlock?.columns[columnIndex];
+  const storeWidget = storeColumn?.widgetContents[widgetIndex];
+
+  const widget = widgetData || storeWidget;
+
+  const content = widget?.contentData
+    ? { ...defaultBillingAddressEditorOptions, ...JSON.parse(widget.contentData) }
+    : defaultBillingAddressEditorOptions;
+
   const [isEditing, setIsEditing] = React.useState(false);
 
   const handleChange =
-    (field: keyof typeof billingAddressEditorOptions) =>
+    (field: keyof BillingAddressEditorOptions) =>
       (e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(updateBillingAddressEditorOptions({ [field]: e.target.value }));
       };
@@ -56,28 +67,31 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
         e.stopPropagation();
         onWidgetClick(e);
         onClick();
+        dispatch(setSelectedBlockId(blockId));
       }}
       sx={{
-        textAlign: billingAddressEditorOptions.textAlign || 'left',
-        padding: billingAddressEditorOptions.padding || '16px',
+        width: '100%',
+        boxSizing: 'border-box',
+        textAlign: content.textAlign || 'left',
+        padding: content.padding || '16px',
         border: '',
         borderRadius: 1,
-        backgroundColor: billingAddressEditorOptions.backgroundColor && billingAddressEditorOptions.backgroundColor !== 'transparent' ? billingAddressEditorOptions.backgroundColor : '#fff',
+        backgroundColor: content.backgroundColor && content.backgroundColor !== 'transparent' ? content.backgroundColor : '#fff',
         position: 'relative',
       }}
     >
       <Box sx={{
         display: 'flex',
         justifyContent:
-          billingAddressEditorOptions.textAlign === 'center' ? 'center' :
-            billingAddressEditorOptions.textAlign === 'right' ? 'flex-end' :
+          content.textAlign === 'center' ? 'center' :
+            content.textAlign === 'right' ? 'flex-end' :
               'flex-start',
         alignItems: 'center'
       }}>
         <Typography variant="h6" sx={{
-          fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-          fontSize: billingAddressEditorOptions.fontSize,
-          color: billingAddressEditorOptions.textColor,
+          fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+          fontSize: content.fontSize,
+          color: content.textColor,
           fontWeight: 'bold',
         }}>BILL TO:</Typography>
       </Box>
@@ -109,8 +123,8 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
               label={field
                 .replace(/([A-Z])/g, ' $1')
                 .replace(/^./, (str) => str.toUpperCase())}
-              value={billingAddressEditorOptions[field as keyof typeof billingAddressEditorOptions]}
-              onChange={handleChange(field as keyof typeof billingAddressEditorOptions)}
+              value={content[field as keyof BillingAddressEditorOptions]}
+              onChange={handleChange(field as keyof BillingAddressEditorOptions)}
               size="small"
               fullWidth
             />
@@ -119,52 +133,52 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
       ) : (
         <Box sx={{ mt: 1 }}>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-            fontWeight: billingAddressEditorOptions.fontWeight,
-            lineHeight: billingAddressEditorOptions.lineHeight ? `${billingAddressEditorOptions.lineHeight}px` : undefined,
-          }}><strong>Name:</strong> {fallback(billingAddressEditorOptions.fullName, previewMode ? 'John Doe' : '{{billing_name}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight ? `${content.lineHeight}px` : undefined,
+          }}><strong>Name:</strong> {fallback(content.fullName, previewMode ? 'John Doe' : '{{billing_name}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Phone:</strong> {fallback(billingAddressEditorOptions.phone, previewMode ? '+1 (555) 123-4567' : '{{billing_phone}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Phone:</strong> {fallback(content.phone, previewMode ? '+1 (555) 123-4567' : '{{billing_phone}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Email:</strong> {fallback(billingAddressEditorOptions.email, previewMode ? 'john.doe@example.com' : '{{billing_email}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Email:</strong> {fallback(content.email, previewMode ? 'john.doe@example.com' : '{{billing_email}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Address Line 1:</strong> {fallback(billingAddressEditorOptions.addressLine1, previewMode ? '123 Main Street' : '{{billing_address_1}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Address Line 1:</strong> {fallback(content.addressLine1, previewMode ? '123 Main Street' : '{{billing_address_1}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Address Line 2:</strong> {fallback(billingAddressEditorOptions.addressLine2, previewMode ? 'Apt 4B' : '{{billing_address_2}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Address Line 2:</strong> {fallback(content.addressLine2, previewMode ? 'Apt 4B' : '{{billing_address_2}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>City:</strong> {fallback(billingAddressEditorOptions.city, previewMode ? 'New York' : '{{billing_city}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>City:</strong> {fallback(content.city, previewMode ? 'New York' : '{{billing_city}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>State:</strong> {fallback(billingAddressEditorOptions.state, previewMode ? 'NY' : '{{billing_state}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>State:</strong> {fallback(content.state, previewMode ? 'NY' : '{{billing_state}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Postal Code:</strong> {fallback(billingAddressEditorOptions.postalCode, previewMode ? '10001' : '{{billing_postcode}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Postal Code:</strong> {fallback(content.postalCode, previewMode ? '10001' : '{{billing_postcode}}')}</Typography>
           <Typography sx={{
-            fontFamily: billingAddressEditorOptions.fontFamily === 'inherit' || !billingAddressEditorOptions.fontFamily ? 'inherit' : billingAddressEditorOptions.fontFamily,
-            fontSize: billingAddressEditorOptions.fontSize,
-            color: billingAddressEditorOptions.textColor,
-          }}><strong>Country:</strong> {fallback(billingAddressEditorOptions.country, previewMode ? 'United States' : '{{billing_country}}')}</Typography>
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+          }}><strong>Country:</strong> {fallback(content.country, previewMode ? 'United States' : '{{billing_country}}')}</Typography>
         </Box>
       )}
     </Box>

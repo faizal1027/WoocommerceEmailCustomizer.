@@ -4,7 +4,8 @@ import {
   IconButton,
   Tooltip,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  Button
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -15,7 +16,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import { useDispatch, useSelector } from 'react-redux';
-import { undo, redo, setMobileView, setPreviewMode, setBlocks } from '../../../Store/Slice/workspaceSlice';
+import { undo, redo, setMobileView, setPreviewMode, setBlocks, setSelectedBlockId, closeEditor } from '../../../Store/Slice/workspaceSlice';
+import WallpaperIcon from '@mui/icons-material/Wallpaper';
 
 const WorkspaceTop = () => {
   const dispatch = useDispatch();
@@ -115,6 +117,8 @@ const WorkspaceTop = () => {
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
+
+
       </Box>
     </Box>
   );

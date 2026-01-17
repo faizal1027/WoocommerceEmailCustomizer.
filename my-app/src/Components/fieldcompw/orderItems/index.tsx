@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, defaultOrderItemsEditorOptions, OrderItem } from '../../../Store/Slice/workspaceSlice';
 
 interface OrderItemsFieldComponentProps {
   blockId: string;
@@ -21,6 +21,7 @@ interface OrderItemsFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
@@ -30,11 +31,23 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
   onClick,
   onWidgetClick,
   widgetIndex,
-  previewMode = true
+  previewMode = true,
+  widgetData
 }) => {
-  const { orderItemsEditorOptions } = useSelector((state: RootState) => state.workspace);
-  const theme = useTheme();
+  const { blocks } = useSelector((state: RootState) => state.workspace);
   const dispatch = useDispatch();
+
+  const storeBlock = blocks.find((b) => b.id === blockId);
+  const storeColumn = storeBlock?.columns[columnIndex];
+  const storeWidget = storeColumn?.widgetContents[widgetIndex];
+
+  const widget = widgetData || storeWidget;
+
+  const content = (widget?.contentData)
+    ? { ...defaultOrderItemsEditorOptions, ...JSON.parse(widget.contentData) }
+    : defaultOrderItemsEditorOptions;
+
+  const theme = useTheme();
 
 
   const getResponsiveWidth = () => {
@@ -64,15 +77,16 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
         dispatch(setSelectedBlockId(blockId));
       }}
       sx={{
-        width: getResponsiveWidth(),
-        padding: orderItemsEditorOptions.padding || '0px 0px 0px 0px',
+        width: '100%',
+        boxSizing: 'border-box',
+        padding: content.padding || '0px 0px 0px 0px',
         border: '',
         borderRadius: 1,
-        backgroundColor: orderItemsEditorOptions.backgroundColor && orderItemsEditorOptions.backgroundColor !== 'transparent' ? orderItemsEditorOptions.backgroundColor : '#fff',
+        backgroundColor: content.backgroundColor && content.backgroundColor !== 'transparent' ? content.backgroundColor : '#fff',
         position: 'relative',
-        fontFamily: orderItemsEditorOptions.fontFamily === 'inherit' || !orderItemsEditorOptions.fontFamily ? 'inherit' : orderItemsEditorOptions.fontFamily,
-        fontSize: orderItemsEditorOptions.fontSize || '14px',
-        color: orderItemsEditorOptions.textColor || '#333333',
+        fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+        fontSize: content.fontSize || '14px',
+        color: content.textColor || '#333333',
       }}
     >
       <Typography
@@ -80,18 +94,18 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
         gutterBottom
         noWrap
         sx={{
-          textAlign: orderItemsEditorOptions.textAlign || 'left',
-          fontFamily: orderItemsEditorOptions.fontFamily === 'inherit' || !orderItemsEditorOptions.fontFamily ? 'inherit' : orderItemsEditorOptions.fontFamily,
-          fontSize: orderItemsEditorOptions.fontSize || '18px',
-          color: orderItemsEditorOptions.textColor || '#333333',
+          textAlign: content.textAlign || 'left',
+          fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+          fontSize: content.fontSize || '18px',
+          color: content.textColor || '#333333',
         }}
       >
-        [Order #{fallback(orderItemsEditorOptions.orderNumber, previewMode ? '12345' : '{{order_id}}')}] (
-        {fallback(orderItemsEditorOptions.orderDate, previewMode ? 'December 10, 2025' : '{{order_date}}')})
+        [Order #{fallback(content.orderNumber, previewMode ? '12345' : '{{order_id}}')}] (
+        {fallback(content.orderDate, previewMode ? 'December 10, 2025' : '{{order_date}}')})
       </Typography>
 
-      <Box sx={{ overflowX: 'none' }}>
-        <Table size="small" sx={{ minWidth: 300 }}>
+      <Box sx={{ overflowX: 'none', width: '100%' }}>
+        <Table size="small" sx={{ minWidth: 300, width: '100%' }}>
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit', fontWeight: 'bold' }}>Product</TableCell>
@@ -100,8 +114,8 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {orderItemsEditorOptions.items.length > 0 ? (
-              orderItemsEditorOptions.items.map((item, index) => (
+            {content.items.length > 0 ? (
+              content.items.map((item: OrderItem, index: number) => (
                 <TableRow key={index}>
                   <TableCell sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>{fallback(item.product, previewMode ? 'Sample Product' : '{{product_name}}')}</TableCell>
                   <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>{fallback(item.quantity, previewMode ? '2' : '{{qty}}')}</TableCell>
@@ -135,17 +149,17 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
                 <strong>Subtotal:</strong>
               </TableCell>
               <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
-                <strong>{fallback(orderItemsEditorOptions.subtotal, previewMode ? '$169.97' : '{{order_subtotal}}')}</strong>
+                <strong>{fallback(content.subtotal, previewMode ? '$169.97' : '{{order_subtotal}}')}</strong>
               </TableCell>
             </TableRow>
             {/* Discount Row */}
-            {(orderItemsEditorOptions.discount !== '£0.00' && orderItemsEditorOptions.discount !== '$0.00' && orderItemsEditorOptions.discount !== '0' && orderItemsEditorOptions.discount !== '') || !previewMode ? (
+            {(content.discount !== '£0.00' && content.discount !== '$0.00' && content.discount !== '0' && content.discount !== '') || !previewMode ? (
               <TableRow>
                 <TableCell colSpan={2} sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
                   <strong>Discount:</strong>
                 </TableCell>
                 <TableCell align="right" sx={{ color: '#e53e3e', fontFamily: 'inherit', fontSize: 'inherit' }}>
-                  -{fallback(orderItemsEditorOptions.discount, previewMode ? '$0.00' : '{{order_discount}}')}
+                  -{fallback(content.discount, previewMode ? '$0.00' : '{{order_discount}}')}
                 </TableCell>
               </TableRow>
             ) : null}
@@ -154,7 +168,7 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
                 <strong>Payment method:</strong>
               </TableCell>
               <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
-                {fallback(orderItemsEditorOptions.paymentMethod, previewMode ? 'Credit Card' : '{{payment_method}}')}
+                {fallback(content.paymentMethod, previewMode ? 'Credit Card' : '{{payment_method}}')}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -162,7 +176,7 @@ const OrderItemsFieldComponent: React.FC<OrderItemsFieldComponentProps> = ({
                 <strong>Total:</strong>
               </TableCell>
               <TableCell align="right" sx={{ fontFamily: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
-                <strong>{fallback(orderItemsEditorOptions.total, previewMode ? '$169.97' : '{{order_total}}')}</strong>
+                <strong>{fallback(content.total, previewMode ? '$169.97' : '{{order_total}}')}</strong>
               </TableCell>
             </TableRow>
           </TableBody>

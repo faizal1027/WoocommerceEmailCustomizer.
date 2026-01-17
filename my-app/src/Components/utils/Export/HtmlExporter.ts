@@ -8,6 +8,7 @@ export interface HtmlExportOptions {
   generateIds?: boolean;
   inlineStyles?: boolean;
   responsive?: boolean;
+  backgroundColor?: string;
 }
 
 export function exportToHTML(blocks: DroppedBlock[], options: HtmlExportOptions = {}): string {
@@ -18,6 +19,7 @@ export function exportToHTML(blocks: DroppedBlock[], options: HtmlExportOptions 
     generateIds: true,
     inlineStyles: true,
     responsive: true,
+    backgroundColor: '#ffffff',
     ...options
   };
 
@@ -122,6 +124,7 @@ function processBlockForExport(block: DroppedBlock, options: Required<HtmlExport
 function wrapInHtmlDocument(content: string, options: Required<HtmlExportOptions>): string {
   const safeTemplateName = escapeHtml(options.templateName);
   const safeDescription = options.templateDescription ? escapeHtml(options.templateDescription) : '';
+  const bgColor = options.backgroundColor || '#ffffff';
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -147,13 +150,13 @@ function wrapInHtmlDocument(content: string, options: Required<HtmlExportOptions
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; display: block; }
-        
+
         body { margin: 0; padding: 0; width: 100% !important; background-color: #f5f5f5; }
         html { width: 100% !important; }
-        
+
         /* HELPER CLASSES */
         .email-container { width: 100% !important; max-width: 600px !important; margin: 0 auto !important; }
-        
+
         /* MEDIA QUERIES */
         @media screen and (max-width: 600px) {
             .email-container { width: 100% !important; }
@@ -162,33 +165,39 @@ function wrapInHtmlDocument(content: string, options: Required<HtmlExportOptions
     </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f5f5f5;">
-    
-    <!--[if mso]>
-    <table role="presentation" align="center" border="0" cellspacing="0" cellpadding="0" width="600">
-    <tr>
-    <td align="center" valign="top">
-    <![endif]-->
-    
-    <div class="email-container" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        ${content}
-        
-        <!-- Footer Info (Optional) -->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
-            <tr>
-                <td style="padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 12px; color: #6c757d;">
-                    ${safeDescription ? `<p style="margin: 0 0 10px 0;">${safeDescription}</p>` : ''}
-                    <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${safeTemplateName}. All rights reserved.</p>
-                </td>
-            </tr>
+
+    <!-- Wrapper -->
+    <div style="background-color: ${bgColor}; width: 96%; margin: 0 auto; padding: 20px 0 20px 0;">
+
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+        <tr>
+        <td align="center" valign="top">
+        <![endif]-->
+
+        <!-- Email Body -->
+        <div class="email-container" style="max-width: 600px; margin: 0 auto; background-color: transparent;">
+            ${content}
+
+            <!-- Footer Info (Optional) -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
+                <tr>
+                    <td style="padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 12px; color: #6c757d;">
+                        ${safeDescription ? `<p style="margin: 0 0 10px 0;">${safeDescription}</p>` : ''}
+                        <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${safeTemplateName}. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!--[if mso]>
+        </td>
+        </tr>
         </table>
+        <![endif]-->
+
     </div>
-    
-    <!--[if mso]>
-    </td>
-    </tr>
-    </table>
-    <![endif]-->
-    
+
 </body>
 </html>`;
 }

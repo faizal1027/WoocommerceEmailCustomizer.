@@ -11,7 +11,7 @@ const Layout: React.FC = () => {
   const { previewMode } = useSelector((state: RootState) => state.workspace);
 
   return (
-    <Box style={{ height: '100%', display: 'flex', width: "100%", margin: 0, justifyContent: "space-between" }}>
+    <Box style={{ height: 'calc(100vh - 32px)', display: 'flex', width: "100%", margin: 0, justifyContent: "space-between", overflow: "hidden" }}>
       {!previewMode ? (
         <>
           <LayoutColumn />

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, IconButton, TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId, updateShippingAddressEditorOptions } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId, updateShippingAddressEditorOptions, defaultShippingAddressEditorOptions, ShippingAddressEditorOptions } from '../../../Store/Slice/workspaceSlice';
 import EditIcon from '@mui/icons-material/Edit';
 
 interface ShippingAddressFieldComponentProps {
@@ -13,6 +13,7 @@ interface ShippingAddressFieldComponentProps {
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
   previewMode?: boolean;
+  widgetData?: any;
 }
 
 const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps> = ({
@@ -22,13 +23,25 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
   onClick,
   onWidgetClick,
   widgetIndex,
-  previewMode = true
+  previewMode = true,
+  widgetData
 }) => {
+  const { blocks } = useSelector((state: RootState) => state.workspace);
   const dispatch = useDispatch();
-  const { shippingAddressEditorOptions } = useSelector((state: RootState) => state.workspace);
+
+  const storeBlock = blocks.find((b) => b.id === blockId);
+  const storeColumn = storeBlock?.columns[columnIndex];
+  const storeWidget = storeColumn?.widgetContents[widgetIndex];
+
+  const widget = widgetData || storeWidget;
+
+  const content = widget?.contentData
+    ? { ...defaultShippingAddressEditorOptions, ...JSON.parse(widget.contentData) }
+    : defaultShippingAddressEditorOptions;
+
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const handleChange = (field: keyof typeof shippingAddressEditorOptions) => (
+  const handleChange = (field: keyof ShippingAddressEditorOptions) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     dispatch(updateShippingAddressEditorOptions({ [field]: e.target.value }));
@@ -49,20 +62,22 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
       }}
 
       sx={{
-        textAlign: shippingAddressEditorOptions.textAlign || 'left',
-        padding: shippingAddressEditorOptions.padding || '16px',
+        width: '100%',
+        boxSizing: 'border-box',
+        textAlign: content.textAlign || 'left',
+        padding: content.padding || '16px',
         border: '',
         borderRadius: 1,
-        backgroundColor: shippingAddressEditorOptions.backgroundColor && shippingAddressEditorOptions.backgroundColor !== 'transparent' ? shippingAddressEditorOptions.backgroundColor : '#fff',
+        backgroundColor: content.backgroundColor && content.backgroundColor !== 'transparent' ? content.backgroundColor : '#fff',
         position: 'relative',
       }}
     >
 
 
       <Typography variant="h6" gutterBottom sx={{
-        fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-        fontSize: shippingAddressEditorOptions.fontSize,
-        color: shippingAddressEditorOptions.textColor,
+        fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+        fontSize: content.fontSize,
+        color: content.textColor,
       }}>
         SHIP TO:
       </Typography>
@@ -71,63 +86,63 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <TextField
             label="Full Name"
-            value={shippingAddressEditorOptions.fullName}
+            value={content.fullName}
             onChange={handleChange('fullName')}
             size="small"
             fullWidth
           />
           <TextField
             label="Phone"
-            value={shippingAddressEditorOptions.phone}
+            value={content.phone}
             onChange={handleChange('phone')}
             size="small"
             fullWidth
           />
           <TextField
             label="Email"
-            value={shippingAddressEditorOptions.email}
+            value={content.email}
             onChange={handleChange('email')}
             size="small"
             fullWidth
           />
           <TextField
             label="Address Line 1"
-            value={shippingAddressEditorOptions.addressLine1}
+            value={content.addressLine1}
             onChange={handleChange('addressLine1')}
             size="small"
             fullWidth
           />
           <TextField
             label="Address Line 2"
-            value={shippingAddressEditorOptions.addressLine2}
+            value={content.addressLine2}
             onChange={handleChange('addressLine2')}
             size="small"
             fullWidth
           />
           <TextField
             label="City"
-            value={shippingAddressEditorOptions.city}
+            value={content.city}
             onChange={handleChange('city')}
             size="small"
             fullWidth
           />
           <TextField
             label="State"
-            value={shippingAddressEditorOptions.state}
+            value={content.state}
             onChange={handleChange('state')}
             size="small"
             fullWidth
           />
           <TextField
             label="Postal Code"
-            value={shippingAddressEditorOptions.postalCode}
+            value={content.postalCode}
             onChange={handleChange('postalCode')}
             size="small"
             fullWidth
           />
           <TextField
             label="Country"
-            value={shippingAddressEditorOptions.country}
+            value={content.country}
             onChange={handleChange('country')}
             size="small"
             fullWidth
@@ -136,69 +151,69 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
       ) : (
         <>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
-            fontWeight: shippingAddressEditorOptions.fontWeight,
-            lineHeight: shippingAddressEditorOptions.lineHeight ? `${shippingAddressEditorOptions.lineHeight}px` : undefined,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight ? `${content.lineHeight}px` : undefined,
           }}>
-            <strong>Name:</strong> {shippingAddressEditorOptions.fullName || (previewMode ? 'Jane Smith' : '{{shipping_name}}')}
+            <strong>Name:</strong> {content.fullName || (previewMode ? 'Jane Smith' : '{{shipping_name}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Phone:</strong> {shippingAddressEditorOptions.phone || (previewMode ? '+1 (555) 987-6543' : '{{shipping_phone}}')}
+            <strong>Phone:</strong> {content.phone || (previewMode ? '+1 (555) 987-6543' : '{{shipping_phone}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Email:</strong> {shippingAddressEditorOptions.email || (previewMode ? 'jane.smith@example.com' : '{{shipping_email}}')}
+            <strong>Email:</strong> {content.email || (previewMode ? 'jane.smith@example.com' : '{{shipping_email}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Address Line 1:</strong> {shippingAddressEditorOptions.addressLine1 || (previewMode ? '456 Oak Avenue' : '{{shipping_address_1}}')}
+            <strong>Address Line 1:</strong> {content.addressLine1 || (previewMode ? '456 Oak Avenue' : '{{shipping_address_1}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Address Line 2:</strong> {shippingAddressEditorOptions.addressLine2 || (previewMode ? 'Suite 200' : '{{shipping_address_2}}')}
+            <strong>Address Line 2:</strong> {content.addressLine2 || (previewMode ? 'Suite 200' : '{{shipping_address_2}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>City:</strong> {shippingAddressEditorOptions.city || (previewMode ? 'Los Angeles' : '{{shipping_city}}')}
+            <strong>City:</strong> {content.city || (previewMode ? 'Los Angeles' : '{{shipping_city}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>State:</strong> {shippingAddressEditorOptions.state || (previewMode ? 'CA' : '{{shipping_state}}')}
+            <strong>State:</strong> {content.state || (previewMode ? 'CA' : '{{shipping_state}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Postal Code:</strong> {shippingAddressEditorOptions.postalCode || (previewMode ? '90001' : '{{shipping_postcode}}')}
+            <strong>Postal Code:</strong> {content.postalCode || (previewMode ? '90001' : '{{shipping_postcode}}')}
           </Typography>
           <Typography sx={{
-            fontFamily: shippingAddressEditorOptions.fontFamily === 'inherit' || !shippingAddressEditorOptions.fontFamily ? 'inherit' : shippingAddressEditorOptions.fontFamily,
-            fontSize: shippingAddressEditorOptions.fontSize,
-            color: shippingAddressEditorOptions.textColor,
+            fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
+            fontSize: content.fontSize,
+            color: content.textColor,
           }}>
-            <strong>Country:</strong> {shippingAddressEditorOptions.country || (previewMode ? 'United States' : '{{shipping_country}}')}
+            <strong>Country:</strong> {content.country || (previewMode ? 'United States' : '{{shipping_country}}')}
           </Typography>
         </>
       )}

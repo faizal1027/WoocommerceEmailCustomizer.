@@ -2,7 +2,7 @@
 import React from 'react';
 
 // Basics Field Components
-import TextFieldComponent from "../fieldcompw/textfielr/index";
+import TextFieldComponent from "../fieldcompw/textField/index";
 import ButtonFieldComponent from "../fieldcompw/button";
 import HeadingFieldComponent from "../fieldcompw/heading";
 import SocialIconsFieldComponent from "../fieldcompw/socialIcons";

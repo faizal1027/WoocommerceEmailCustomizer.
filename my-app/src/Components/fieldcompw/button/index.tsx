@@ -1,7 +1,7 @@
 import { Button, Box } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../Store/store';
-import { setSelectedBlockId, updateColumnHeight } from '../../../Store/Slice/workspaceSlice';
+import { setSelectedBlockId } from '../../../Store/Slice/workspaceSlice';
 import { useRef, useEffect, useCallback } from 'react';
 import { ButtonEditorOptions, defaultButtonEditorOptions } from '../../../Store/Slice/workspaceSlice';
 
@@ -53,44 +53,7 @@ const ButtonFieldComponent: React.FC<ButtonFieldComponentProps> = ({
   const urlDisabled = buttonData?.urlDisabled || false;
   const url = buttonData?.url || '#';
 
-  const measureHeight = useCallback(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      dispatch(updateColumnHeight({ blockId, columnIndex, height: contentHeight }));
-    }
-  }, [blockId, columnIndex, dispatch]);
 
-  useEffect(() => {
-    let resizeObserver: ResizeObserver;
-
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: any;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(func, delay);
-      };
-    };
-
-    const debouncedMeasureHeight = debounce(measureHeight, 100);
-
-    measureHeight();
-
-    if (contentRef.current) {
-      resizeObserver = new ResizeObserver(debouncedMeasureHeight);
-      resizeObserver.observe(contentRef.current);
-    }
-
-    window.addEventListener('resize', debouncedMeasureHeight);
-    const timer = setTimeout(measureHeight, 0);
-
-    return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', debouncedMeasureHeight);
-      clearTimeout(timer);
-    };
-  }, [measureHeight]);
 
   return (
     <Box

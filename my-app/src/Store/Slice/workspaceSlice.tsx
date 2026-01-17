@@ -43,42 +43,23 @@ interface WidgetContent {
 const deepUpdateWidgetData = (contentData: string | null, path: Array<{ colIdx: number; childIdx: number }>, payload: any): string => {
   const data = JSON.parse(contentData || '{}');
 
-  // INTEGRITY MONITOR: Pre-update state
-  const prevChildrenCount = data.children ? data.children.length : (data.columnsData ? data.columnsData.reduce((acc: number, col: any) => acc + (col.children ? col.children.length : 0), 0) : 0);
-
   if (!path || path.length === 0) {
-    // Standard merge
-    // [Integrity Monitor] Paranoid Safety Check
-
-
-    // Check for children loss
+    // Top-level update: Safety Check for lost children/columns
     if (data.children && data.children.length > 0 && (!payload.children || payload.children.length === 0)) {
-      console.error("CRITICAL: WIDGET LOSS DETECTED - ATTEMPTING RESCUE", {
-        currentChildren: data.children.length,
-        payloadChildren: payload.children ? payload.children.length : 'undefined'
-      });
-      // Force preserve children if they are missing in payload
       if (!payload.children) {
         payload.children = data.children;
-        // console.log("RESCUED CHILDREN (Re-assigned from currentData)");
       }
     }
 
-    // Check for columnsData loss (for Rows)
     if (data.columnsData && data.columnsData.length > 0 && (!payload.columnsData || payload.columnsData.length === 0)) {
-      console.error("CRITICAL: COLUMN LOSS DETECTED - ATTEMPTING RESCUE", {
-        currentColumns: data.columnsData.length,
-        payloadColumns: payload.columnsData ? payload.columnsData.length : 'undefined'
-      });
       if (!payload.columnsData) {
         payload.columnsData = data.columnsData;
-        // console.log("RESCUED COLUMNS (Re-assigned from currentData)");
       }
     }
 
     const merged = { ...data, ...payload };
 
-    // SAFETY CHECK: Explicitly preserve children/columnsData if not in payload
+    // Explicitly preserve if missing in payload
     if (data.children && !payload.children) {
       merged.children = data.children;
     }
@@ -86,26 +67,16 @@ const deepUpdateWidgetData = (contentData: string | null, path: Array<{ colIdx: 
       merged.columnsData = data.columnsData;
     }
 
-    // INTEGRITY MONITOR: Post-update check
-    const newChildrenCount = merged.children ? merged.children.length : (merged.columnsData ? merged.columnsData.reduce((acc: number, col: any) => acc + (col.children ? col.children.length : 0), 0) : 0);
-
-    if (prevChildrenCount > 0 && newChildrenCount === 0) {
-      console.error("CRITICAL: WIDGET LOSS DETECTED during Top-Level Update!", {
-        before: data,
-        payload: payload,
-        after: merged
-      });
-    }
-
     return JSON.stringify(merged);
   }
 
+  // Recursive update for nested children
   const [head, ...tail] = path;
   let targetWidget = null;
   if (head.colIdx === -1) {
     // FLAT CHILDREN (e.g. Container)
     if (!data.children) data.children = [];
-    if (!data.children[head.childIdx]) data.children[head.childIdx] = { contentType: 'unknown', contentData: '{}' }; // Fallback
+    if (!data.children[head.childIdx]) data.children[head.childIdx] = { contentType: 'unknown', contentData: '{}' };
     targetWidget = data.children[head.childIdx];
   } else {
     // COLUMN BASED (e.g. Row)
@@ -210,6 +181,10 @@ interface DroppedBlock {
   id: string;
   columns: Column[];
   style: BlockStyle;
+}
+
+export interface BodyStyle {
+  backgroundColor: string;
 }
 
 // ==================== BASIC LAYOUT INTERFACES ====================
@@ -1095,6 +1070,7 @@ export interface WorkspaceState {
   previewMode: boolean;
   past: DroppedBlock[][];
   future: DroppedBlock[][];
+  bodyStyle: BodyStyle;
 }
 
 export const defaultColumnStyle: ColumnStyle = {
@@ -1112,6 +1088,9 @@ export const defaultColumnStyle: ColumnStyle = {
   height: 'auto',
   textAlign: 'left',
 };
+
+// Basic Layout Defaults
+
 
 export const defaultBlockStyle: BlockStyle = {
   bgColor: '#e6f0fa',
@@ -1131,6 +1110,7 @@ export const defaultBlockStyle: BlockStyle = {
 export const neutralBlockStyle: BlockStyle = {
   bgColor: 'transparent',
   borderTopColor: 'transparent',
+  // ...
   borderBottomColor: 'transparent',
   borderLeftColor: 'transparent',
   borderRightColor: 'transparent',
@@ -1515,7 +1495,7 @@ const defaultLabelEditorOptions: LabelEditorOptions = {
 };
 
 // WooCommerce Layout Defaults
-const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
+export const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
   fullName: "John Doe",
   phone: "+1-555-123-4567",
   email: "john.doe@example.com",
@@ -1536,7 +1516,7 @@ const defaultShippingAddressEditorOptions: ShippingAddressEditorOptions = {
   letterSpacing: 0,
 };
 
-const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
+export const defaultBillingAddressEditorOptions: BillingAddressEditorOptions = {
   fullName: "John Doe",
   phone: "+1-555-123-4567",
   email: "john.doe@example.com",
@@ -1581,7 +1561,7 @@ export const defaultTaxBillingEditorOptions: TaxBillingEditorOptions = {
   padding: '15px',
 };
 
-const defaultOrderItemsEditorOptions: OrderItemsEditorOptions = {
+export const defaultOrderItemsEditorOptions: OrderItemsEditorOptions = {
   orderNumber: "",
   orderDate: "",
   items: [],
@@ -1855,7 +1835,8 @@ const initialState: WorkspaceState = {
   previewMode: false,
   past: [],
   future: [],
-};
+  bodyStyle: { backgroundColor: '#f5f7f9' },
+} as WorkspaceState;
 
 const workspaceSlice = createSlice({
   name: 'workspace',
@@ -2150,6 +2131,10 @@ const workspaceSlice = createSlice({
 
     setSelectedBlockId: (state, action: PayloadAction<string | null>) => {
       state.selectedBlockId = action.payload;
+    },
+
+    updateBodyStyle: (state, action: PayloadAction<BodyStyle>) => {
+      state.bodyStyle = action.payload;
     },
 
     openEditor: (state, action: PayloadAction<{
@@ -4188,6 +4173,7 @@ export const {
   setMobileView, setPreviewMode,
   undo, redo,
   updateContactEditorOptions, updateProductDetailsEditorOptions,
+  updateBodyStyle,
 } = workspaceSlice.actions;
 
 export type { Column, DroppedBlock, WidgetContent };

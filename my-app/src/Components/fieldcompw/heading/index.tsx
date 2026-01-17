@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../Store/store';
 import {
   updateWidgetContentData,
-  updateColumnHeight,
   openEditor,
   setSelectedBlockId,
   defaultHeadingEditorOptions,
@@ -54,43 +53,7 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
     }
   };
 
-  const measureHeight = useCallback(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      dispatch(updateColumnHeight({
-        blockId,
-        columnIndex,
-        height: contentHeight,
-      }));
-    }
-  }, [blockId, columnIndex, dispatch]);
 
-  useEffect(() => {
-    let resizeObserver: ResizeObserver;
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: any;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(func, delay);
-      };
-    };
-
-    const debouncedMeasureHeight = debounce(measureHeight, 100);
-
-    if (contentRef.current) {
-      resizeObserver = new ResizeObserver(debouncedMeasureHeight);
-      resizeObserver.observe(contentRef.current);
-    }
-
-    measureHeight();
-    window.addEventListener('resize', debouncedMeasureHeight);
-    return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', debouncedMeasureHeight);
-    };
-  }, [measureHeight]);
 
   const { fontFamily, fontWeight, fontSize, color, textAlign, lineHeight, letterSpace, content, backgroundColor, headingType } = headingContent;
   const padding = headingContent.padding || { top: 0, right: 0, bottom: 0, left: 0 };
@@ -112,7 +75,7 @@ const HeadingFieldComponent: React.FC<HeadingFieldComponentProps> = ({ blockId, 
         boxSizing: "border-box",
         minHeight: "auto",
         justifyContent: "flex-start",
-        alignItems: "flex-start",
+        alignItems: "stretch",
       }}
     >
       {hasContent ? (

@@ -107,11 +107,11 @@ const DraggableWidgetWrapper: React.FC<DraggableWidgetWrapperProps> = ({
                     sx={{
                         position: 'absolute',
                         top: 0,
-                        right: 0,
+                        right: -55, // Float outside the 600px white box into the colored area
                         backgroundColor: '#2196F3',
-                        borderRadius: '0 0 0 4px',
+                        borderRadius: '0 4px 4px 0', // Rounded on the right side now
                         display: isSelected ? 'flex' : 'none',
-                        zIndex: 10,
+                        zIndex: 15, // Higher z-index to stay above block controls if they meet
                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                     }}
                 >

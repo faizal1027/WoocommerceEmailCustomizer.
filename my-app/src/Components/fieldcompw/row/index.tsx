@@ -178,12 +178,22 @@ const ColumnDropTarget = ({ colData, colIdx, onDrop, onDeleteChild, blockId, col
         display: 'flex',
         flexDirection: 'column',
         justifyContent: colData.children && colData.children.length > 0 ? 'flex-start' : 'center',
-        alignItems: 'center',
+        alignItems: 'stretch',
         p: 1
       }}
     >
       {(!colData.children || colData.children.length === 0) ? (
-        <Typography sx={{ fontSize: '12px', color: '#999' }}>Column {colIdx + 1}</Typography>
+        <Typography sx={{
+          fontSize: '12px',
+          color: '#999',
+          width: '100%',
+          textAlign: 'center',
+          padding: '10px',
+          border: '1px dashed #ccc',
+          boxSizing: 'border-box'
+        }}>
+          Column {colIdx + 1}
+        </Typography>
       ) : (
         colData.children.map((child: any, idx: number) => {
           const WidgetComponent = getWidgetComponent(child.contentType);

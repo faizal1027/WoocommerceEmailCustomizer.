@@ -49,6 +49,7 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 import DeleteOutlineTwoToneIcon from "@mui/icons-material/DeleteOutlineTwoTone";
+import EditIcon from '@mui/icons-material/Edit';
 
 import { getWidgetComponent } from "../../utils/getWidgetComponent";
 import { useDrag } from "react-dnd";
@@ -71,9 +72,13 @@ const WorkspaceArea = ({
   previewMode = false,
 }: WorkspaceAreaProps) => {
   const dispatch = useDispatch();
-  const { blocks, selectedBlockId, isMobileView } = useSelector(
+  const { blocks, selectedBlockId, isMobileView, bodyStyle } = useSelector(
     (state: RootState) => state.workspace
   );
+
+  useEffect(() => {
+    console.log("Renderer Version: EXACT_REPLICA_V1 (Height fixed)");
+  }, []);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(
     null
   );
@@ -105,8 +110,7 @@ const WorkspaceArea = ({
 
   useEffect(() => {
     if (!window.emailCustomizerAjax) {
-      console.error("emailCustomizerAjax is undefined");
-      alert("Error: AJAX configuration is missing");
+      // console.error("emailCustomizerAjax is undefined");
       return;
     }
 
@@ -114,7 +118,6 @@ const WorkspaceArea = ({
     if (!templateId) {
       return;
     }
-
 
     const fetchTemplateData = async () => {
       try {
@@ -131,11 +134,9 @@ const WorkspaceArea = ({
           }
         );
 
-
         if (response.data.success && response.data.data?.json_data) {
           try {
-            let parsedBlocks: DroppedBlock[] = JSON.parse(response.data.data.json_data);
-
+            let parsedBlocks: DroppedBlock[] = JSON.parse(response.data.data.json_data || '[]');
 
             if (parsedBlocks.length > 0) {
               parsedBlocks = parsedBlocks.map(block => {
@@ -163,48 +164,10 @@ const WorkspaceArea = ({
             sessionStorage.setItem("templateJsonData", response.data.data.json_data);
           } catch (parseError: any) {
             console.error("Error parsing template JSON data:", parseError);
-            console.error("Problematic template JSON:", response.data.data.json_data);
-            console.error("JSON string length:", response.data.data.json_data?.length);
-            console.error("First 100 characters:", response.data.data.json_data?.substring(0, 100));
-
-            // Attempt automatic recovery
-            const shouldRecover = window.confirm(
-              "Template data is corrupted and cannot be loaded.\n\n" +
-              "Would you like to reset this template to empty?\n\n" +
-              "Click OK to reset and start fresh, or Cancel to go back."
-            );
-
-            if (shouldRecover) {
-              // Reset template to empty
-              const resetFormData = new URLSearchParams();
-              resetFormData.append("action", "save_email_template");
-              resetFormData.append("template_id", templateId);
-              resetFormData.append("template_name", "Recovered Template " + templateId);
-              resetFormData.append("json_data", "[]");
-              resetFormData.append("_ajax_nonce", window.emailCustomizerAjax.nonce);
-
-              axios.post(window.emailCustomizerAjax.ajax_url, resetFormData, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              }).then(() => {
-                alert("Template has been reset successfully. The page will reload.");
-                window.location.reload();
-              }).catch((error) => {
-                console.error("Failed to reset template:", error);
-                alert("Failed to reset template. Please contact support or use the fix-all-templates.php script.");
-              });
-            } else {
-              // User cancelled, go back to templates list
-              window.location.href = window.location.origin + window.location.pathname.replace(/&id=\d+/, '');
-            }
           }
-        } else {
-          const errorMsg = response.data?.data?.message || "Invalid response format";
-          console.error("Error:", errorMsg);
-          alert("Error: " + errorMsg);
         }
       } catch (error: any) {
         console.error("AJAX Error:", error.message || error);
-        alert("An error occurred while fetching the data: " + (error.message || error));
       }
     };
 
@@ -228,12 +191,9 @@ const WorkspaceArea = ({
   };
 
   const handleDelete = (id: string) => {
-
     if (previewMode) return;
     dispatch(deleteBlock(id));
   };
-  // Confirmation dialog removed as per user request
-
 
   const handleCopy = (id: string) => {
     if (previewMode) return;
@@ -248,158 +208,251 @@ const WorkspaceArea = ({
   return (
     <Box
       ref={dropRef}
+      onClick={(e) => {
+        // Deselect if clicking on the background (Outer workspace)
+        if (e.target === e.currentTarget && !previewMode) {
+          dispatch(setSelectedBlockId(null));
+          dispatch(closeEditor());
+        }
+      }}
       onClickCapture={handleClickOutside}
       sx={{
         width: "100%",
-        backgroundColor: previewMode ? "#fff" : "#f5f7f9",
-        padding: previewMode ? 0 : 2,
-        paddingTop: 0,
-        paddingX: 0,
-        height: previewMode ? "auto" : "100%",
-        cursor: previewMode ? "default" : "auto",
+        height: "100%",
+        backgroundColor: "#f5f5f5",
         overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "0",
       }}
     >
-      {blocks.length === 0 && !previewMode && !isLayoutSelectorOpen && (
+      {/* Area 2: The Colored Background Section */}
+      <Box
+        sx={{
+          width: "96%",
+          margin: "0 auto",
+          backgroundColor: bodyStyle?.backgroundColor || "#ffffff",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "20px 0 20px 0",
+          minHeight: "fit-content",
+          position: "relative",
+        }}
+      >
+        {/* Background Toolbar */}
+        {!previewMode && (
+          <Box sx={{
+            width: '600px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '10px'
+          }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(setSelectedBlockId(null));
+                dispatch(openEditor({
+                  blockId: null, columnIndex: null, widgetIndex: null, contentType: null
+                }));
+              }}
+              sx={{
+                textTransform: 'none',
+                border: 'none',
+                color: '#333',
+                backgroundColor: '#ebebeb',
+                borderRadius: '0px',
+                '&:hover': {
+                  backgroundColor: '#dadada'
+                }
+              }}
+            >
+              Background
+            </Button>
+          </Box>
+        )}
+
+        {/* Area 1: The White Email Layout (600px) */}
         <Box
           sx={{
-            border: "2px dashed #3ba0f3ff",
-            borderRadius: "8px",
-            padding: 4,
-            textAlign: "center",
-            color: "#6cb7f4ff",
-            fontSize: "16px",
-            width: isMobileView ? "100%" : "700px",
-            height: isMobileView ? "100%" : "440px",
-            margin: isMobileView ? "0" : "20px auto",
-            alignContent: "center",
-            justifyItems: "center",
-            background: "#e8e8e8ff",
-          }}
-          onClick={() => setIsLayoutSelectorOpen(true)}
-        >
-          <AddCircleOutlineIcon
-            sx={{
-              fontSize: 40,
-              color: "#1275c6ff",
-              width: "60px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                color: "#42a5f5",
-                transform: "scale(1.2)",
-              },
-            }}
-          />
-          <Typography>
-            Click or drag a layout to get started
-          </Typography>
-        </Box>
-      )}
-
-      {blocks.map((block, index) => (
-        <Block
-          key={block.id}
-          block={block}
-          index={index}
-          handleBlockClick={handleBlockClick}
-          handleCopy={handleCopy}
-          handleDelete={handleDelete}
-          selectedBlockId={selectedBlockId}
-          isMobileView={isMobileView}
-          previewMode={previewMode}
-        />
-      ))}
-
-      {isLayoutSelectorOpen && !previewMode && (
-        <Box
-          sx={{
-            width: "fit-content",
-            margin: "15px auto",
-            padding: "16px 24px",
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-            textAlign: "center",
+            width: previewMode ? "100%" : (isMobileView ? "100%" : "600px"),
+            maxWidth: "600px",
+            backgroundSize: "cover", // Ensure background image covers the area
+            backgroundColor: "transparent", // Email area is transparent to show Wrapper color
+            margin: "0 auto",
+            minHeight: "120px",
+            height: "auto",
+            flexShrink: 0,
+            boxShadow: "none",
+            border: "none",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            transition: "all 0.3s ease",
+            boxSizing: "border-box",
+            position: "relative",
+            overflow: "visible",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !previewMode) {
+              dispatch(setSelectedBlockId(null));
+              dispatch(closeEditor());
+            }
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 1.5,
-              mb: 1,
-            }}
-          >
-            {[1, 2, 3, 4].map((cols) => (
+          {/* Email Content Area */}
+          <Box sx={{
+            width: '100%',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: "8px",
+          }}>
+            {blocks.length === 0 && !previewMode && !isLayoutSelectorOpen && (
               <Box
-                key={cols}
-                onClick={() => handleAddLayout(cols)}
                 sx={{
-                  width: 70,
-                  height: 35,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "3px",
+                  border: "1px dashed #cccccc",
+                  borderRadius: "4px",
+                  padding: 2,
+                  textAlign: "center",
+                  color: "#999",
+                  fontSize: "14px",
+                  width: "100%",
+                  minHeight: "120px",
                   display: "flex",
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    borderColor: "#3ba0f3",
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                  },
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "transparent",
+                  boxSizing: 'border-box',
+                  cursor: "pointer"
                 }}
+                onClick={() => setIsLayoutSelectorOpen(true)}
               >
-                {Array.from({ length: cols }).map((_, i) => (
-                  <Box
-                    key={i}
+                <AddCircleOutlineIcon
+                  sx={{
+                    fontSize: 40,
+                    color: "#1275c6ff",
+                    width: "60px",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      color: "#42a5f5",
+                      transform: "scale(1.1)",
+                    },
+                  }}
+                />
+                <Typography sx={{ mt: 1 }}>Add Layout</Typography>
+              </Box>
+            )}
+
+            {blocks.map((block, index) => (
+              <Block
+                key={block.id}
+                block={block}
+                index={index}
+                handleBlockClick={handleBlockClick}
+                handleCopy={handleCopy}
+                handleDelete={handleDelete}
+                selectedBlockId={selectedBlockId}
+                isMobileView={isMobileView}
+                previewMode={previewMode}
+              />
+            ))}
+
+            {isLayoutSelectorOpen && (
+              <>
+                <Box
+                  onClick={() => setIsLayoutSelectorOpen(false)}
+                  sx={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 9,
+                    cursor: 'default'
+                  }}
+                />
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    backgroundColor: '#fff',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '4px',
+                    padding: '15px 25px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    gap: '30px',
+                    position: 'relative',
+                    zIndex: 10,
+                    width: 'fit-content',
+                    margin: '20px auto'
+                  }}
+                >
+                  {[1, 2, 3, 4].map((cols) => (
+                    <Box
+                      key={cols}
+                      onClick={() => handleAddLayout(cols)}
+                      sx={{
+                        display: "flex",
+                        gap: "2px",
+                        cursor: "pointer",
+                        width: "70px", // Fixed total width for all options
+                        height: "45px",
+                        transition: "opacity 0.2s",
+                        opacity: 0.8,
+                        "&:hover": {
+                          opacity: 1
+                        }
+                      }}
+                    >
+                      {Array.from({ length: cols }).map((_, i) => (
+                        <Box
+                          key={i}
+                          className="col-block"
+                          sx={{
+                            flex: 1, // Divide the 70px width equally
+                            height: "100%",
+                            backgroundColor: "#5e6266",
+                            borderRadius: "2px"
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  ))}
+                </Box>
+              </>
+            )}
+
+            {blocks.length > 0 && !previewMode && !isLayoutSelectorOpen && (
+              <Box sx={{ textAlign: "center", my: 2 }}>
+                <Tooltip title="Add Layout">
+                  <AddCircleOutlineIcon
+                    onClick={() => setIsLayoutSelectorOpen(true)}
                     sx={{
-                      flex: 1,
-                      backgroundColor: "#6c757d",
-                      borderRight: i < cols - 1 ? "1px solid #fff" : "none",
+                      fontSize: 32,
+                      color: "#999",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: "#666",
+                        transform: "scale(1.1)",
+                      },
                     }}
                   />
-                ))}
+                </Tooltip>
               </Box>
-            ))}
+            )}
           </Box>
-          <Typography
-            onClick={() => setIsLayoutSelectorOpen(false)}
-            sx={{
-              fontSize: "12px",
-              color: "#1976d2",
-              cursor: "pointer",
-              "&:hover": { textDecoration: "underline" }
-            }}
-          >
-            Cancel
-          </Typography>
-        </Box>
-      )}
+        </Box> {/* End Area 1: White Box */}
 
-      {blocks.length > 0 && !previewMode && !isLayoutSelectorOpen && (
-        <Box sx={{ textAlign: "center", my: 3 }}>
-          <Tooltip title="Add Layout">
-            <AddCircleOutlineIcon
-              onClick={() => setIsLayoutSelectorOpen(true)}
-              sx={{
-                fontSize: 40,
-                color: "#1275c6ff",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  color: "#42a5f5",
-                  transform: "scale(1.1)",
-                },
-              }}
-            />
-          </Tooltip>
-        </Box>
-      )}
+
+      </Box>
     </Box>
   );
 };
@@ -504,16 +557,17 @@ const Block = ({
         }
       }}
       sx={{
-        display: isMobileView ? "flex" : "table",
-        tableLayout: "fixed",
+        display: isMobileView ? "flex" : "flex", // Force flex for better column control
         flexDirection: isMobileView ? "column" : "row",
-        maxWidth: isMobileView ? "100%" : previewMode ? "100%" : "80%",
+        maxWidth: "100%",
         margin: previewMode ? "0" : "0 auto",
         width: "100%",
         boxSizing: "border-box",
         cursor: previewMode ? "default" : "pointer",
         opacity: isDragging ? 0.5 : 1,
         zIndex: (selectedBlockId === block.id || isDragging) ? 2 : 1,
+        overflow: "visible", // Ensure actions at top-right are visible
+        flexShrink: 0, // Ensure blocks don't collapse
         // Using pseudo-element overlay for guaranteed visibility
         position: "relative",
         boxShadow: "none",
@@ -557,10 +611,12 @@ const Block = ({
             sx={{
               position: "absolute",
               top: 0,
-              right: -70,
+              left: -70, // Float left into Area 1 (Colored section)
               display: "flex",
-              justifyContent: "right",
+              justifyContent: "left",
               width: 70,
+              backgroundColor: "transparent",
+              zIndex: 11,
             }}
           >
             <Tooltip title="duplicate" placement="bottom">
@@ -722,7 +778,15 @@ const ColumnDropTarget = ({
     if (column.widgetContents.length === 0) {
       return (
         <Typography
-          sx={{ fontSize: "14px", color: "#999", textAlign: "center", width: "100%" }}
+          sx={{
+            fontSize: "14px",
+            color: "#999",
+            textAlign: "center",
+            width: "100%",
+            padding: "20px",
+            border: "1px dashed #ccc",
+            boxSizing: "border-box"
+          }}
         >
           Drag Content Here
         </Typography>
@@ -795,11 +859,9 @@ const ColumnDropTarget = ({
   };
 
   const columnDisplayHeight =
-    typeof column.style.height === "number"
-      ? column.style.height
-      : column.widgetContents.length === 0
-        ? 100 // Keep empty columns tall for easy dragging
-        : Math.max(30, column.widgetContents.length * 20); // Compact for filled columns to avoid gaps
+    column.widgetContents.length === 0
+      ? 100 // Keep empty columns tall for easy dragging
+      : 30; // Minimum floor for filled columns
 
   // Calculate correct column width based on number of columns
   const columnWidth = 100 / block.columns.length;
@@ -809,7 +871,10 @@ const ColumnDropTarget = ({
 
   }
   const columnStyle: React.CSSProperties = {
-    display: isMobileView ? 'block' : 'table-cell',
+    display: 'flex',
+    flexDirection: 'column',
+    flex: isMobileView ? '1 1 auto' : '1 1 0', // Reverted to standard basis
+    minWidth: 0, // Keep this to allow internal content clipping/scrolling if needed
     verticalAlign: 'top',
     width: isMobileView ? '100%' : `${columnWidth}%`,
     boxSizing: 'border-box',
@@ -825,7 +890,7 @@ const ColumnDropTarget = ({
     textAlign: (column.style.textAlign as any) || 'left',
     minHeight: `${columnDisplayHeight}px`,
     position: 'relative',
-    height: column.style.height === 'auto' ? 'auto' : `${column.style.height}px`,
+    height: 'auto', // Always auto to prevent clipping
   };
 
   // Map textAlign to flex alignItems
@@ -853,7 +918,7 @@ const ColumnDropTarget = ({
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: alignItems,
+        alignItems: 'stretch', // Fill the column horizontally
         justifyContent: column.widgetContents.length ? 'flex-start' : 'center',
         gap: '0px',
         minHeight: `${columnDisplayHeight}px`,

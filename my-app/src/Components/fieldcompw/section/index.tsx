@@ -146,12 +146,20 @@ const SectionFieldComponent: React.FC<SectionFieldComponentProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: (!sectionOptions.children || sectionOptions.children.length === 0) ? 'center' : 'flex-start',
-        alignItems: 'center',
+        alignItems: 'stretch',
         outline: isOver ? '2px dashed green' : 'none'
       }}
     >
       {(!sectionOptions.children || sectionOptions.children.length === 0) ? (
-        <Typography sx={{ color: '#999', fontSize: '14px' }}>
+        <Typography sx={{
+          color: '#999',
+          fontSize: '14px',
+          width: '100%',
+          textAlign: 'center',
+          padding: '20px',
+          border: '1px dashed #ccc',
+          boxSizing: 'border-box'
+        }}>
           Drag Content Here
         </Typography>
       ) : (
