@@ -155,7 +155,8 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontSize: content.fontSize,
             color: content.textColor,
             fontWeight: content.fontWeight,
-            lineHeight: content.lineHeight ? `${content.lineHeight}px` : undefined,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Name:</strong> {content.fullName || (previewMode ? 'Jane Smith' : '{{shipping_name}}')}
           </Typography>
@@ -163,6 +164,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Phone:</strong> {content.phone || (previewMode ? '+1 (555) 987-6543' : '{{shipping_phone}}')}
           </Typography>
@@ -170,6 +174,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Email:</strong> {content.email || (previewMode ? 'jane.smith@example.com' : '{{shipping_email}}')}
           </Typography>
@@ -177,6 +184,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Address Line 1:</strong> {content.addressLine1 || (previewMode ? '456 Oak Avenue' : '{{shipping_address_1}}')}
           </Typography>
@@ -184,6 +194,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Address Line 2:</strong> {content.addressLine2 || (previewMode ? 'Suite 200' : '{{shipping_address_2}}')}
           </Typography>
@@ -191,6 +204,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>City:</strong> {content.city || (previewMode ? 'Los Angeles' : '{{shipping_city}}')}
           </Typography>
@@ -198,6 +214,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>State:</strong> {content.state || (previewMode ? 'CA' : '{{shipping_state}}')}
           </Typography>
@@ -205,6 +224,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Postal Code:</strong> {content.postalCode || (previewMode ? '90001' : '{{shipping_postcode}}')}
           </Typography>
@@ -212,6 +234,9 @@ const ShippingAddressFieldComponent: React.FC<ShippingAddressFieldComponentProps
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}>
             <strong>Country:</strong> {content.country || (previewMode ? 'United States' : '{{shipping_country}}')}
           </Typography>

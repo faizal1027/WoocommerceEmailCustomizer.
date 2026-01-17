@@ -137,47 +137,72 @@ const BillingAddressFieldComponent: React.FC<BillingAddressFieldComponentProps> 
             fontSize: content.fontSize,
             color: content.textColor,
             fontWeight: content.fontWeight,
-            lineHeight: content.lineHeight ? `${content.lineHeight}px` : undefined,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Name:</strong> {fallback(content.fullName, previewMode ? 'John Doe' : '{{billing_name}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Phone:</strong> {fallback(content.phone, previewMode ? '+1 (555) 123-4567' : '{{billing_phone}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Email:</strong> {fallback(content.email, previewMode ? 'john.doe@example.com' : '{{billing_email}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Address Line 1:</strong> {fallback(content.addressLine1, previewMode ? '123 Main Street' : '{{billing_address_1}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Address Line 2:</strong> {fallback(content.addressLine2, previewMode ? 'Apt 4B' : '{{billing_address_2}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>City:</strong> {fallback(content.city, previewMode ? 'New York' : '{{billing_city}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>State:</strong> {fallback(content.state, previewMode ? 'NY' : '{{billing_state}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Postal Code:</strong> {fallback(content.postalCode, previewMode ? '10001' : '{{billing_postcode}}')}</Typography>
           <Typography sx={{
             fontFamily: content.fontFamily === 'inherit' || !content.fontFamily ? 'inherit' : content.fontFamily,
             fontSize: content.fontSize,
             color: content.textColor,
+            fontWeight: content.fontWeight,
+            lineHeight: content.lineHeight || undefined,
+            marginBottom: '4px',
           }}><strong>Country:</strong> {fallback(content.country, previewMode ? 'United States' : '{{billing_country}}')}</Typography>
         </Box>
       )}
