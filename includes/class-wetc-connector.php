@@ -274,7 +274,16 @@ class WETC_Connector {
 
             // Enqueue only the LATEST CSS file
             if (!empty($css_files)) {
-                $css_file = $css_files[0];
+                // Prioritize app_bundle.css if it exists
+                $css_file = '';
+                foreach ($css_files as $f) {
+                    if (basename($f) === 'app_bundle.css') {
+                        $css_file = $f;
+                        break;
+                    }
+                }
+                if (!$css_file) $css_file = $css_files[0];
+                
                 $file_name = basename($css_file);
                 wp_enqueue_style(
                     'react-email-customizer-css-main',
@@ -288,7 +297,8 @@ class WETC_Connector {
             $main_js_handle = '';
             foreach ($js_files as $js_file) {
                 $file_name = basename($js_file);
-                if (strpos($file_name, 'main.') === 0) {
+                // Check for app_bundle.js (our new naming) or main.*.js (legacy naming)
+                if (strpos($file_name, 'main.') === 0 || $file_name === 'app_bundle.js') {
                     $handle = 'react-email-customizer-js-main';
                     $deps = ['email-customizer-ajax', 'email-template-fetcher'];
                     $main_js_handle = $handle;

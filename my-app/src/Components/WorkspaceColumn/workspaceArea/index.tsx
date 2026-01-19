@@ -851,6 +851,7 @@ const ColumnDropTarget = ({
               onClick={defaultOnClick}
               onWidgetClick={handleWidgetClick(widget.contentType, index)}
               widgetData={widget}
+              previewMode={previewMode}
             />
           )}
         </DraggableWidgetWrapper>

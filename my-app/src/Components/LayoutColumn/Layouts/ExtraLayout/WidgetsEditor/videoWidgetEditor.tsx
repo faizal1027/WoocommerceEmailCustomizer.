@@ -272,7 +272,7 @@ const VideoWidgetEditor = () => {
             <FormControlLabel
               control={
                 <Switch
-                  checked={videoEditorOptions.controls || true}
+                  checked={videoEditorOptions.controls !== false}
                   onChange={handleChange('controls')}
                   color="primary"
                   size="small"

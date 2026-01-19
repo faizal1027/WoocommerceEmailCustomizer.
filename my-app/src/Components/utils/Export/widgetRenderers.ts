@@ -984,7 +984,6 @@ const widgetRenderers: Record<string, (data: any) => string> = {
             ${addressHtml}
             ${contactHtml}
             ${legalLinksHtml}
-            ${legalLinksHtml}
             ${copyrightHtml}
           </td>
         </tr>

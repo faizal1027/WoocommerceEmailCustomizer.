@@ -11,6 +11,7 @@ interface VideoFieldComponentProps {
   onClick: () => void;
   onWidgetClick: (e: React.MouseEvent) => void;
   widgetIndex: number;
+  previewMode?: boolean;
 }
 
 const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
@@ -19,7 +20,8 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
   isSelected,
   onClick,
   onWidgetClick,
-  widgetIndex
+  widgetIndex,
+  previewMode
 }) => {
   const dispatch = useDispatch();
   const { videoEditorOptions } = useSelector((state: RootState) => state.workspace);
@@ -76,6 +78,7 @@ const VideoFieldComponent: React.FC<VideoFieldComponentProps> = ({
               zIndex: 10,
               cursor: 'pointer',
               backgroundColor: 'transparent',
+              display: previewMode ? 'none' : 'block',
             }}
           />
         </>
