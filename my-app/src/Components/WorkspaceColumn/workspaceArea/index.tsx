@@ -46,7 +46,7 @@ import {
   defaultProductDetailsEditorOptions,
   setMobileView, // Added import
 } from "../../../Store/Slice/workspaceSlice";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddIcon from "@mui/icons-material/Add";
 import ContentCopyTwoToneIcon from "@mui/icons-material/ContentCopyTwoTone";
 import DeleteOutlineTwoToneIcon from "@mui/icons-material/DeleteOutlineTwoTone";
 import EditIcon from '@mui/icons-material/Edit';
@@ -225,32 +225,33 @@ const WorkspaceArea = ({
         flexDirection: "column",
         alignItems: "center",
         padding: "0",
+        position: "relative",
       }}
     >
       {/* Area 2: The Colored Background Section */}
       <Box
         sx={{
-          width: "96%",
+          width: "100%",
           margin: "0 auto",
           backgroundColor: bodyStyle?.backgroundColor || "#ffffff",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "20px 0 20px 0",
+          padding: "40px 0 60px 0",
           minHeight: "fit-content",
           position: "relative",
         }}
       >
-        {/* Background Toolbar */}
+        {/* Background Button - Pinned to Top Right */}
         {!previewMode && (
           <Box sx={{
-            width: '600px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: '10px'
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 10
           }}>
             <Button
-              variant="outlined"
+              variant="contained"
               size="small"
               startIcon={<EditIcon sx={{ fontSize: 16 }} />}
               onClick={(e) => {
@@ -262,12 +263,15 @@ const WorkspaceArea = ({
               }}
               sx={{
                 textTransform: 'none',
-                border: 'none',
+                boxShadow: 'none',
                 color: '#333',
                 backgroundColor: '#ebebeb',
-                borderRadius: '0px',
+                borderRadius: '4px',
+                height: '32px',
+                border: '1px solid #ccc',
                 '&:hover': {
-                  backgroundColor: '#dadada'
+                  backgroundColor: '#dadada',
+                  boxShadow: 'none',
                 }
               }}
             >
@@ -281,8 +285,8 @@ const WorkspaceArea = ({
           sx={{
             width: previewMode ? "100%" : (isMobileView ? "100%" : "600px"),
             maxWidth: "600px",
-            backgroundSize: "cover", // Ensure background image covers the area
-            backgroundColor: "transparent", // Email area is transparent to show Wrapper color
+            backgroundSize: "cover",
+            backgroundColor: "#ffffff", // Set to initial white as per design
             margin: "0 auto",
             minHeight: "120px",
             height: "auto",
@@ -332,19 +336,29 @@ const WorkspaceArea = ({
                 }}
                 onClick={() => setIsLayoutSelectorOpen(true)}
               >
-                <AddCircleOutlineIcon
-                  sx={{
-                    fontSize: 40,
-                    color: "#1275c6ff",
-                    width: "60px",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      color: "#42a5f5",
-                      transform: "scale(1.1)",
-                    },
+                <Box
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsLayoutSelectorOpen(true);
                   }}
-                />
+                  sx={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: '#666', // Darker gray for contrast
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: '#444',
+                      transform: 'scale(1.1)'
+                    }
+                  }}
+                >
+                  <AddIcon sx={{ color: '#fff', fontSize: 20 }} />
+                </Box>
                 <Typography sx={{ mt: 1 }}>Add Layout</Typography>
               </Box>
             )}
@@ -430,21 +444,36 @@ const WorkspaceArea = ({
             )}
 
             {blocks.length > 0 && !previewMode && !isLayoutSelectorOpen && (
-              <Box sx={{ textAlign: "center", my: 2 }}>
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%',
+                my: 2
+              }}>
                 <Tooltip title="Add Layout">
-                  <AddCircleOutlineIcon
-                    onClick={() => setIsLayoutSelectorOpen(true)}
-                    sx={{
-                      fontSize: 32,
-                      color: "#999",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        color: "#666",
-                        transform: "scale(1.1)",
-                      },
+                  <Box
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsLayoutSelectorOpen(true);
                     }}
-                  />
+                    sx={{
+                      width: '32px',
+                      height: '32px',
+                      backgroundColor: '#666', // Darker gray for contrast
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: '#444',
+                        transform: 'scale(1.1)'
+                      }
+                    }}
+                  >
+                    <AddIcon sx={{ color: '#fff', fontSize: 20 }} />
+                  </Box>
                 </Tooltip>
               </Box>
             )}

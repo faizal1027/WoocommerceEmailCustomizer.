@@ -10,10 +10,10 @@ const Workspace = () => {
   return (
     <Box
       sx={{
-        width: '90%',
+        width: '100%',
         display: "flex",
         flexDirection: "column",
-        backgroundColor: '#f5f7f9', // Default app background
+        backgroundColor: bodyStyle?.backgroundColor || '#f5f7f9',
         height: "100vh",
         overflow: "hidden",
       }}

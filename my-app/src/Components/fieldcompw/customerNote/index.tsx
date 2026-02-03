@@ -48,7 +48,11 @@ const CustomerNoteFieldComponent: React.FC<Props> = ({
                 fontFamily: customerNoteEditorOptions.fontFamily || 'Arial, sans-serif',
                 fontSize: customerNoteEditorOptions.fontSize || '14px',
                 fontWeight: customerNoteEditorOptions.fontWeight,
-                lineHeight: customerNoteEditorOptions.lineHeight ? `${customerNoteEditorOptions.lineHeight}px` : undefined,
+                lineHeight: customerNoteEditorOptions.lineHeight
+                    ? (customerNoteEditorOptions.lineHeight > 10
+                        ? `${customerNoteEditorOptions.lineHeight}px`
+                        : customerNoteEditorOptions.lineHeight)
+                    : 'normal',
                 color: customerNoteEditorOptions.textColor || '#333333',
                 display: 'flex',
                 alignItems: 'center',

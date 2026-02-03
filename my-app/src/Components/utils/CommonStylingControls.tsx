@@ -156,7 +156,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {showTypography && showLineHeight && (
                     <Box sx={{ minWidth: 0 }}>
                         <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
-                            Line height (px)
+                            Line height (1.5 or 24px)
                         </Typography>
                         <TextField
                             type="number"
@@ -164,8 +164,8 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                             onChange={(e) => handleChange('lineHeight', parseFloat(e.target.value))}
                             size="small"
                             fullWidth
-                            placeholder="24"
-                            inputProps={{ step: 1, min: 0 }}
+                            placeholder="1.5"
+                            inputProps={{ step: 0.1, min: 0 }}
                         />
                     </Box>
                 )}
