@@ -142,7 +142,7 @@ const EmailFooterFieldComponent: React.FC<EmailFooterFieldComponentProps> = ({
             {emailFooterEditorOptions?.showContact !== false && (
                 <Typography variant="body2" sx={{ marginBottom: '10px', fontSize: 'inherit', fontFamily: 'inherit', color: 'inherit' }}>
                     {emailFooterEditorOptions?.emailLabel || 'Email:'} {emailFooterEditorOptions?.contactEmail || '{{store_email}}'} |
-                    {emailFooterEditorOptions?.phoneLabel || 'Phone:'} {emailFooterEditorOptions?.contactPhone || '{{store_phone}}'}
+                    {emailFooterEditorOptions?.phoneLabel || 'Phone:'} {emailFooterEditorOptions?.contactPhone || '0000-0000-0000'}
                 </Typography>
             )}
 

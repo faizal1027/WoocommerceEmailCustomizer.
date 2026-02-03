@@ -6,6 +6,12 @@ export interface ImportResult {
   error?: string;
   warnings?: string[];
   fileName?: string;
+  templateMeta?: {
+    name?: string;
+    description?: string;
+    emailType?: string;
+    priority?: number;
+  };
 }
 
 export interface ImportOptions {
@@ -62,7 +68,13 @@ export function importFromText(jsonText: string, options: ImportOptions = {}): I
     return {
       success: true,
       data: blocks,
-      warnings: validation.warnings
+      warnings: validation.warnings,
+      templateMeta: parsedData.template ? {
+        name: parsedData.template.name,
+        description: parsedData.template.description,
+        emailType: parsedData.template.emailType,
+        priority: parsedData.template.priority
+      } : undefined
     };
 
   } catch (error: any) {
@@ -105,7 +117,13 @@ export function importTemplate(file: File, options: ImportOptions = {}): Promise
           success: true,
           data: blocks,
           warnings: validation.warnings,
-          fileName: file.name
+          fileName: file.name,
+          templateMeta: parsedData.template ? {
+            name: parsedData.template.name,
+            description: parsedData.template.description,
+            emailType: parsedData.template.emailType,
+            priority: parsedData.template.priority
+          } : undefined
         });
 
       } catch (error: any) {

@@ -41,15 +41,7 @@ const ProductDetailsWidgetEditor = () => {
         <Box sx={{ p: 2 }}>
             <Typography variant="subtitle2" gutterBottom>Product Details Settings</Typography>
 
-            <FormControlLabel
-                control={
-                    <Switch
-                        checked={options.showImage}
-                        onChange={(e) => handleChange('showImage', e.target.checked)}
-                    />
-                }
-                label="Show Product Images"
-            />
+
 
             <Box sx={{ my: 2 }}>
                 <Typography variant="caption" sx={{ color: '#666' }}>Border Color</Typography>

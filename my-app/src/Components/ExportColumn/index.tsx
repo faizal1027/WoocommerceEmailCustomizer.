@@ -229,11 +229,15 @@ const ExportColumn = () => {
 
     try {
       let content: string;
+      const typeInfo = EMAIL_TYPES.find(t => t.name === selectedTemplateId);
+      const emailType = typeInfo ? typeInfo.type : selectedTemplateId;
 
       if (format === "json") {
         content = exportToJSON(blocks, {
           templateName: templateName || "Email Template",
           templateDescription: templateDescription || "",
+          emailType: emailType,
+          priority: priority || 0,
           generateIds: true,
           validate: true
         });
@@ -287,7 +291,21 @@ const ExportColumn = () => {
 
       if (result.success && result.data) {
         dispatch(setBlocks(result.data));
-        setTemplateName(file.name.replace('.json', ''));
+
+        // Restore Metadata
+        if (result.templateMeta) {
+          setTemplateName(result.templateMeta.name || file.name.replace('.json', ''));
+          setTemplateDescription(result.templateMeta.description || "");
+          if (result.templateMeta.priority !== undefined) setPriority(result.templateMeta.priority);
+
+          if (result.templateMeta.emailType) {
+            const matchedType = EMAIL_TYPES.find(t => t.type === result.templateMeta!.emailType);
+            if (matchedType) setSelectedTemplateId(matchedType.name); // Set by Name as UI expects
+          }
+        } else {
+          setTemplateName(file.name.replace('.json', ''));
+        }
+
         setImportDialogOpen(false);
 
         // Show warnings if any
@@ -322,7 +340,21 @@ const ExportColumn = () => {
 
       if (result.success && result.data) {
         dispatch(setBlocks(result.data));
-        setTemplateName("Imported Template");
+
+        // Restore Metadata
+        if (result.templateMeta) {
+          setTemplateName(result.templateMeta.name || "Imported Template");
+          setTemplateDescription(result.templateMeta.description || "");
+          if (result.templateMeta.priority !== undefined) setPriority(result.templateMeta.priority);
+
+          if (result.templateMeta.emailType) {
+            const matchedType = EMAIL_TYPES.find(t => t.type === result.templateMeta!.emailType);
+            if (matchedType) setSelectedTemplateId(matchedType.name);
+          }
+        } else {
+          setTemplateName("Imported Template");
+        }
+
         setImportDialogOpen(false);
 
         // Show warnings if any

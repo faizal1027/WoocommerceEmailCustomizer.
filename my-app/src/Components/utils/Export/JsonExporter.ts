@@ -6,6 +6,8 @@ export interface JsonExportOptions {
   includeMeta?: boolean;
   templateName?: string;
   templateDescription?: string;
+  emailType?: string;
+  priority?: number;
   validate?: boolean;
 }
 
@@ -16,6 +18,8 @@ export interface ExportSchema {
   template: {
     name: string;
     description: string;
+    emailType?: string;
+    priority?: number;
     created: string;
   };
   blocks: any[];
@@ -39,6 +43,8 @@ export function exportToJSON(blocks: DroppedBlock[], options: JsonExportOptions 
     includeMeta: true,
     templateName: 'Email Template',
     templateDescription: '',
+    emailType: '',
+    priority: 0,
     validate: true,
     ...options
   };
@@ -54,6 +60,8 @@ export function exportToJSON(blocks: DroppedBlock[], options: JsonExportOptions 
     template: {
       name: opts.templateName || 'Email Template',
       description: opts.templateDescription || '',
+      emailType: opts.emailType,
+      priority: opts.priority,
       created: new Date().toISOString()
     },
     blocks: processedBlocks,

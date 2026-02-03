@@ -352,7 +352,11 @@ private function get_order_id_from_object($email) {
                 '{{shipping_address_2}}',
                 '{{billing_company}}',
                 '{{shipping_company}}',
-                '{{customer_note}}'
+                '{{customer_note}}',
+                '{{refund_amount}}',
+                '{{refund_reason}}',
+                '{{reset_link}}',
+                '{{user_login}}'
             ];
 
             if (empty($value)) {
@@ -397,6 +401,8 @@ private function get_order_id_from_object($email) {
         $related_products_data = [];
         $customer_note = "";
         $order_totals_table = "";
+        $user_login = "";
+        $reset_link = "";
 
         // --- Store Details ---
         $store_name = get_bloginfo('name');
@@ -443,6 +449,10 @@ private function get_order_id_from_object($email) {
             $coupon_discount = $order->get_total_discount();
             $coupon_discount = $order->get_total_discount();
             $customer_note = $order->get_customer_note();
+            $user_id = $order->get_user_id();
+            $user = $user_id ? get_userdata($user_id) : null;
+            $user_login = $user ? $user->user_login : '';
+            $reset_link = wp_lostpassword_url();
 
             // Additional Billing Details
             $billing_first_name = $order->get_billing_first_name();
@@ -457,11 +467,10 @@ private function get_order_id_from_object($email) {
             $shipping_postcode   = $order->get_shipping_postcode();
             
             // Refund Details (Global Calculation)
-            $refund_amount = '';
+            $refund_amount = wc_price($order->get_total_refunded());
             $refund_reason = '';
             $total_refunded = $order->get_total_refunded();
             if ($total_refunded > 0) {
-                 $refund_amount = wc_price($total_refunded);
                  $refunds = $order->get_refunds();
                  if (!empty($refunds)) {
                      $latest_refund = reset($refunds);
@@ -512,20 +521,11 @@ private function get_order_id_from_object($email) {
                  * 2. If no image or localhost image (which breaks), yield 3-column row where Product Name spans 2 cols.
                  *    This satisfies "don't show empty image" and "don't show placeholder" and "empty cell is not correct".
                  */
-                if (!empty($img_cell_html)) {
-                    $order_items_rows_with_images .= "<tr>
-                        $img_cell_html
+                $order_items_rows_with_images .= "<tr>
                         <td style='padding: 10px; border: 1px solid #ddd;'>$product_name</td>
                         <td style='padding: 10px; border: 1px solid #ddd;'>$quantity</td>
                         <td style='padding: 10px; border: 1px solid #ddd;'>" . wc_price($line_regular_total) . "</td>
                     </tr>";
-                } else {
-                     $order_items_rows_with_images .= "<tr>
-                        <td colspan='2' style='padding: 10px; border: 1px solid #ddd;'>$product_name</td>
-                        <td style='padding: 10px; border: 1px solid #ddd;'>$quantity</td>
-                        <td style='padding: 10px; border: 1px solid #ddd;'>" . wc_price($line_regular_total) . "</td>
-                    </tr>";
-                }
             }
             $combined_discount = $coupon_discount + $total_sale_discount;
 
@@ -583,6 +583,8 @@ private function get_order_id_from_object($email) {
             if ($user) {
                 $customer_name = $user->display_name;
                 $billing_email = $user->user_email;
+                $user_login = $user->user_login;
+                $reset_link = wp_lostpassword_url();
             }
         }
         // --- PERFORM REPLACEMENTS ---
@@ -600,7 +602,7 @@ private function get_order_id_from_object($email) {
             '{{order_items_rows}}' => $order_items_rows,
             '{{order_items}}' => $order_items_rows, // Alias for compatibility
             '{{order_details_table_basic}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows . '</tbody></table>',
-            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;" colspan="2">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
+            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Product</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Qty</th><th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
             
             // New Placeholders Support
             '{{checkout_url}}' => function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : site_url('/checkout'),
@@ -609,6 +611,8 @@ private function get_order_id_from_object($email) {
             '{{order_status}}' => ($order instanceof \WC_Order) ? wc_get_order_status_name($order->get_status()) : '',
             '{{currency}}' => ($order instanceof \WC_Order) ? $order->get_currency() : '',
             '{{transaction_id}}' => ($order instanceof \WC_Order) ? $order->get_transaction_id() : '',
+            '{{site_name}}' => get_bloginfo('name'),
+            '{{site_url}}' => site_url(),
             '{{admin_email}}' => get_option('admin_email'),
             '{{user_email}}' => $billing_email,
             '{{customer_email}}' => $billing_email,
@@ -666,8 +670,10 @@ private function get_order_id_from_object($email) {
             '{{order_tracking_url}}' => $order_url, // Standard fallback
             '{{order_tracking_url}}' => $order_url, // Standard fallback
             '{{order_totals_table}}' => $order_totals_table,
+            '{{user_login}}' => $user_login,
+            '{{reset_link}}' => $reset_link,
             '{{order_details_table_basic}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border:1px solid #ddd;">Product</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Qty</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Price</th></tr></thead><tbody>' . $order_items_rows . '</tbody></table>',
-            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border:1px solid #ddd;">Image</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Product</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Qty</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
+            '{{order_details_table_with_images}}' => '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border:1px solid #ddd;">Product</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Qty</th><th style="text-align:left; padding:8px; border:1px solid #ddd;">Price</th></tr></thead><tbody>' . $order_items_rows_with_images . '</tbody></table>',
             '{{tax_rate}}' => ($order instanceof \WC_Order) ? (function($order) {
                 $taxes = $order->get_taxes();
                 foreach ($taxes as $tax) {

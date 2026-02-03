@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Accordion, AccordionSummary,
   AccordionDetails, Typography,
-  Box, Slide, TextField, InputAdornment,
+  Box, Slide, Paper, InputBase, IconButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
@@ -128,20 +128,28 @@ const OverallLayout = () => {
         }}
       >
         <Box sx={{ p: 2, position: 'sticky', top: 0, bgcolor: 'background.paper', zIndex: 1, borderBottom: '1px solid #eee' }}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Search blocks..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
+          <Paper
+            component="div"
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              border: '1px solid #ccc',
+              boxShadow: 'none',
+              borderRadius: '4px'
             }}
-          />
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search element"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <IconButton type="button" sx={{ p: '10px' }} aria-label="search" disabled>
+              <SearchIcon color="action" />
+            </IconButton>
+          </Paper>
         </Box>
 
         {/* General Layout */}

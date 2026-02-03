@@ -381,7 +381,6 @@ const EmailFooterWidgetEditor: React.FC = () => {
                                                 InputProps={{ style: { fontSize: '12px' } }}
                                                 sx={{ mb: 2 }}
                                             />
-                                            <PlaceholderSelect onSelect={handlePlaceholderSelect('contactPhone')} />
                                         </Box>
                                     </Paper>
                                 </>

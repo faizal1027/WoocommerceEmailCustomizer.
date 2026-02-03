@@ -73,7 +73,7 @@ const ProductDetailsFieldComponent: React.FC<ProductDetailsFieldComponentProps> 
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'inherit', fontFamily: 'inherit' }}>
                 <thead>
                     <tr style={{ backgroundColor: options.headerBackgroundColor, color: options.headerTextColor }}>
-                        {options.showImage && <th style={{ padding: '8px', borderBottom: `1px solid ${options.borderColor}`, textAlign: 'left' }}>Image</th>}
+
                         <th style={{ padding: '8px', borderBottom: `1px solid ${options.borderColor}`, textAlign: 'left' }}>Product</th>
                         <th style={{ padding: '8px', borderBottom: `1px solid ${options.borderColor}`, textAlign: 'left' }}>Quantity</th>
                         <th style={{ padding: '8px', borderBottom: `1px solid ${options.borderColor}`, textAlign: 'right' }}>Price</th>
@@ -81,11 +81,7 @@ const ProductDetailsFieldComponent: React.FC<ProductDetailsFieldComponentProps> 
                 </thead>
                 <tbody>
                     <tr>
-                        {options.showImage && (
-                            <td style={{ padding: '12px', border: `1px solid ${options.borderColor}` }}>
-                                <Box sx={{ width: 32, height: 32, backgroundColor: '#eee', display: 'inline-block', verticalAlign: 'middle' }} />
-                            </td>
-                        )}
+
                         <td style={{ padding: '12px', border: `1px solid ${options.borderColor}` }}>
                             Sample Product
                         </td>
@@ -93,11 +89,7 @@ const ProductDetailsFieldComponent: React.FC<ProductDetailsFieldComponentProps> 
                         <td style={{ padding: '12px', border: `1px solid ${options.borderColor}`, textAlign: 'right' }}>$50.00</td>
                     </tr>
                     <tr>
-                        {options.showImage && (
-                            <td style={{ padding: '12px', border: `1px solid ${options.borderColor}` }}>
-                                <Box sx={{ width: 32, height: 32, backgroundColor: '#eee', display: 'inline-block', verticalAlign: 'middle' }} />
-                            </td>
-                        )}
+
                         <td style={{ padding: '12px', border: `1px solid ${options.borderColor}` }}>
                             Another Product
                         </td>
