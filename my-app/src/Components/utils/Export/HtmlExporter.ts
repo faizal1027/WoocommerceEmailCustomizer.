@@ -180,14 +180,7 @@ function wrapInHtmlDocument(content: string, options: Required<HtmlExportOptions
             ${content}
 
             <!-- Footer Info (Optional) -->
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
-                <tr>
-                    <td style="padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 12px; color: #6c757d;">
-                        ${safeDescription ? `<p style="margin: 0 0 10px 0;">${safeDescription}</p>` : ''}
-                        <p style="margin: 0;">&copy; ${new Date().getFullYear()} ${safeTemplateName}. All rights reserved.</p>
-                    </td>
-                </tr>
-            </table>
+
         </div>
 
         <!--[if mso]>
