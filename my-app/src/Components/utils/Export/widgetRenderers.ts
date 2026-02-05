@@ -948,13 +948,13 @@ const widgetRenderers: Record<string, (data: any) => string> = {
 
     const addressHtml = data.showAddress !== false ? `
       <div style="margin-bottom: 10px; font-size: inherit; color: inherit;">
-        ${escapeHtml(data.storeAddress || '123 Main Street, New York, NY 10001')}
+        ${escapeHtml(data.storeAddress || '{{store_address}}')}
       </div>
     ` : '';
 
     const contactHtml = data.showContact !== false ? `
       <div style="margin-bottom: 10px; font-size: inherit; color: inherit;">
-        ${data.emailLabel || 'Email:'} ${escapeHtml(data.contactEmail || 'support@yourstore.com')} | ${data.phoneLabel || 'Phone:'} ${escapeHtml(data.contactPhone || '+1 (555) 123-4567')}
+        ${data.emailLabel || 'Email:'} ${escapeHtml(data.contactEmail || '{{store_email}}')} | ${data.phoneLabel || 'Phone:'} ${escapeHtml(data.contactPhone || '{{store_phone}}')}
       </div>
     ` : '';
 
