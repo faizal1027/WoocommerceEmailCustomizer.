@@ -356,10 +356,20 @@ private function get_order_id_from_object($email) {
                 '{{refund_amount}}',
                 '{{refund_reason}}',
                 '{{reset_link}}',
-                '{{user_login}}'
+                '{{user_login}}',
+                '{{order_discount}}',
+                '{{coupon_discount}}',
+                '{{sale_discount}}',
+                '{{payment_method}}',
+                '{{shipping_method}}',
+                '{{tax_amount}}',
+                '{{tax_rate}}',
+                '{{shipping_email}}'
             ];
 
-            if (empty($value)) {
+            // If value is null or empty string, it's "missing". 
+            // 0 or "0" should NOT be considered missing.
+            if ($value === null || $value === '') {
                 if (in_array($placeholder, $optional_placeholders)) {
                     return ''; // Allow empty for these
                 }
@@ -621,9 +631,9 @@ private function get_order_id_from_object($email) {
 
             '{{order_subtotal}}' => $subtotal,
             '{{order_shipping}}' => $order_shipping,
-            '{{order_discount}}' => $combined_discount > 0 ? wc_price($combined_discount) : '',
-            '{{coupon_discount}}' => $coupon_discount > 0 ? wc_price($coupon_discount) : '',
-            '{{sale_discount}}' => $total_sale_discount > 0 ? wc_price($total_sale_discount) : '',
+            '{{order_discount}}' => (string)wc_price($combined_discount),
+            '{{coupon_discount}}' => $coupon_discount > 0 ? (string)wc_price($coupon_discount) : '',
+            '{{sale_discount}}' => $total_sale_discount > 0 ? (string)wc_price($total_sale_discount) : '',
             '{{tax_amount}}' => $tax_amount,
             '{{billing_name}}' => $billing_name,
             '{{billing_address_1}}' => $billing_address_1,
@@ -693,10 +703,19 @@ private function get_order_id_from_object($email) {
         // Execute Replacements with Notification Logic
         foreach ($replacements as $placeholder => $value) {
             // Process placeholders if they exist in the body
-            
             if (strpos($body, $placeholder) !== false) {
                  $replacement_value = $safe_replace($placeholder, $value);
                  $body = str_replace($placeholder, $replacement_value, $body);
+            }
+
+            // Handle HTML Entity encoded versions
+            $encoded_placeholder = str_replace(['{', '}'], ['&#123;', '&#125;'], $placeholder);
+            
+
+
+            if (strpos($body, $encoded_placeholder) !== false) {
+                 $replacement_value = $safe_replace($placeholder, $value);
+                 $body = str_replace($encoded_placeholder, $replacement_value, $body);
             }
         }
         
@@ -772,7 +791,7 @@ public function refunded_order_email($order_id, $refund_id = null, $force = fals
     $extra = [];
     // ... rest of logic
     if ($refund_id) {
-        $refund = wc_get_refund($refund_id);
+        $refund = wc_get_order($refund_id);
         if ($refund) {
             $extra = [
                 '{{refund_amount}}' => wc_price($refund->get_amount()),
@@ -807,10 +826,10 @@ public function refunded_order_email_admin($order_id, $refund_id = null, $force 
 
     $extra = [];
     if ($refund_id) {
-        $refund = wc_get_refund($refund_id);
+        $refund = \wc_get_order($refund_id);
         if ($refund) {
             $extra = [
-                '{{refund_amount}}' => wc_price($refund->get_amount()),
+                '{{refund_amount}}' => \wc_price($refund->get_amount()),
                 '{{refund_reason}}' => $refund->get_reason() ?: 'Not specified'
             ];
         }
