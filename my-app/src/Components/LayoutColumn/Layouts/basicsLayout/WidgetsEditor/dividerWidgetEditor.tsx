@@ -4,8 +4,11 @@ import {
   IconButton, Tooltip,
   Stack,
   Divider,
-  Popover,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
 import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
 import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
@@ -53,205 +56,145 @@ const DividerWidgetEditor = () => {
 
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Divider
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Customize divider line.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Divider</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Customize divider line.
+        </Typography>
+      </Box>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Appearance
-          </Typography>
-          <Stack spacing={2}>
-
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Width
-              </Typography>
-              <Slider
-                value={parseInt(dividerOptions.width)}
-                onChange={(_, value) => handleOptionChange("width", `${value || 1}`)}
-                min={1}
-                max={100}
-                step={1}
-                valueLabelDisplay="auto"
-                size="small"
-              />
-            </Box>
-
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Style Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Divider</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Style
-                </Typography>
-                <TextField
-                  select
-                  value={dividerOptions.style}
-                  onChange={(e) => handleOptionChange("style", e.target.value)}
-                  fullWidth
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Width (%)</Typography>
+                <Slider
+                  value={parseInt(dividerOptions.width)}
+                  onChange={(_, value) => handleOptionChange("width", `${value || 1}`)}
+                  min={1}
+                  max={100}
+                  step={1}
                   size="small"
-                  SelectProps={{
-                    MenuProps: {
-                      disablePortal: false,
-                      anchorOrigin: {
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      },
-                      transformOrigin: {
-                        vertical: 'top',
-                        horizontal: 'left',
-                      },
-                      sx: { zIndex: 1300001 },
-                      style: { zIndex: 1300001 }
-                    }
-                  }}
-                >
-                  <MenuItem value="solid">Solid</MenuItem>
-                  <MenuItem value="dashed">Dashed</MenuItem>
-                  <MenuItem value="dotted">Dotted</MenuItem>
-                </TextField>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Weight
-                </Typography>
-                <TextField
-                  type="number"
-                  value={dividerOptions.thickness}
-                  onChange={(e) =>
-                    handleOptionChange("thickness", parseInt(e.target.value) || 1)
-                  }
-                  inputProps={{ min: 1 }}
-                  fullWidth
-                  size="small"
+                  sx={{ color: '#93003c' }}
                 />
               </Box>
-            </Box>
 
-            <ColorPicker
-              label="Color"
-              value={dividerOptions.color}
-              onChange={(color) => handleOptionChange("color", color)}
-            />
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Style</Typography>
+                  <TextField
+                    select
+                    value={dividerOptions.style}
+                    onChange={(e) => handleOptionChange("style", e.target.value)}
+                    fullWidth
+                    size="small"
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    SelectProps={{
+                      MenuProps: {
+                        disablePortal: true,
+                        sx: { zIndex: 999999 }
+                      }
+                    }}
+                  >
+                    <MenuItem value="solid" sx={{ fontSize: '11px' }}>Solid</MenuItem>
+                    <MenuItem value="dashed" sx={{ fontSize: '11px' }}>Dashed</MenuItem>
+                    <MenuItem value="dotted" sx={{ fontSize: '11px' }}>Dotted</MenuItem>
+                  </TextField>
+                </Box>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Alignment
-              </Typography>
-              <ToggleButtonGroup
-                value={dividerOptions.alignment}
-                exclusive
-                onChange={(_, newAlign) => {
-                  if (newAlign) handleOptionChange("alignment", newAlign);
-                }}
-                fullWidth
-                size="small"
-              >
-                <ToggleButton value="left">
-                  <FormatAlignLeftIcon fontSize="small" />
-                </ToggleButton>
-                <ToggleButton value="center">
-                  <FormatAlignCenterIcon fontSize="small" />
-                </ToggleButton>
-                <ToggleButton value="right">
-                  <FormatAlignRightIcon fontSize="small" />
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-          </Stack>
-        </Box>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Weight (px)</Typography>
+                  <TextField
+                    type="number"
+                    value={dividerOptions.thickness}
+                    onChange={(e) => handleOptionChange("thickness", parseInt(e.target.value) || 1)}
+                    inputProps={{ min: 1 }}
+                    fullWidth
+                    size="small"
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                  />
+                </Box>
+              </Box>
 
-        <Divider />
+              <ColorPicker
+                label="Color"
+                value={dividerOptions.color}
+                onChange={(color) => handleOptionChange("color", color)}
+              />
 
-        {/* Padding */}
-        <Box pb={2}>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Padding
-          </Typography>
-          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Top
-              </Typography>
-              <TextField type="number" value={dividerOptions.padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} size="small" fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Bottom
-              </Typography>
-              <TextField type="number" value={dividerOptions.padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} size="small" fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Left
-              </Typography>
-              <TextField type="number" value={dividerOptions.padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} size="small" fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Right
-              </Typography>
-              <TextField type="number" value={dividerOptions.padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} size="small" fullWidth />
-            </Box>
-          </Box>
-        </Box>
-      </Stack>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Alignment</Typography>
+                <ToggleButtonGroup
+                  value={dividerOptions.alignment}
+                  exclusive
+                  onChange={(_, newAlign) => newAlign && handleOptionChange("alignment", newAlign)}
+                  fullWidth
+                  size="small"
+                  sx={{ bgcolor: '#f9f9f9' }}
+                >
+                  <ToggleButton value="left" sx={{ p: '5px' }}><FormatAlignLeftIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="center" sx={{ p: '5px' }}><FormatAlignCenterIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="right" sx={{ p: '5px' }}><FormatAlignRightIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Advanced Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Advanced</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Padding</Typography>
+                <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={1}>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>TOP</Typography>
+                    <TextField type="number" size="small" fullWidth value={dividerOptions.padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>RIGHT</Typography>
+                    <TextField type="number" size="small" fullWidth value={dividerOptions.padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>BOTTOM</Typography>
+                    <TextField type="number" size="small" fullWidth value={dividerOptions.padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>LEFT</Typography>
+                    <TextField type="number" size="small" fullWidth value={dividerOptions.padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                </Box>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

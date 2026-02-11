@@ -32,13 +32,11 @@ const MainLayout = ({ searchTerm = '' }: { searchTerm?: string }) => {
   return (
     <Box
       sx={{
-        flex: 1,
-        width: "100%", p: 2,
-        overflowY: 'auto',
+        width: "100%",
+        p: 2,
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: 1,
-        placeItems: "left"
       }}
     >
       {filteredWidgets.map(({ Component, name }, index) => (

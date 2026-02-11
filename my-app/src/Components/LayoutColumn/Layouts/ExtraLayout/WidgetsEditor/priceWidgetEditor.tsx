@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Typography, TextField, Tooltip, IconButton, Switch, FormControlLabel, Stack, Divider, InputAdornment, Select, MenuItem } from '@mui/material';
+import { Box, Typography, TextField, Tooltip, IconButton, Switch, FormControlLabel, Stack, Divider, InputAdornment, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updatePriceEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CommonStylingControls from '../../../../utils/CommonStylingControls';
 
 const PriceWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -38,205 +39,162 @@ const PriceWidgetEditor = () => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Price Display
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Edit pricing format.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Price Display</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Edit the pricing format and amount.
+        </Typography>
+      </Box>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Amount & Currency
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Label
-              </Typography>
-              <TextField
-                value={priceEditorOptions.label}
-                onChange={handleChange('label')}
-                size="small"
-                fullWidth
-                placeholder="Price"
-              />
-            </Box>
-
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={3}>
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Amount
-                </Typography>
-                <TextField
-                  type="number"
-                  value={priceEditorOptions.amount || 99.99}
-                  onChange={handleChange('amount')}
-                  size="small"
-                  placeholder="99.99"
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Typography variant="body2" color="textSecondary">
-                          {priceEditorOptions.currencySymbol || '$'}
-                        </Typography>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Amount & Currency</Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Label</Typography>
+                    <TextField
+                      value={priceEditorOptions.label}
+                      onChange={handleChange('label')}
+                      size="small"
+                      fullWidth
+                      placeholder="Price"
+                      InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    />
+                  </Box>
+
+                  <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Amount</Typography>
+                      <TextField
+                        type="number"
+                        value={priceEditorOptions.amount || 99.99}
+                        onChange={handleChange('amount')}
+                        size="small"
+                        placeholder="99.99"
+                        fullWidth
+                        InputProps={{
+                          sx: { fontSize: '11px', bgcolor: '#f9f9f9' },
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Typography sx={{ fontSize: '12px', color: '#666' }}>
+                                {priceEditorOptions.currencySymbol || '$'}
+                              </Typography>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Currency</Typography>
+                      <TextField
+                        value={priceEditorOptions.currency || ''}
+                        onChange={handleChange('currency')}
+                        size="small"
+                        placeholder="USD"
+                        fullWidth
+                        disabled={priceEditorOptions.showCurrencyCode === false}
+                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                      />
+                    </Box>
+                  </Box>
+                </Stack>
               </Box>
+
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Currency
-                </Typography>
-                <TextField
-                  value={priceEditorOptions.currency || ''}
-                  onChange={handleChange('currency')}
-                  size="small"
-                  placeholder="USD"
-                  fullWidth
-                  disabled={priceEditorOptions.showCurrencyCode === false}
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Formatting</Typography>
+                <Stack spacing={2}>
+                  <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Symbol</Typography>
+                      <Select
+                        value={priceEditorOptions.currencySymbol || '$'}
+                        onChange={handleChange('currencySymbol')}
+                        size="small"
+                        fullWidth
+                        sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                        MenuProps={{ disablePortal: true, sx: { zIndex: 999999 } }}
+                      >
+                        {['$', '€', '£', '¥', '₹', 'Rp', 'R$', 'AED', 'sar', 'Fr'].map((symbol) => (
+                          <MenuItem key={symbol} value={symbol} sx={{ fontSize: '11px' }}>
+                            {symbol}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Decimals</Typography>
+                      <TextField
+                        type="number"
+                        value={priceEditorOptions.decimals || 2}
+                        onChange={handleChange('decimals')}
+                        size="small"
+                        fullWidth
+                        inputProps={{ min: 0, max: 4 }}
+                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Stack spacing={0.5}>
+                    <FormControlLabel
+                      control={<Switch checked={priceEditorOptions.showDecimals !== false} onChange={handleChange('showDecimals')} size="small" />}
+                      label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Decimals</Typography>}
+                      sx={{ ml: 0 }}
+                    />
+                    <FormControlLabel
+                      control={<Switch checked={priceEditorOptions.showCurrencySymbol !== false} onChange={handleChange('showCurrencySymbol')} size="small" />}
+                      label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Symbol</Typography>}
+                      sx={{ ml: 0 }}
+                    />
+                    <FormControlLabel
+                      control={<Switch checked={priceEditorOptions.showCurrencyCode !== false} onChange={handleChange('showCurrencyCode')} size="small" />}
+                      label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Currency Code</Typography>}
+                      sx={{ ml: 0 }}
+                    />
+                  </Stack>
+                </Stack>
               </Box>
-            </Box>
-          </Stack>
-        </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Formatting
-          </Typography>
-          <Stack spacing={2}>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Symbol
-                </Typography>
-                <Select
-                  value={priceEditorOptions.currencySymbol || '$'}
-                  onChange={handleChange('currencySymbol')}
-                  size="small"
-                  fullWidth
-                  MenuProps={{ disablePortal: true }}
-                >
-                  {['$', '€', '£', '¥', '₹', 'Rp', 'R$', 'AED', 'sar', 'Fr'].map((symbol) => (
-                    <MenuItem key={symbol} value={symbol}>
-                      {symbol}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Decimals
-                </Typography>
-                <TextField
-                  type="number"
-                  value={priceEditorOptions.decimals || 2}
-                  onChange={handleChange('decimals')}
-                  size="small"
-                  fullWidth
-                  inputProps={{ min: 0, max: 4 }}
-                />
-              </Box>
-            </Box>
-
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={priceEditorOptions.showDecimals !== false}
-                    onChange={handleChange('showDecimals')}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={<Typography variant="body2">Show Decimals</Typography>}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={priceEditorOptions.showCurrencySymbol !== false}
-                    onChange={handleChange('showCurrencySymbol')}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={<Typography variant="body2">Show Symbol</Typography>}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={priceEditorOptions.showCurrencyCode !== false}
-                    onChange={handleChange('showCurrencyCode')}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={<Typography variant="body2">Show Currency Code</Typography>}
-              />
-            </Box>
-          </Stack>
-        </Box>
-      </Stack>
+        {/* Style Section */}
+        <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <CommonStylingControls
+              options={priceEditorOptions}
+              onUpdate={(updatedOptions) => dispatch(updatePriceEditorOptions(updatedOptions))}
+            />
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

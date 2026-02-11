@@ -51,14 +51,27 @@ export const SocialIconInsertSelect: React.FC<SocialIconInsertSelectProps> = ({
             label={label}
             value=""
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+                shrink: true,
+                sx: { fontSize: '13px', fontWeight: 600, color: '#555' }
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    fontSize: '11px',
+                    bgcolor: '#f9f9f9',
+                    "& fieldset": { borderColor: "#e7e9eb" },
+                    "&:hover fieldset": { borderColor: "#d5dadf" },
+                    "&.Mui-focused fieldset": { borderColor: "#93003c" },
+                },
+                "& .MuiInputBase-input": { padding: "8px 12px" },
+            }}
             SelectProps={{
                 displayEmpty: true,
                 renderValue: (value: any) => {
                     if (value === "") {
-                        return <span style={{ color: "rgba(0, 0, 0, 0.6)" }}>Select...</span>;
+                        return <span style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: '11px' }}>Select...</span>;
                     }
-                    return "Selected";
+                    return <span style={{ fontSize: '11px' }}>Selected</span>;
                 },
                 MenuProps: {
                     disablePortal: true,
@@ -73,14 +86,14 @@ export const SocialIconInsertSelect: React.FC<SocialIconInsertSelectProps> = ({
                 }
             }}
         >
-            <MenuItem value="" disabled>
+            <MenuItem value="" disabled sx={{ fontSize: '11px' }}>
                 Select Icon...
             </MenuItem>
             {SOCIAL_ICONS.map((icon) => (
-                <MenuItem key={icon.value} value={icon.value} sx={{ paddingLeft: 1, paddingRight: 1 }}>
+                <MenuItem key={icon.value} value={icon.value} sx={{ paddingLeft: 1, paddingRight: 1, fontSize: '11px' }}>
                     <Box display="flex" alignItems="center" width="100%" gap={1}>
                         <img src={icon.value} alt={icon.label} width="24" height="24" style={{ objectFit: 'contain' }} />
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontSize: '11px' }}>
                             {icon.label}
                         </Typography>
                     </Box>

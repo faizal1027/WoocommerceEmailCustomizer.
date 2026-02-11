@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Tooltip, IconButton, Stack, Divider, Popover, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Tooltip, IconButton, Stack, Divider, Popover, ToggleButtonGroup, ToggleButton, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
@@ -55,239 +56,151 @@ const IconWidgetEditor = () => {
   ];
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Icon
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Customize icon and style.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Icon</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Customize icon content and style.
+        </Typography>
+      </Box>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Icon Settings
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Type
-              </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  value={iconEditorOptions.iconType || 'star'}
-                  onChange={handleChange('iconType')}
-                  MenuProps={{
-                    disablePortal: true,
-                    sx: { zIndex: 1300001 },
-                    style: { zIndex: 1300001 }
-                  }}
-                >
-                  {iconTypes.map((icon) => (
-                    <MenuItem key={icon} value={icon}>
-                      {icon}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Icon</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Color
-                </Typography>
-                <ColorPicker
-                  label=""
-                  value={iconEditorOptions.color || '#000000'}
-                  onChange={handleColorChange}
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Icon Type</Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={iconEditorOptions.iconType || 'star'}
+                    onChange={handleChange('iconType')}
+                    sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                    MenuProps={{
+                      disablePortal: true,
+                      sx: { zIndex: 999999 }
+                    }}
+                  >
+                    {iconTypes.map((icon) => (
+                      <MenuItem key={icon} value={icon} sx={{ fontSize: '11px' }}>
+                        {icon.charAt(0).toUpperCase() + icon.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
 
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Size (px)
-                </Typography>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Link URL</Typography>
                 <TextField
-                  type="number"
-                  value={iconEditorOptions.size || 24}
-                  onChange={handleChange('size')}
                   size="small"
                   fullWidth
+                  value={iconEditorOptions.link || ''}
+                  onChange={handleChange('link')}
+                  placeholder="https://example.com"
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
                 />
               </Box>
-            </Box>
-          </Stack>
-        </Box>
 
-        <Divider />
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Alignment</Typography>
+                <ToggleButtonGroup
+                  exclusive
+                  fullWidth
+                  value={iconEditorOptions.alignment || 'left'}
+                  onChange={(e, newAlign) => newAlign && handleChange('alignment')(newAlign)}
+                  size="small"
+                  sx={{ bgcolor: '#f9f9f9' }}
+                >
+                  <ToggleButton value="left" sx={{ p: '5px' }}><FormatAlignLeftIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="center" sx={{ p: '5px' }}><FormatAlignCenterIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="right" sx={{ p: '5px' }}><FormatAlignRightIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="justify" sx={{ p: '5px' }}><FormatAlignJustifyIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Layout
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Alignment
-              </Typography>
-              <ToggleButtonGroup
-                value={iconEditorOptions.alignment || 'left'}
-                exclusive
-                onChange={(e, newAlignment) => {
-                  if (newAlignment !== null) {
-                    handleChange('alignment')(newAlignment);
-                  }
-                }}
-                size="small"
-                fullWidth
-              >
-                <ToggleButton value="left">
-                  <FormatAlignLeftIcon fontSize="small" />
-                </ToggleButton>
-                <ToggleButton value="center">
-                  <FormatAlignCenterIcon fontSize="small" />
-                </ToggleButton>
-                <ToggleButton value="right">
-                  <FormatAlignRightIcon fontSize="small" />
-                </ToggleButton>
-                <ToggleButton value="justify">
-                  <FormatAlignJustifyIcon fontSize="small" />
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+        {/* Style Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <ColorPicker
+                label="Icon Color"
+                value={iconEditorOptions.color || '#000000'}
+                onChange={handleColorChange}
+              />
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 1, color: '#666' }}>
-                Padding (px)
-              </Typography>
-              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-                <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
-                    Top
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={iconEditorOptions.paddingTop || 0}
-                    onChange={handleChange('paddingTop')}
-                    size="small"
-                    fullWidth
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
-                    Right
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={iconEditorOptions.paddingRight || 0}
-                    onChange={handleChange('paddingRight')}
-                    size="small"
-                    fullWidth
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
-                    Bottom
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={iconEditorOptions.paddingBottom || 0}
-                    onChange={handleChange('paddingBottom')}
-                    size="small"
-                    fullWidth
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>
-                    Left
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={iconEditorOptions.paddingLeft || 0}
-                    onChange={handleChange('paddingLeft')}
-                    size="small"
-                    fullWidth
-                  />
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Icon Size (px)</Typography>
+                <TextField
+                  type="number"
+                  size="small"
+                  fullWidth
+                  value={iconEditorOptions.size || 24}
+                  onChange={handleChange('size')}
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                />
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Advanced Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Advanced</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Padding</Typography>
+                <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={1}>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>TOP</Typography>
+                    <TextField type="number" size="small" fullWidth value={iconEditorOptions.paddingTop || 0} onChange={handleChange('paddingTop')} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>RIGHT</Typography>
+                    <TextField type="number" size="small" fullWidth value={iconEditorOptions.paddingRight || 0} onChange={handleChange('paddingRight')} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>BOTTOM</Typography>
+                    <TextField type="number" size="small" fullWidth value={iconEditorOptions.paddingBottom || 0} onChange={handleChange('paddingBottom')} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>LEFT</Typography>
+                    <TextField type="number" size="small" fullWidth value={iconEditorOptions.paddingLeft || 0} onChange={handleChange('paddingLeft')} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Link
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                URL (optional)
-              </Typography>
-              <TextField
-                value={iconEditorOptions.link || ''}
-                onChange={handleChange('link')}
-                size="small"
-                fullWidth
-                placeholder="https://example.com"
-              />
-            </Box>
-          </Stack>
-        </Box>
-      </Stack>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

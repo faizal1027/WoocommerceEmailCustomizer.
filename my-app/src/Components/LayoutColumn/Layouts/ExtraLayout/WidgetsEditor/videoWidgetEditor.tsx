@@ -1,10 +1,12 @@
 import React from 'react';
-import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider, Select, MenuItem, InputAdornment } from '@mui/material';
+import { Box, Typography, TextField, Switch, FormControlLabel, Tooltip, IconButton, Stack, Divider, Select, MenuItem, InputAdornment, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateVideoEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
+import CommonStylingControls from '../../../../utils/CommonStylingControls';
 
 const VideoWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -37,252 +39,174 @@ const VideoWidgetEditor = () => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Video
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Configure video settings.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Video</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Configure video settings and player style.
+        </Typography>
+      </Box>
 
-        <Divider />
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Video Source</Typography>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', color: '#6d7882', mb: 0.5 }}>Video URL</Typography>
+                  <TextField
+                    value={videoEditorOptions.url || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+                    onChange={handleChange('url')}
+                    size="small"
+                    fullWidth
+                    placeholder="YouTube or Vimeo URL"
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                  />
+                </Box>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Video Source
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Video URL
-              </Typography>
-              <TextField
-                value={videoEditorOptions.url || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
-                onChange={handleChange('url')}
-                size="small"
-                fullWidth
-                placeholder="YouTube or Vimeo URL"
+        {/* Style Section */}
+        <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={3}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Dimensions</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', color: '#6d7882', mb: 0.5 }}>Width</Typography>
+                    <TextField
+                      value={String(videoEditorOptions.width || '').replace(/[^0-9]/g, '')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const unit = (videoEditorOptions.width || '').includes('%') ? '%' : 'px';
+                        handleChange('width')({ target: { value: val === '' ? `0${unit}` : `${val}${unit}` } });
+                      }}
+                      type="number"
+                      size="small"
+                      fullWidth
+                      InputProps={{
+                        sx: { fontSize: '11px', bgcolor: '#f9f9f9' },
+                        endAdornment: (
+                          <InputAdornment position="end" sx={{ mx: 0 }}>
+                            <Select
+                              value={(videoEditorOptions.width || '').includes('%') ? '%' : 'px'}
+                              onChange={(e) => {
+                                const val = String(videoEditorOptions.width || '').replace(/[^0-9]/g, '');
+                                const unit = e.target.value;
+                                handleChange('width')({ target: { value: `${val}${unit}` } });
+                              }}
+                              variant="standard"
+                              disableUnderline
+                              sx={{
+                                fontSize: '11px',
+                                '& .MuiSelect-select': { py: 0, pr: '14px !important' }
+                              }}
+                              MenuProps={{ disablePortal: true, sx: { zIndex: 999999 } }}
+                            >
+                              <MenuItem value="px" sx={{ fontSize: '11px' }}>px</MenuItem>
+                              <MenuItem value="%" sx={{ fontSize: '11px' }}>%</MenuItem>
+                            </Select>
+                          </InputAdornment>
+                        ),
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', color: '#6d7882', mb: 0.5 }}>Height</Typography>
+                    <TextField
+                      value={String(videoEditorOptions.height || '').replace(/[^0-9]/g, '')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const unit = (videoEditorOptions.height || '').includes('%') ? '%' : 'px';
+                        handleChange('height')({ target: { value: val === '' ? `0${unit}` : `${val}${unit}` } });
+                      }}
+                      type="number"
+                      size="small"
+                      fullWidth
+                      InputProps={{
+                        sx: { fontSize: '11px', bgcolor: '#f9f9f9' },
+                        endAdornment: (
+                          <InputAdornment position="end" sx={{ mx: 0 }}>
+                            <Select
+                              value={(videoEditorOptions.height || '').includes('%') ? '%' : 'px'}
+                              onChange={(e) => {
+                                const val = String(videoEditorOptions.height || '').replace(/[^0-9]/g, '');
+                                const unit = e.target.value;
+                                handleChange('height')({ target: { value: `${val}${unit}` } });
+                              }}
+                              variant="standard"
+                              disableUnderline
+                              sx={{
+                                fontSize: '11px',
+                                '& .MuiSelect-select': { py: 0, pr: '14px !important' }
+                              }}
+                              MenuProps={{ disablePortal: true, sx: { zIndex: 999999 } }}
+                            >
+                              <MenuItem value="px" sx={{ fontSize: '11px' }}>px</MenuItem>
+                              <MenuItem value="%" sx={{ fontSize: '11px' }}>%</MenuItem>
+                            </Select>
+                          </InputAdornment>
+                        ),
+                        inputProps: { min: 0 }
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Playback Settings</Typography>
+                <Stack spacing={0.5}>
+                  <FormControlLabel
+                    control={<Switch checked={videoEditorOptions.autoplay || false} onChange={handleChange('autoplay')} size="small" />}
+                    label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Autoplay</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={videoEditorOptions.controls !== false} onChange={handleChange('controls')} size="small" />}
+                    label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Controls</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                </Stack>
+              </Box>
+
+              <Divider />
+              <CommonStylingControls
+                options={videoEditorOptions}
+                onUpdate={(updatedOptions) => dispatch(updateVideoEditorOptions(updatedOptions))}
               />
-            </Box>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Dimensions
-          </Typography>
-          <Stack spacing={2}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Width
-                </Typography>
-                <TextField
-                  value={String(videoEditorOptions.width || '').replace(/[^0-9]/g, '')}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const unit = (videoEditorOptions.width || '').includes('%') ? '%' : 'px';
-                    handleChange('width')({ target: { value: val === '' ? `0${unit}` : `${val}${unit}` } });
-                  }}
-                  type="number"
-                  size="small"
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end" sx={{ mx: 0 }}>
-                        <Select
-                          value={(videoEditorOptions.width || '').includes('%') ? '%' : 'px'}
-                          onChange={(e) => {
-                            const val = String(videoEditorOptions.width || '').replace(/[^0-9]/g, '');
-                            const unit = e.target.value;
-                            handleChange('width')({ target: { value: `${val}${unit}` } });
-                          }}
-                          variant="standard"
-                          disableUnderline
-                          sx={{
-                            '& .MuiSelect-select': {
-                              py: 0,
-                              pr: '14px !important',
-                              pl: '0 !important',
-                              paddingLeft: '0 !important',
-                              fontSize: '0.875rem',
-                              display: 'flex',
-                              alignItems: 'center'
-                            },
-                            '& .MuiSvgIcon-root': { right: -4 }
-                          }}
-                          MenuProps={{
-                            disablePortal: true,
-                            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                            transformOrigin: { vertical: 'top', horizontal: 'left' },
-                            PaperProps: {
-                              sx: {
-                                minWidth: 'unset !important',
-                                width: 'fit-content !important',
-                                '& .MuiList-root': { p: 0 },
-                                '& .MuiMenuItem-root': { minHeight: 'auto', py: 0.5, px: 0.5, justifyContent: 'center', fontSize: '0.875rem', textAlign: 'center' }
-                              }
-                            }
-                          }}
-                        >
-                          <MenuItem value="px">px</MenuItem>
-                          <MenuItem value="%">%</MenuItem>
-                        </Select>
-                      </InputAdornment>
-                    ),
-                    inputProps: { min: 0 }
-                  }}
-                />
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Height
-                </Typography>
-                <TextField
-                  value={String(videoEditorOptions.height || '').replace(/[^0-9]/g, '')}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const unit = (videoEditorOptions.height || '').includes('%') ? '%' : 'px';
-                    handleChange('height')({ target: { value: val === '' ? `0${unit}` : `${val}${unit}` } });
-                  }}
-                  type="number"
-                  size="small"
-                  fullWidth
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end" sx={{ mx: 0 }}>
-                        <Select
-                          value={(videoEditorOptions.height || '').includes('%') ? '%' : 'px'}
-                          onChange={(e) => {
-                            const val = String(videoEditorOptions.height || '').replace(/[^0-9]/g, '');
-                            const unit = e.target.value;
-                            handleChange('height')({ target: { value: `${val}${unit}` } });
-                          }}
-                          variant="standard"
-                          disableUnderline
-                          sx={{
-                            '& .MuiSelect-select': {
-                              py: 0,
-                              pr: '14px !important',
-                              pl: '0 !important',
-                              paddingLeft: '0 !important',
-                              fontSize: '0.875rem',
-                              display: 'flex',
-                              alignItems: 'center'
-                            },
-                            '& .MuiSvgIcon-root': { right: -4 }
-                          }}
-                          MenuProps={{
-                            disablePortal: true,
-                            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                            transformOrigin: { vertical: 'top', horizontal: 'left' },
-                            PaperProps: {
-                              sx: {
-                                minWidth: 'unset !important',
-                                width: 'fit-content !important',
-                                '& .MuiList-root': { p: 0 },
-                                '& .MuiMenuItem-root': { minHeight: 'auto', py: 0.5, px: 0.5, justifyContent: 'center', fontSize: '0.875rem', textAlign: 'center' }
-                              }
-                            }
-                          }}
-                        >
-                          <MenuItem value="px">px</MenuItem>
-                          <MenuItem value="%">%</MenuItem>
-                        </Select>
-                      </InputAdornment>
-                    ),
-                    inputProps: { min: 0 }
-                  }}
-                />
-              </Box>
-            </Box>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Playback
-          </Typography>
-          <Stack spacing={1}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={videoEditorOptions.autoplay || false}
-                  onChange={handleChange('autoplay')}
-                  color="primary"
-                  size="small"
-                />
-              }
-              label={<Typography variant="body2">Autoplay</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={videoEditorOptions.controls !== false}
-                  onChange={handleChange('controls')}
-                  color="primary"
-                  size="small"
-                />
-              }
-              label={<Typography variant="body2">Show Controls</Typography>}
-            />
-          </Stack>
-        </Box>
-      </Stack>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

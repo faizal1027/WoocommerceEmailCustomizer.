@@ -11,8 +11,12 @@ import {
   Tooltip,
   Stack,
   Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import React, { memo } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -32,7 +36,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../../Store/store";
 import {
-  updateWidgetContentData,
   deleteColumnContent,
   closeEditor,
   updateSocialIconsEditorOptions
@@ -63,8 +66,6 @@ const SocialIconsWidgetEditor = memo(() => {
   const { iconAlign, padding, iconColor, iconSize, iconSpace, addedIcons } =
     socialIconsEditorOptions;
 
-  // const { updateSocialIconsEditorOptions, deleteColumnContent } = workspaceSlice.actions; // Removed invalid line
-
 
   const updateSocialIconsData = (updates: Partial<typeof socialIconsEditorOptions>) => {
     dispatch(updateSocialIconsEditorOptions(updates));
@@ -86,8 +87,8 @@ const SocialIconsWidgetEditor = memo(() => {
   const handleDeleteIcon = (key: SocialIconKey) => {
     const iconIndex = addedIcons.icons.indexOf(key);
     if (iconIndex !== -1) {
-      const newIcons = addedIcons.icons.filter((_: any, i: any) => i !== iconIndex);
-      const newUrls = addedIcons.url.filter((_: any, i: any) => i !== iconIndex);
+      const newIcons = addedIcons.icons.filter((_, i) => i !== iconIndex);
+      const newUrls = addedIcons.url.filter((_, i) => i !== iconIndex);
       updateSocialIconsData({
         addedIcons: { icons: newIcons, url: newUrls },
       });
@@ -128,274 +129,200 @@ const SocialIconsWidgetEditor = memo(() => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Social Icons
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Manage social media links.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Social Icons</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Manage social media links.
+        </Typography>
+      </Box>
 
-        <Divider />
-
-        {/* Added Icons Section */}
-        <Box mb={2}>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Active Icons
-          </Typography>
-          {addedIcons.icons.length === 0 && (
-            <Typography variant="caption" color="textSecondary" sx={{ mb: 2, display: 'block' }}>
-              No icons added. Click icons below to add.
-            </Typography>
-          )}
-          <Stack spacing={2}>
-            {addedIcons.icons.map((key: SocialIconKey, index: number) => {
-              const { icon } = socialIcons[key];
-              return (
-                <Box
-                  key={key}
-                  sx={{ border: "1px solid #ddd", borderRadius: 1, padding: 1.5, bgcolor: '#fafafa' }}
-                >
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: 'center', mb: 1 }}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {React.cloneElement(icon, {
-                        sx: {
-                          color: iconColor === "color" ? socialIcons[key].color : iconColor === "black" ? "#000000" : "#0000",
-                          width: 24, height: 24
-                        },
-                      })}
-                      <Typography variant="body2" fontWeight="bold">{key.charAt(0).toUpperCase() + key.slice(1)}</Typography>
-                    </Box>
-                    <IconButton
-                      onClick={() => handleDeleteIcon(key)}
-                      size="small"
-                      sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                      Icon URL
-                    </Typography>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      value={addedIcons.url[index] || ""}
-                      onChange={(e) => handleUrlChange(key, e.target.value)}
-                      variant="outlined"
-                      sx={{ bgcolor: 'white' }}
-                    />
-                  </Box>
-                </Box>
-              );
-            })}
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        {/* Available Icons Section */}
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Add Icons
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {Object.keys(socialIcons)
-              .filter((key) => !addedIcons.icons.includes(key as SocialIconKey))
-              .map((iconKey) => {
-                const iconData = socialIcons[iconKey as SocialIconKey];
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Icons Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Social Icons</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              {addedIcons.icons.map((key: SocialIconKey, index: number) => {
+                const { icon } = socialIcons[key];
                 return (
-                  <Tooltip title={`Add ${iconKey}`} key={iconKey}>
-                    <Box
-                      onClick={() => handleAddIcon(iconKey as SocialIconKey)}
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        border: '1px solid #ddd',
-                        backgroundColor: "white",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        "&:hover": { bgcolor: '#f5f5f5' },
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {iconData.icon ? (
-                        React.cloneElement(iconData.icon, { sx: { color: iconData.color, width: 20, height: 20 } })
-                      ) : (
-                        <Typography sx={{ color: iconData.color, fontWeight: 'bold' }}>{iconData.fallback}</Typography>
-                      )}
+                  <Box key={key} sx={{ border: "1px solid #e7e9eb", borderRadius: '4px', p: 2, bgcolor: '#f9f9f9' }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: 'center', mb: 1.5 }}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        {React.cloneElement(icon, {
+                          sx: {
+                            color: iconColor === "color" ? socialIcons[key].color : iconColor === "black" ? "#000" : "#a4afb7",
+                            width: 20, height: 20
+                          },
+                        })}
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#495157' }}>{key.charAt(0).toUpperCase() + key.slice(1)}</Typography>
+                      </Box>
+                      <IconButton onClick={() => handleDeleteIcon(key)} size="small" sx={{ p: 0.5 }}>
+                        <DeleteIcon fontSize="small" sx={{ color: '#ff4d4d', fontSize: '16px' }} />
+                      </IconButton>
                     </Box>
-                  </Tooltip>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>URL</Typography>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={addedIcons.url[index] || ""}
+                        onChange={(e) => handleUrlChange(key, e.target.value)}
+                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#fff' } }}
+                      />
+                    </Box>
+                  </Box>
                 );
               })}
-          </Box>
-        </Box>
 
-        <Divider />
+              <Box sx={{ pt: 1 }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Add New Icon</Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {Object.keys(socialIcons)
+                    .filter((key) => !addedIcons.icons.includes(key as SocialIconKey))
+                    .map((iconKey) => {
+                      const iconData = socialIcons[iconKey as SocialIconKey];
+                      return (
+                        <Tooltip title={`Add ${iconKey}`} key={iconKey} arrow>
+                          <Box
+                            onClick={() => handleAddIcon(iconKey as SocialIconKey)}
+                            sx={{
+                              width: 32, height: 32, borderRadius: "50%", border: '1px solid #e7e9eb',
+                              backgroundColor: "white", display: "flex", justifyContent: "center", alignItems: "center",
+                              cursor: "pointer", "&:hover": { bgcolor: '#f9f9f9', transform: 'scale(1.1)' },
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            {React.cloneElement(iconData.icon, { sx: { color: iconData.color, width: 18, height: 18 } })}
+                          </Box>
+                        </Tooltip>
+                      );
+                    })}
+                </Box>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        {/* Settings Section */}
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Appearance
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Color Style
-              </Typography>
-              <FormControl size="small" fullWidth>
-                <Select
-                  value={iconColor === "color" ? "color" : iconColor === "black" ? "black" : "#0000"}
-                  onChange={(e) => updateSocialIconsData({ iconColor: e.target.value as string })}
-                  MenuProps={{
-                    disablePortal: false,
-                    sx: { zIndex: 1300001 },
-                    style: { zIndex: 1300001 }
-                  }}
+        {/* Style Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Color Style</Typography>
+                <FormControl size="small" fullWidth>
+                  <Select
+                    value={iconColor === "color" ? "color" : iconColor === "black" ? "black" : "#0000"}
+                    onChange={(e) => updateSocialIconsData({ iconColor: e.target.value as string })}
+                    sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                    MenuProps={{
+                      disablePortal: true,
+                      sx: { zIndex: 999999 }
+                    }}
+                  >
+                    <MenuItem value="color" sx={{ fontSize: '11px' }}>Original Color</MenuItem>
+                    <MenuItem value="black" sx={{ fontSize: '11px' }}>Black & White</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Icon Size (px)</Typography>
+                  <TextField
+                    value={iconSize}
+                    onChange={(e) => updateSocialIconsData({ iconSize: Number(e.target.value) })}
+                    type="number"
+                    InputProps={{ inputProps: { min: 0 }, sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Spacing (px)</Typography>
+                  <TextField
+                    value={iconSpace}
+                    onChange={(e) => updateSocialIconsData({ iconSpace: Number(e.target.value) })}
+                    type="number"
+                    InputProps={{ inputProps: { min: 0 }, sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Alignment</Typography>
+                <ToggleButtonGroup
+                  exclusive
+                  fullWidth
+                  value={iconAlign}
+                  onChange={(e, newAlign) => newAlign && updateSocialIconsData({ iconAlign: newAlign as "left" | "center" | "right" })}
+                  size="small"
+                  sx={{ bgcolor: '#f9f9f9' }}
                 >
-                  <MenuItem value="color">Original Color</MenuItem>
-                  <MenuItem value="black">Black & White</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  <ToggleButton value="left" sx={{ p: '5px' }}><FormatAlignLeftIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="center" sx={{ p: '5px' }}><FormatAlignCenterIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="right" sx={{ p: '5px' }}><FormatAlignRightIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Size (px)
-              </Typography>
-              <TextField
-                value={iconSize}
-                onChange={(e) => updateSocialIconsData({ iconSize: Number(e.target.value) })}
-                type="number"
-                InputProps={{ inputProps: { min: 0 } }}
-                size="small"
-                fullWidth
-              />
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Icon Spacing (px)
-              </Typography>
-              <TextField
-                value={iconSpace}
-                onChange={(e) => updateSocialIconsData({ iconSpace: Number(e.target.value) })}
-                type="number"
-                InputProps={{ inputProps: { min: 0 } }}
-                size="small"
-                fullWidth
-              />
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Alignment
-              </Typography>
-              <ToggleButtonGroup
-                exclusive
-                fullWidth
-                value={iconAlign}
-                onChange={(e, newAlign) => newAlign && updateSocialIconsData({ iconAlign: newAlign as "left" | "center" | "right" })}
-                size="small"
-              >
-                <ToggleButton value="left"><FormatAlignLeftIcon fontSize="small" /></ToggleButton>
-                <ToggleButton value="center"><FormatAlignCenterIcon fontSize="small" /></ToggleButton>
-                <ToggleButton value="right"><FormatAlignRightIcon fontSize="small" /></ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        {/* padding */}
-        <Box pb={2}>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Padding
-          </Typography>
-          <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Top
-              </Typography>
-              <TextField type="number" size="small" value={padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Bottom
-              </Typography>
-              <TextField type="number" size="small" value={padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Left
-              </Typography>
-              <TextField type="number" size="small" value={padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} fullWidth />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Right
-              </Typography>
-              <TextField type="number" size="small" value={padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} fullWidth />
-            </Box>
-          </Box>
-        </Box>
-
-      </Stack>
+        {/* Advanced Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Advanced</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Padding</Typography>
+                <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={1}>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>TOP</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>RIGHT</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>BOTTOM</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>LEFT</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                </Box>
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 });

@@ -53,7 +53,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
     return (
         <Box sx={{ mt: 2, mb: 2, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold', color: '#555555' }}>
+            <Typography sx={{ mb: 2, fontSize: '13px', fontWeight: 'bold', color: '#555555' }}>
                 {title}
             </Typography>
 
@@ -61,13 +61,14 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Family */}
                 {showTypography && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             Font Family
                         </Typography>
                         <FormControl size="small" fullWidth>
                             <Select
                                 value={options.fontFamily === 'inherit' || !options.fontFamily ? 'inherit' : (FONT_FAMILIES.includes(options.fontFamily.split(',')[0].replace(/'/g, '').trim()) ? options.fontFamily.split(',')[0].replace(/'/g, '').trim() : 'inherit')}
                                 onChange={(e) => handleChange('fontFamily', e.target.value)}
+                                sx={{ fontSize: '11px' }}
                                 MenuProps={{
                                     disablePortal: false,
                                     anchorOrigin: {
@@ -88,7 +89,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                                 }}
                             >
                                 {FONT_FAMILIES.map((font) => (
-                                    <MenuItem key={font} value={font === 'Global' ? 'inherit' : font}>
+                                    <MenuItem key={font} value={font === 'Global' ? 'inherit' : font} sx={{ fontSize: '11px' }}>
                                         {font}
                                     </MenuItem>
                                 ))}
@@ -100,7 +101,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Size */}
                 {showTypography && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             Font Size
                         </Typography>
                         <TextField
@@ -111,6 +112,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                             fullWidth
                             placeholder="14"
                             InputProps={{
+                                sx: { fontSize: '11px' },
                                 inputProps: { min: 1 }
                             }}
                         />
@@ -120,14 +122,14 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Font Weight */}
                 {showTypography && showFontWeight && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             Font Weight
                         </Typography>
                         <FormControl size="small" fullWidth>
                             <Select
                                 value={options.fontWeight || '400'}
                                 onChange={(e) => handleChange('fontWeight', e.target.value)}
-                                style={{ fontSize: '14px' }}
+                                style={{ fontSize: '11px' }}
                                 MenuProps={{
                                     disablePortal: false,
                                     anchorOrigin: {
@@ -143,7 +145,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                                 }}
                             >
                                 {['100', '200', '300', '400', '500', '600', '700', '800', '900'].map((weight) => (
-                                    <MenuItem key={weight} value={weight} style={{ fontSize: '14px' }}>
+                                    <MenuItem key={weight} value={weight} style={{ fontSize: '11px' }}>
                                         {weight}
                                     </MenuItem>
                                 ))}
@@ -155,8 +157,8 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Line Height */}
                 {showTypography && showLineHeight && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
-                            Line height (1.5 or 24px)
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
+                            Line height
                         </Typography>
                         <TextField
                             type="number"
@@ -165,6 +167,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                             size="small"
                             fullWidth
                             placeholder="1.5"
+                            InputProps={{ sx: { fontSize: '11px' } }}
                             inputProps={{ step: 0.1, min: 0 }}
                         />
                     </Box>
@@ -173,7 +176,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                 {/* Text Color */}
                 {showTextColor && (
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '0.7rem' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             Text Color
                         </Typography>
                         <input
@@ -187,7 +190,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
                 {/* Background Color */}
                 <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666', fontSize: '0.7rem' }}>
+                    <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                         Background Color
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
@@ -214,7 +217,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {showTextAlign && (
                     <Box>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             {textAlignLabel}
                         </Typography>
                         <ToggleButtonGroup
@@ -244,7 +247,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                         {showLabelAlign && (
                             <Box>
-                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
+                                <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                                     Label Align
                                 </Typography>
                                 <ToggleButtonGroup
@@ -268,7 +271,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                         )}
                         {showValueAlign && (
                             <Box>
-                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
+                                <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                                     Value Align
                                 </Typography>
                                 <ToggleButtonGroup
@@ -295,7 +298,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
                 {showPadding && (
                     <Box>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666' }}>
+                        <Typography sx={{ display: 'block', mb: 0.5, color: '#555', fontSize: '13px', fontWeight: 600 }}>
                             Padding (px)
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -322,7 +325,7 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
 
                                 return (
                                     <Box key={side} sx={{ minWidth: 0 }}>
-                                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '13px' }}>
+                                        <Typography sx={{ display: 'block', mb: 0.5, color: '#666666', fontSize: '9px', fontWeight: 700, textAlign: 'center', textTransform: 'uppercase' }}>
                                             {side}
                                         </Typography>
                                         <TextField
@@ -336,7 +339,8 @@ const CommonStylingControls: React.FC<CommonStylingControlsProps> = ({
                                                 const newPadding = `${newValues.Top}px ${newValues.Right}px ${newValues.Bottom}px ${newValues.Left}px`;
                                                 handleChange('padding', newPadding);
                                             }}
-                                            inputProps={{ style: { fontSize: '14px' }, min: 0 }}
+                                            inputProps={{ style: { fontSize: '11px', textAlign: 'center' }, min: 0 }}
+                                            sx={{ bgcolor: '#f9f9f9' }}
                                         />
                                     </Box>
                                 );

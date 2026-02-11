@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDrag } from 'react-dnd';
+import HorizontalRuleIcon from '@mui/icons-material/HorizontalRule';
 
 const DividerWidget = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -9,7 +10,7 @@ const DividerWidget = () => {
     type: 'content',
     item: {
       widgetType: 'divider',
-      initialContent: 'divider', 
+      initialContent: 'divider',
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -26,27 +27,26 @@ const DividerWidget = () => {
     <Box
       ref={ref}
       sx={{
-        backgroundColor: '#eef2f7',
-        border: '1px solid #ccc',
-        borderRadius: 1,
-        py: 4,
-        m: 0,
-        textAlign: 'center',
-        width: '70px',
-        height: '50px',
+        width: '100%',
+        height: '80px',
+        backgroundColor: '#fff',
+        border: '1px solid #e0e0e0',
+        borderRadius: '3px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'grab',
-        opacity: isDragging ? 0.5 : 1, 
-        userSelect: 'none', 
+        opacity: isDragging ? 0.5 : 1,
+        transition: 'all 0.2s',
+        '&:hover': {
+          borderColor: '#93003c',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        }
       }}
     >
-      <Typography variant="h6" sx={{ fontSize: '12px' }} color="textSecondary">
-        ─
-      </Typography>
-      <Typography variant="subtitle2" sx={{ fontSize: '12px' }} color="textSecondary">
+      <HorizontalRuleIcon sx={{ fontSize: "28px", mb: 1, color: '#6d7882' }} />
+      <Typography variant="caption" sx={{ fontSize: "11px", fontWeight: 500, color: '#6d7882' }}>
         Divider
       </Typography>
     </Box>

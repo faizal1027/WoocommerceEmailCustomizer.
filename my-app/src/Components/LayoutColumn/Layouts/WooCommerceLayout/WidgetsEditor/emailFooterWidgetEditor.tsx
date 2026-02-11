@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, TextField, Typography, Switch, FormControlLabel, Stack, Divider, InputLabel, IconButton, Tooltip, Paper } from '@mui/material';
+import { Box, TextField, Typography, Switch, FormControlLabel, Stack, Divider, InputLabel, IconButton, Tooltip, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
-import { updateEmailFooterEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
+import { updateEmailFooterEditorOptions, closeEditor, deleteColumnContent } from '../../../../../Store/Slice/workspaceSlice';
 import CommonStylingControls from '../../../../utils/CommonStylingControls';
 import { PlaceholderSelect } from '../../../../utils/PlaceholderSelect';
 import FacebookIcon from "@mui/icons-material/Facebook";
@@ -34,10 +36,26 @@ const socialIconsMap: any = {
 
 const EmailFooterWidgetEditor: React.FC = () => {
     const dispatch = useDispatch();
-    const { emailFooterEditorOptions } = useSelector((state: RootState) => state.workspace);
+    const { emailFooterEditorOptions, selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector((state: RootState) => state.workspace);
 
     const handleChange = (field: string, value: any) => {
         dispatch(updateEmailFooterEditorOptions({ [field]: value }));
+    };
+
+    const handleCloseEditor = () => {
+        dispatch(closeEditor());
+    };
+
+    const handleDeleteContent = () => {
+        if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+            dispatch(
+                deleteColumnContent({
+                    blockId: selectedBlockForEditor,
+                    columnIndex: selectedColumnIndex,
+                    widgetIndex: selectedWidgetIndex,
+                })
+            );
+        }
     };
 
     const addedIcons = emailFooterEditorOptions?.socialIcons || { icons: [], urls: [] };
@@ -169,327 +187,245 @@ const EmailFooterWidgetEditor: React.FC = () => {
         }
     };
 
-    const renderLabel = (text: string) => (
-        <Typography variant="caption" sx={{ marginBottom: 1, display: 'block', fontWeight: 500, color: 'text.secondary' }}>
-            {text}
-        </Typography>
-    );
-
     return (
-        <Box sx={{ padding: '20px' }}>
-            <Stack spacing={3}>
-                <Box>
-                    <Typography variant="h6" gutterBottom>
-                        Email Footer
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Customize your email footer branding and links.
-                    </Typography>
+        <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+            {/* Editor Header */}
+            <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Email Footer</Typography>
+                    <Box display="flex" gap={1}>
+                        <Tooltip title="Close">
+                            <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                            <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
+                <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+                    Customize your email footer branding and links.
+                </Typography>
+            </Box>
 
-                <Divider />
-
-
-
-                {/* Section: Visibility */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Visibility
-                    </Typography>
-                    <Stack spacing={1}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailFooterEditorOptions?.showSocialMedia !== false}
-                                    onChange={(e) => handleChange('showSocialMedia', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Social Media Icons</Typography>}
-                        />
-                        {emailFooterEditorOptions?.showSocialMedia !== false && (
-                            <Box sx={{ ml: 1, pl: 2, borderLeft: '2px solid #eee', mt: 1, mb: 2 }}>
-                                {/* Active Icons */}
-                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>Active Icons</Typography>
-                                <Stack spacing={1} sx={{ mb: 2 }}>
-                                    {addedIcons.icons.map((key, index) => (
-                                        <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f9f9f9', p: 1, borderRadius: 1 }}>
-                                            {socialIconsMap[key]?.icon ? React.cloneElement(socialIconsMap[key].icon, { sx: { width: 20, height: 20, color: socialIconsMap[key].color } }) : null}
-                                            <TextField
-                                                size="small"
-                                                fullWidth
-                                                variant="standard"
-                                                value={addedIcons.urls[index]}
-                                                onChange={(e) => handleUrlChange(key, e.target.value)}
-                                                InputProps={{ disableUnderline: true, style: { fontSize: '12px' } }}
-                                                sx={{ flexGrow: 1 }}
-                                            />
-                                            <IconButton size="small" onClick={() => handleDeleteIcon(key)}>
-                                                <DeleteIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                                            </IconButton>
-                                        </Box>
-                                    ))}
-                                    {addedIcons.icons.length === 0 && <Typography variant="caption" color="text.secondary">No icons added.</Typography>}
-                                </Stack>
-
-                                {/* Add Icons */}
-                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>Add Icons</Typography>
-                                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                                    {Object.keys(socialIconsMap)
-                                        .filter((key) => !addedIcons.icons.includes(key))
-                                        .map((key) => (
-                                            <Tooltip title={`Add ${key}`} key={key}>
-                                                <Box
-                                                    onClick={() => handleAddIcon(key)}
-                                                    sx={{
-                                                        width: 28, height: 28,
-                                                        borderRadius: "50%",
-                                                        border: '1px solid #ddd',
-                                                        display: "flex", justifyContent: "center", alignItems: "center",
-                                                        cursor: "pointer",
-                                                        "&:hover": { bgcolor: '#f0f0f0' }
-                                                    }}
-                                                >
-                                                    {React.cloneElement(socialIconsMap[key].icon, { sx: { width: 16, height: 16, color: socialIconsMap[key].color } })}
-                                                </Box>
-                                            </Tooltip>
+            {/* Editor Sections */}
+            <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+                {/* Visibility & Social Section */}
+                <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>General & Social</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2}>
+                            <FormControlLabel
+                                control={<Switch size="small" checked={emailFooterEditorOptions?.showSocialMedia !== false} onChange={(e) => handleChange('showSocialMedia', e.target.checked)} />}
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Social Media</Typography>}
+                                sx={{ ml: 0 }}
+                            />
+                            {emailFooterEditorOptions?.showSocialMedia !== false && (
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 1, fontWeight: 600 }}>Social Icons</Typography>
+                                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}>
+                                        {Object.keys(socialIconsMap)
+                                            .filter((key) => !addedIcons.icons.includes(key))
+                                            .map((key) => (
+                                                <Tooltip title={`Add ${key}`} key={key}>
+                                                    <Box
+                                                        onClick={() => handleAddIcon(key)}
+                                                        sx={{
+                                                            width: 28, height: 28,
+                                                            borderRadius: "4px",
+                                                            border: '1px solid #e0e0e0',
+                                                            display: "flex", justifyContent: "center", alignItems: "center",
+                                                            cursor: "pointer", bgcolor: '#f9f9f9',
+                                                            "&:hover": { bgcolor: '#fff', borderColor: socialIconsMap[key].color }
+                                                        }}
+                                                    >
+                                                        {React.cloneElement(socialIconsMap[key].icon, { sx: { width: 16, height: 16, color: socialIconsMap[key].color } })}
+                                                    </Box>
+                                                </Tooltip>
+                                            ))}
+                                    </Box>
+                                    <Stack spacing={1}>
+                                        {addedIcons.icons.map((key, index) => (
+                                            <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1, border: '1px solid #e7e9eb', p: '4px 8px', borderRadius: '4px' }}>
+                                                {socialIconsMap[key]?.icon ? React.cloneElement(socialIconsMap[key].icon, { sx: { width: 18, height: 18, color: socialIconsMap[key].color } }) : null}
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    variant="standard"
+                                                    value={addedIcons.urls[index]}
+                                                    onChange={(e) => handleUrlChange(key, e.target.value)}
+                                                    InputProps={{ disableUnderline: true, sx: { fontSize: '11px' } }}
+                                                />
+                                                <IconButton size="small" onClick={() => handleDeleteIcon(key)} sx={{ p: 0.2 }}>
+                                                    <DeleteIcon sx={{ fontSize: '16px', color: '#d32f2f' }} />
+                                                </IconButton>
+                                            </Box>
                                         ))}
+                                    </Stack>
                                 </Box>
-                            </Box>
-                        )}
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailFooterEditorOptions?.showAddress !== false}
-                                    onChange={(e) => handleChange('showAddress', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Store Address</Typography>}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailFooterEditorOptions?.showContact !== false}
-                                    onChange={(e) => handleChange('showContact', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Contact Info</Typography>}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailFooterEditorOptions?.showLegal !== false}
-                                    onChange={(e) => handleChange('showLegal', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Legal Section</Typography>}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={emailFooterEditorOptions?.showCopyright !== false}
-                                    onChange={(e) => handleChange('showCopyright', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Copyright Text</Typography>}
-                        />
-                    </Stack>
-                </Box>
+                            )}
+                            <Divider />
+                            <FormControlLabel
+                                control={<Switch size="small" checked={emailFooterEditorOptions?.showAddress !== false} onChange={(e) => handleChange('showAddress', e.target.checked)} />}
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Address</Typography>}
+                                sx={{ ml: 0 }}
+                            />
+                            <FormControlLabel
+                                control={<Switch size="small" checked={emailFooterEditorOptions?.showContact !== false} onChange={(e) => handleChange('showContact', e.target.checked)} />}
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Contact Info</Typography>}
+                                sx={{ ml: 0 }}
+                            />
+                            <FormControlLabel
+                                control={<Switch size="small" checked={emailFooterEditorOptions?.showLegal !== false} onChange={(e) => handleChange('showLegal', e.target.checked)} />}
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Legal Section</Typography>}
+                                sx={{ ml: 0 }}
+                            />
+                            <FormControlLabel
+                                control={<Switch size="small" checked={emailFooterEditorOptions?.showCopyright !== false} onChange={(e) => handleChange('showCopyright', e.target.checked)} />}
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Copyright Text</Typography>}
+                                sx={{ ml: 0 }}
+                            />
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
 
-                <Divider />
-
-                {/* Section: Content Details */}
-                {(emailFooterEditorOptions?.showAddress !== false || emailFooterEditorOptions?.showContact !== false || emailFooterEditorOptions?.showLegal !== false || emailFooterEditorOptions?.showCopyright !== false) && (
-                    <Box>
-                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                            Content Details
-                        </Typography>
+                {/* Content Details Section */}
+                <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content Data</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
                         <Stack spacing={3}>
                             {emailFooterEditorOptions?.showAddress !== false && (
-                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Store Address</Typography>
-                                    <Box>
-                                        {renderLabel("Address Text")}
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={emailFooterEditorOptions?.storeAddress || ''}
-                                            onChange={(e) => handleChange('storeAddress', e.target.value)}
-                                            multiline
-                                            rows={2}
-                                            InputProps={{ style: { fontSize: '12px' } }}
-                                            sx={{ mb: 2 }}
-                                        />
-                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('storeAddress')} />
-                                    </Box>
-                                </Paper>
+                                <Box>
+                                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>STORE ADDRESS</Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={emailFooterEditorOptions?.storeAddress || ''}
+                                        onChange={(e) => handleChange('storeAddress', e.target.value)}
+                                        multiline
+                                        rows={2}
+                                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                                        sx={{ mb: 1 }}
+                                    />
+                                    <PlaceholderSelect onSelect={handlePlaceholderSelect('storeAddress')} />
+                                </Box>
                             )}
 
                             {emailFooterEditorOptions?.showContact !== false && (
                                 <>
-                                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Contact Email</Typography>
-                                        <Box sx={{ mb: 2 }}>
-                                            {renderLabel("Label")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={emailFooterEditorOptions?.emailLabel || ''}
-                                                onChange={(e) => handleChange('emailLabel', e.target.value)}
-                                                placeholder="e.g. Email:"
-                                                InputProps={{ style: { fontSize: '12px' } }}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            {renderLabel("Value")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={emailFooterEditorOptions?.contactEmail || ''}
-                                                onChange={(e) => handleChange('contactEmail', e.target.value)}
-                                                InputProps={{ style: { fontSize: '12px' } }}
-                                                sx={{ mb: 2 }}
-                                            />
-                                            <PlaceholderSelect onSelect={handlePlaceholderSelect('contactEmail')} />
-                                        </Box>
-                                    </Paper>
+                                    <Box>
+                                        <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>CONTACT EMAIL</Typography>
+                                        <Stack spacing={1.5}>
+                                            <Box>
+                                                <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Label</Typography>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.emailLabel || ''} onChange={(e) => handleChange('emailLabel', e.target.value)} placeholder="e.g. Email:" InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                                            </Box>
+                                            <Box>
+                                                <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Value</Typography>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.contactEmail || ''} onChange={(e) => handleChange('contactEmail', e.target.value)} InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} sx={{ mb: 1 }} />
+                                                <PlaceholderSelect onSelect={handlePlaceholderSelect('contactEmail')} />
+                                            </Box>
+                                        </Stack>
+                                    </Box>
 
-                                    <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Contact Phone</Typography>
-                                        <Box sx={{ mb: 2 }}>
-                                            {renderLabel("Label")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={emailFooterEditorOptions?.phoneLabel || ''}
-                                                onChange={(e) => handleChange('phoneLabel', e.target.value)}
-                                                placeholder="e.g. Phone:"
-                                                InputProps={{ style: { fontSize: '12px' } }}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            {renderLabel("Value")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={emailFooterEditorOptions?.contactPhone || ''}
-                                                onChange={(e) => handleChange('contactPhone', e.target.value)}
-                                                InputProps={{ style: { fontSize: '12px' } }}
-                                                sx={{ mb: 2 }}
-                                            />
-                                        </Box>
-                                    </Paper>
+                                    <Box>
+                                        <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>CONTACT PHONE</Typography>
+                                        <Stack spacing={1.5}>
+                                            <Box>
+                                                <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Label</Typography>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.phoneLabel || ''} onChange={(e) => handleChange('phoneLabel', e.target.value)} placeholder="e.g. Phone:" InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                                            </Box>
+                                            <Box>
+                                                <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Value</Typography>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.contactPhone || ''} onChange={(e) => handleChange('contactPhone', e.target.value)} InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                                            </Box>
+                                        </Stack>
+                                    </Box>
                                 </>
                             )}
 
                             {emailFooterEditorOptions?.showLegal !== false && (
-                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Legal Links</Typography>
-                                    <Stack spacing={2}>
+                                <Box>
+                                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>LEGAL LINKS</Typography>
+                                    <Stack spacing={2} sx={{ p: 1.5, border: '1px solid #e7e9eb', borderRadius: '4px' }}>
                                         <Box>
-                                            {renderLabel("Privacy Policy")}
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5, fontWeight: 700 }}>Privacy Policy</Typography>
                                             <Stack spacing={1}>
-                                                <Box>
-                                                    {renderLabel("Label")}
-                                                    <TextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={emailFooterEditorOptions?.privacyLinkText || ''}
-                                                        onChange={(e) => handleChange('privacyLinkText', e.target.value)}
-                                                        InputProps={{ style: { fontSize: '12px' } }}
-                                                    />
-                                                </Box>
-                                                <Box>
-                                                    {renderLabel("URL")}
-                                                    <TextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={emailFooterEditorOptions?.privacyLinkUrl || ''}
-                                                        onChange={(e) => handleChange('privacyLinkUrl', e.target.value)}
-                                                        InputProps={{ style: { fontSize: '12px' } }}
-                                                    />
-                                                </Box>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.privacyLinkText || ''} onChange={(e) => handleChange('privacyLinkText', e.target.value)} placeholder="Label" InputProps={{ sx: { fontSize: '11px' } }} />
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.privacyLinkUrl || ''} onChange={(e) => handleChange('privacyLinkUrl', e.target.value)} placeholder="URL" InputProps={{ sx: { fontSize: '11px' } }} />
                                             </Stack>
                                         </Box>
                                         <Divider />
                                         <Box>
-                                            {renderLabel("Terms & Conditions")}
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5, fontWeight: 700 }}>Terms & Conditions</Typography>
                                             <Stack spacing={1}>
-                                                <Box>
-                                                    {renderLabel("Label")}
-                                                    <TextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={emailFooterEditorOptions?.termsLinkText || ''}
-                                                        onChange={(e) => handleChange('termsLinkText', e.target.value)}
-                                                        InputProps={{ style: { fontSize: '12px' } }}
-                                                    />
-                                                </Box>
-                                                <Box>
-                                                    {renderLabel("URL")}
-                                                    <TextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={emailFooterEditorOptions?.termsLinkUrl || ''}
-                                                        onChange={(e) => handleChange('termsLinkUrl', e.target.value)}
-                                                        InputProps={{ style: { fontSize: '12px' } }}
-                                                    />
-                                                </Box>
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.termsLinkText || ''} onChange={(e) => handleChange('termsLinkText', e.target.value)} placeholder="Label" InputProps={{ sx: { fontSize: '11px' } }} />
+                                                <TextField fullWidth size="small" value={emailFooterEditorOptions?.termsLinkUrl || ''} onChange={(e) => handleChange('termsLinkUrl', e.target.value)} placeholder="URL" InputProps={{ sx: { fontSize: '11px' } }} />
                                             </Stack>
                                         </Box>
                                     </Stack>
-                                </Paper>
+                                </Box>
                             )}
 
-                            <Box sx={{ display: emailFooterEditorOptions?.showCopyright !== false ? 'block' : 'none' }}>
-                                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fafafa' }}>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Copyright</Typography>
-                                    <Box>
-                                        {renderLabel("Copyright Text")}
-                                        <Box sx={{
-                                            border: '1px solid #ccc',
-                                            borderRadius: '4px',
-                                            mt: 1,
-                                            mb: 2,
-                                            bgcolor: '#fff',
-                                            '& .ck-editor__editable': {
-                                                minHeight: '150px',
-                                                padding: '10px'
-                                            }
-                                        }}>
-                                            <div ref={editorRef} />
-                                        </Box>
-                                        <PlaceholderSelect onSelect={handlePlaceholderSelect('copyrightText')} />
+                            {emailFooterEditorOptions?.showCopyright !== false && (
+                                <Box>
+                                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>COPYRIGHT</Typography>
+                                    <Box sx={{
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        mt: 1,
+                                        mb: 1,
+                                        bgcolor: '#fff',
+                                        '& .ck-editor__editable': {
+                                            minHeight: '120px',
+                                            padding: '10px'
+                                        }
+                                    }}>
+                                        <div ref={editorRef} />
                                     </Box>
-                                </Paper>
+                                    <PlaceholderSelect onSelect={handlePlaceholderSelect('copyrightText')} />
+                                </Box>
+                            )}
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+
+                {/* Style Section */}
+                <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2.5}>
+                            <CommonStylingControls
+                                options={emailFooterEditorOptions}
+                                onUpdate={(updatedOptions) => dispatch(updateEmailFooterEditorOptions(updatedOptions))}
+                            />
+                            <Box>
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Link Color</Typography>
+                                <TextField
+                                    fullWidth
+                                    type="color"
+                                    size="small"
+                                    value={emailFooterEditorOptions?.linkColor === 'transparent' ? '#4CAF50' : (emailFooterEditorOptions?.linkColor || '#4CAF50')}
+                                    onChange={(e) => handleChange('linkColor', e.target.value)}
+                                    sx={{
+                                        '& .MuiInputBase-input': { padding: 0, height: '35px', cursor: 'pointer', border: 'none', bgcolor: 'transparent' },
+                                        '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #ddd' }
+                                    }}
+                                />
                             </Box>
                         </Stack>
-                    </Box>
-                )}
-
-                <Divider />
-
-                <CommonStylingControls
-                    options={emailFooterEditorOptions}
-                    onUpdate={(updatedOptions) => dispatch(updateEmailFooterEditorOptions(updatedOptions))}
-                />
-
-                <Box>
-                    {renderLabel("Link Color")}
-                    <TextField
-                        fullWidth
-                        type="color"
-                        size="small"
-                        value={emailFooterEditorOptions?.linkColor === 'transparent' ? '#4CAF50' : (emailFooterEditorOptions?.linkColor || '#4CAF50')}
-                        onChange={(e) => handleChange('linkColor', e.target.value)}
-                        sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
-                    />
-                </Box>
-            </Stack>
+                    </AccordionDetails>
+                </Accordion>
+            </Box>
         </Box>
     );
 };

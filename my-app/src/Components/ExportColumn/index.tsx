@@ -30,6 +30,18 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { EMAIL_TYPES } from "../../Constants/emailTypes";
 
+// Icons & UI
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SaveIcon from '@mui/icons-material/Save';
+import PublishIcon from '@mui/icons-material/Publish';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Paper
+} from "@mui/material";
+
 
 interface Template {
   id: string;
@@ -620,54 +632,168 @@ const ExportColumn = () => {
   };
 
 
-  return (
+  // Styles for Accordion to look like Elementor Panel
+  const accordionStyle = {
+    boxShadow: 'none',
+    border: 'none',
+    bgcolor: 'transparent',
+    '&:before': { display: 'none' },
+    '&.Mui-expanded': { margin: 0 },
+  };
 
+  const summaryStyle = {
+    minHeight: '40px',
+    borderBottom: '1px solid #e0e0e0',
+    '&.Mui-expanded': { minHeight: '40px', borderBottom: '1px solid #e0e0e0' },
+    '& .MuiAccordionSummary-content': { margin: '12px 0' },
+  };
+
+  const headerStyle = {
+    fontSize: '11px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    color: '#6d7882',
+  };
+
+  return (
     <Box
       sx={{
-        height: "100%",
-        width: "30%",
-        boxShadow: "-4px 0 8px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        flexDirection: "column",
-        background: "#fff",
-        padding: "20px",
-        gap: 2,
-        overflowY: "auto",
+        height: "100%", width: "100%",
+        display: "flex", flexDirection: "column",
+        bgcolor: "#f9f9f9",
+        overflow: "hidden"
       }}
     >
-      {/* Hidden file input for import */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileUpload}
-        accept=".json"
-        style={{ display: 'none' }}
-      />
+      {/* File Input */}
+      <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" style={{ display: 'none' }} />
 
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
+      {/* Header */}
+      <Box sx={{ p: 2, bgcolor: "#fff", borderBottom: "1px solid #e0e0e0", display: 'flex', alignItems: 'center', height: '50px', flexShrink: 0 }}>
+        <SettingsIcon sx={{ color: '#555', mr: 1 }} />
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '12px', color: '#333' }}>
+          Template Settings
+        </Typography>
+      </Box>
+
+      {/* Scrollable Settings */}
+      <Box sx={{ flex: 1, overflowY: "auto", px: 0 }}>
+
+        {/* General Settings */}
+        <Accordion defaultExpanded disableGutters sx={accordionStyle}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={summaryStyle}>
+            <Typography sx={headerStyle}>General Settings</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2 }}>
+
+            {/* Title */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 0.5, color: '#555' }}>Title</Typography>
+            <TextField fullWidth size="small" value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="Template Name" sx={{ mb: 2, bgcolor: '#fff' }} InputProps={{ style: { fontSize: '13px' } }} />
+
+            {/* Status Badge (Visual Only) */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+              <Typography sx={{ fontSize: "11px", fontWeight: 600, color: '#555' }}>Status:</Typography>
+              <Box sx={{
+                bgcolor: isEditMode && templates.find(t => t.id === currentTemplateId)?.status === 'publish' ? '#e6f7eb' : '#fff8e1',
+                color: isEditMode && templates.find(t => t.id === currentTemplateId)?.status === 'publish' ? '#008f4c' : '#f57f17',
+                fontSize: '10px', fontWeight: 700, px: 1, py: 0.25, borderRadius: '3px', textTransform: 'uppercase', border: '1px solid currentColor'
+              }}>
+                {isEditMode ? (templates.find(t => t.id === currentTemplateId)?.status || 'Draft') : 'New Draft'}
+              </Box>
+            </Box>
+
+            {/* Description */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 0.5, color: '#555' }}>Description</Typography>
+            <TextField fullWidth multiline minRows={3} value={templateDescription} onChange={(e) => setTemplateDescription(e.target.value)} placeholder="Short description..." sx={{ bgcolor: '#fff' }} InputProps={{ style: { fontSize: '13px' } }} />
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Email Configuration */}
+        <Accordion defaultExpanded disableGutters sx={accordionStyle}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={summaryStyle}>
+            <Typography sx={headerStyle}>Email Configuration</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2 }}>
+            {/* Type */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 0.5, color: '#555' }}>Type</Typography>
+            <Select
+              size="small"
+              fullWidth
+              displayEmpty
+              value={selectedTemplateId}
+              onChange={(e) => handleTemplateSelect(e.target.value as string)}
+              sx={{ mb: 2, bgcolor: '#fff', fontSize: '13px' }}
+              MenuProps={{
+                disablePortal: true, // Fix positioning in WP Admin
+                PaperProps: {
+                  sx: {
+                    zIndex: 999999,
+                    maxHeight: 400,
+                  }
+                }
+              }}
+            >
+              <MenuItem value="" sx={{ fontSize: '13px' }}><em>Select Type...</em></MenuItem>
+              <ListSubheader sx={{ fontSize: '11px', lineHeight: '24px' }}>Admin</ListSubheader>
+              {EMAIL_TYPES.filter(t => t.category === 'admin').map((type) => (
+                <MenuItem key={type.type} value={type.name} sx={{ fontSize: '13px', pl: 3 }}>{type.name}</MenuItem>
+              ))}
+              <ListSubheader sx={{ fontSize: '11px', lineHeight: '24px' }}>Customer</ListSubheader>
+              {EMAIL_TYPES.filter(t => t.category === 'customer').map((type) => (
+                <MenuItem key={type.type} value={type.name} sx={{ fontSize: '13px', pl: 3 }}>{type.name}</MenuItem>
+              ))}
+            </Select>
+
+            {/* Priority */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 0.5, color: '#555' }}>Priority</Typography>
+            <TextField fullWidth size="small" type="number" value={priority} onChange={(e) => setPriority(parseInt(e.target.value) || 0)} sx={{ bgcolor: '#fff' }} InputProps={{ style: { fontSize: '13px' }, inputProps: { min: 0 } }} />
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Actions */}
+        <Accordion disableGutters sx={accordionStyle}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={summaryStyle}>
+            <Typography sx={headerStyle}>Actions</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2 }}>
+            {/* Test Email */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 0.5, color: '#555' }}>Send Test Email</Typography>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <TextField fullWidth size="small" placeholder="email@example.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} sx={{ bgcolor: '#fff' }} InputProps={{ style: { fontSize: '13px' } }} />
+              <Button variant="contained" size="small" onClick={handleSendTestEmail} disabled={isSending} sx={{ minWidth: 'auto', px: 2, bgcolor: '#6d7882', '&:hover': { bgcolor: '#555' } }}>Send</Button>
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Import/Export */}
+            <Typography sx={{ fontSize: "11px", fontWeight: 600, mb: 1, color: '#555' }}>Data Management</Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button variant="outlined" size="small" startIcon={<CloudUploadIcon />} onClick={() => openImportDialog()} sx={{ flex: 1, fontSize: '12px', borderColor: '#ddd', color: '#555' }}>Import</Button>
+              <Button variant="outlined" size="small" startIcon={<DownloadIcon />} onClick={() => setExportDialogOpen(true)} disabled={blocks.length === 0} sx={{ flex: 1, fontSize: '12px', borderColor: '#ddd', color: '#555' }}>Export</Button>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+
+      </Box>
+
+      {/* Bottom Sticky Area */}
+      <Box sx={{ p: 2, bgcolor: "#fff", borderTop: "1px solid #e0e0e0", display: 'flex', gap: 1, flexShrink: 0 }}>
+        <Button variant="outlined" onClick={() => handleSaveTemplate('draft')} disabled={isSending} sx={{ flex: 1, borderColor: '#ddd', color: '#6d7882', textTransform: 'uppercase', fontSize: '11px', fontWeight: 600 }}>
+          Save Draft
+        </Button>
+        <Button variant="contained" onClick={() => handleSaveTemplate('publish')} disabled={isSending} sx={{ flex: 1, bgcolor: '#93003c', '&:hover': { bgcolor: '#d32f2f' }, textTransform: 'uppercase', fontSize: '11px', fontWeight: 600 }}>
+          {isEditMode && templates.find(t => t.id === currentTemplateId)?.status === 'publish' ? 'Update' : 'Publish'}
+        </Button>
+      </Box>
+
+      {/* Modals */}
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} sx={{ zIndex: 9999999 }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>
 
-      {/* Import Dialog */}
-      <Dialog
-        open={importDialogOpen}
-        onClose={() => setImportDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-        sx={{ zIndex: 1300001 }}
-      >
+      <ExportDialogModal open={exportDialogOpen} onClose={() => setExportDialogOpen(false)} onExport={generateExport} content={exportContent} format={selectedExportFormat} />
+
+      <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)} maxWidth="md" fullWidth sx={{ zIndex: 9999999 }}>
         <DialogTitle>Import Template</DialogTitle>
         <DialogContent>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -676,385 +802,23 @@ const ExportColumn = () => {
               <Tab label="Paste JSON" />
             </Tabs>
           </Box>
-
           <TabPanel value={tabValue} index={0}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Upload a JSON file exported from this tool
-            </Typography>
-            <Button
-              variant="contained"
-              component="label"
-              startIcon={<CloudUploadIcon />}
-              fullWidth
-              sx={{ py: 2 }}
-            >
+            <Button variant="contained" component="label" startIcon={<CloudUploadIcon />} fullWidth sx={{ py: 2, mt: 2 }}>
               Select JSON File
-              <input
-                type="file"
-                hidden
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".json"
-              />
+              <input type="file" hidden ref={fileInputRef} onChange={handleFileUpload} accept=".json" />
             </Button>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Supports .json files exported from this tool
-            </Typography>
           </TabPanel>
-
           <TabPanel value={tabValue} index={1}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Paste JSON code from an exported template
-            </Typography>
-            <Box sx={{ position: 'relative' }}>
-              <TextareaAutosize
-                minRows={15}
-                maxRows={20}
-                value={jsonText}
-                onChange={(e) => setJsonText(e.target.value)}
-                placeholder='Paste your JSON code here...'
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontFamily: 'monospace',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  resize: 'vertical',
-                }}
-              />
-              <Button
-                startIcon={<ContentPasteIcon />}
-                onClick={handlePasteFromClipboard}
-                size="small"
-                sx={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                }}
-              >
-                Paste
-              </Button>
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Paste valid JSON exported from this tool
-            </Typography>
+            <TextareaAutosize minRows={15} maxRows={20} value={jsonText} onChange={(e) => setJsonText(e.target.value)} placeholder='Paste JSON code...' style={{ width: '100%', padding: '12px', marginTop: '16px', fontFamily: 'monospace' }} />
+            <Button onClick={handleImportFromText} variant="contained" disabled={!jsonText.trim()} sx={{ mt: 2 }}>Import JSON</Button>
           </TabPanel>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImportDialogOpen(false)}>Cancel</Button>
-          {tabValue === 1 && (
-            <Button
-              onClick={handleImportFromText}
-              variant="contained"
-              disabled={!jsonText.trim()}
-            >
-              Import JSON
-            </Button>
-          )}
         </DialogActions>
       </Dialog>
 
-
-      {/* Save + Publish Buttons */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleSaveTemplate('draft')}
-          disabled={isSending}
-          sx={{
-            fontSize: "14px",
-            borderRadius: "3px",
-            textTransform: "none",
-            width: "48%",
-            height: "2.5rem",
-            "&:hover": {
-              backgroundColor: "transparent",
-              color: "primary.main",
-              border: "1px solid",
-              borderColor: "primary.main",
-            },
-            "&:disabled": {
-              backgroundColor: "#cccccc",
-              color: "#666",
-            },
-          }}
-        >
-          Save Draft
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleSaveTemplate('publish')}
-          disabled={isSending}
-          sx={{
-            fontSize: "14px",
-            borderRadius: "3px",
-            textTransform: "none",
-            width: "48%",
-            height: "2.5rem",
-            "&:hover": {
-              backgroundColor: "transparent",
-              color: "primary.main",
-              border: "1px solid",
-              borderColor: "primary.main",
-            },
-            "&:disabled": {
-              backgroundColor: "#cccccc",
-              color: "#666",
-            },
-          }}
-        >
-          {isEditMode && templates.find(t => t.id === currentTemplateId)?.status === 'publish' ? 'Update' : 'Publish'}
-        </Button>
-      </Box>
-
-
-      <Divider />
-
-      {/* Email Type */}
-      <Box sx={{ mt: 1 }}>
-        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Email type</Typography>
-        <Select
-          size="small"
-          fullWidth
-          displayEmpty
-          value={selectedTemplateId}
-          onChange={(e) => handleTemplateSelect(e.target.value as string)}
-          MenuProps={{
-            disablePortal: true,
-            PaperProps: {
-              sx: {
-                maxHeight: '400px',
-                width: 'auto',
-                '& .MuiListSubheader-root': {
-                  backgroundColor: '#f5f5f5',
-                  lineHeight: '32px',
-                  fontWeight: 'bold',
-                  color: 'primary.main',
-                },
-              }
-            }
-          }}
-          sx={{ fontSize: "14px" }}
-        >
-          <MenuItem value="">
-            <em>Default template</em>
-          </MenuItem>
-
-          <ListSubheader>Admin</ListSubheader>
-          {EMAIL_TYPES.filter(t => t.category === 'admin').map((type) => (
-            <MenuItem key={type.type} value={type.name} sx={{ pl: 4 }}>
-              {type.name}
-            </MenuItem>
-          ))}
-
-          <ListSubheader>Customer</ListSubheader>
-          {EMAIL_TYPES.filter(t => t.category === 'customer').map((type) => (
-            <MenuItem key={type.type} value={type.name} sx={{ pl: 4 }}>
-              {type.name}
-            </MenuItem>
-          ))}
-
-
-        </Select>
-      </Box>
-
-      {/* Priority */}
-      <Box sx={{ mt: 1 }}>
-        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Priority</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          type="number"
-          value={priority}
-          onChange={(e) => setPriority(parseInt(e.target.value) || 0)}
-          InputProps={{ inputProps: { min: 0 } }}
-          placeholder="0"
-          helperText="Higher value means higher priority."
-          sx={{ fontSize: "14px" }}
-        />
-      </Box>
-
-      {/* Title */}
-      <Box>
-        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Title</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Template Name"
-          value={templateName}
-          onChange={(e) => setTemplateName(e.target.value)}
-        />
-      </Box>
-
-      {/* Description (Compact) */}
-      <Box>
-        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Description</Typography>
-        <TextField
-          fullWidth
-          multiline
-          minRows={2}
-          maxRows={4}
-          placeholder="Description"
-          value={templateDescription}
-          onChange={(e) => setTemplateDescription(e.target.value)}
-          variant="outlined"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              padding: "8px",
-              // Fix for WP admin double border: Reset WP global styles on the inner textarea
-              "& textarea": {
-                border: "none !important",
-                boxShadow: "none !important",
-                background: "transparent !important"
-              }
-            }
-          }}
-        />
-      </Box>
-
-      {/* Email Address */}
-      <Box>
-        <Typography sx={{ fontSize: "14px", mb: 0.5 }}>Test Email</Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <TextField
-            size="small"
-            placeholder="email@example.com"
-            fullWidth
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleSendTestEmail}
-            disabled={isSending}
-            sx={{ minWidth: '60px' }}
-          >
-            {isSending ? "..." : "Send"}
-          </Button>
-        </Box>
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
-
-
-      {/* ====== EXPORT SECTION ====== */}
-      {/* ====== EXPORT/IMPORT SECTION ====== */}
-      <Box>
-        <Typography sx={{ fontWeight: "bold", fontSize: "16px", mb: 1.5 }}>
-          {isEditMode ? "Export" : "Export/Import"}
-        </Typography>
-
-        {isEditMode ? (
-          // Edit Mode: Only Export Template (Full Width)
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={() => setExportDialogOpen(true)}
-            disabled={blocks.length === 0}
-            fullWidth
-            sx={{
-              backgroundColor: "#1E5AB6",
-              textTransform: "none",
-              color: "white",
-              fontWeight: "bold",
-              fontSize: "14px",
-              py: 1.5,
-              borderColor: "#1E5AB6",
-              "&:hover": {
-                backgroundColor: "transparent",
-                color: "primary.main",
-                border: "1px solid",
-                borderColor: "primary.main",
-              },
-              "&:disabled": {
-                backgroundColor: "#cccccc",
-                color: "#666",
-                borderColor: "#cccccc",
-              },
-            }}
-          >
-            Export Template
-          </Button>
-        ) : (
-          // Add New Mode: Import and Export Side-by-Side
-          <Box sx={{ display: "flex", gap: 2 }}>
-            {/* Import Button */}
-            <Button
-              variant="outlined"
-              startIcon={<CloudUploadIcon />}
-              onClick={() => fileInputRef.current?.click()}
-              fullWidth
-              sx={{
-                backgroundColor: "#1E5AB6",
-                textTransform: "none",
-                color: "white",
-                fontWeight: "normal",
-                fontSize: "14px",
-                py: 1.5,
-                borderColor: "#ddd",
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  color: "primary.main",
-                  border: "1px solid",
-                  borderColor: "primary.main",
-                },
-              }}
-            >
-              Import
-            </Button>
-
-            {/* Export Button */}
-            <Button
-              variant="outlined"
-              startIcon={<DownloadIcon />}
-              onClick={() => setExportDialogOpen(true)}
-              disabled={blocks.length === 0}
-              fullWidth
-              sx={{
-                backgroundColor: "#1E5AB6",
-                textTransform: "none",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: "14px",
-                py: 1.5,
-                borderColor: "#1E5AB6",
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  color: "primary.main",
-                  border: "1px solid",
-                  borderColor: "primary.main",
-                },
-                "&:disabled": {
-                  backgroundColor: "#cccccc",
-                  color: "#666",
-                  borderColor: "#cccccc",
-                },
-              }}
-            >
-              Export
-            </Button>
-          </Box>
-        )}
-      </Box>
-
-      {/* Export Dialog Modal */}
-      <ExportDialogModal
-        open={exportDialogOpen}
-        onClose={() => setExportDialogOpen(false)}
-        onExport={generateExport}
-        content={exportContent}
-        format={selectedExportFormat}
-      />
-    </Box >
+    </Box>
   );
 };
 

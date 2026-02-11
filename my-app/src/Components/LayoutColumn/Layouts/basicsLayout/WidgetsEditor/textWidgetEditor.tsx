@@ -13,12 +13,16 @@ import {
   Stack,
   Divider,
   InputLabel,
+  Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
 import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
 import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
@@ -230,92 +234,94 @@ const TextWidgetEditor = () => {
 
 
   return (
-    <>
-      <Box p={2}>
-        <Stack spacing={3}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Box>
-              <Typography variant="h6">Text</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Customize text content and style.
-              </Typography>
-            </Box>
-            <Box display="flex" gap={1}>
-              <Tooltip title="Close">
-                <IconButton onClick={handleCloseEditor} size="small" sx={{ bgcolor: '#eee' }}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton onClick={handleDeleteContent} size="small" sx={{ bgcolor: '#eee' }}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Text</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+              </IconButton>
+            </Tooltip>
           </Box>
+        </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Customize text content and style.
+        </Typography>
+      </Box>
 
-          <Divider />
-
-          <Box>
-            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Content
-            </Typography>
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
             <Box className="ck-content">
-              {/* Shortcodes Row - Full Width */}
+              {/* Shortcodes Row */}
               <Box mb={2}>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Shortcodes
-                </Typography>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Shortcodes</Typography>
                 <PlaceholderSelect onSelect={handlePlaceholderSelect} />
               </Box>
 
-              {/* Icons Row - Side by Side */}
-              <Box mb={2} display="flex" gap={1} alignItems="flex-end">
+              {/* Icons Row */}
+              <Box mb={2} display="flex" gap={2}>
                 <Box flex={1}>
-                  <IconInsertSelect onSelect={handleIconSelect} label="Normal" />
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Normal</Typography>
+                  <IconInsertSelect onSelect={handleIconSelect} label="" />
                 </Box>
                 <Box flex={1}>
-                  <SocialIconInsertSelect onSelect={handleSocialIconSelect} label="Social" />
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Social</Typography>
+                  <SocialIconInsertSelect onSelect={handleSocialIconSelect} label="" />
                 </Box>
               </Box>
 
               <div ref={editorRef} />
-              <Box mt={1}>
+              <Box mt={1.5}>
                 <Button
                   variant="outlined"
                   size="small"
                   onClick={() => setLinkDialogOpen(true)}
                   startIcon={<span>🔗</span>}
+                  fullWidth
+                  sx={{ borderColor: '#d5dadf', color: '#6d7882', textTransform: 'none', fontSize: '12px', '&:hover': { borderColor: '#a4afb7', bgcolor: '#f9f9f9' } }}
                 >
-                  Insert Link
+                  INSERT LINK
                 </Button>
               </Box>
             </Box>
-          </Box>
+          </AccordionDetails>
+        </Accordion>
 
-          <Divider />
-
-          <Box>
-            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-              Typography
-            </Typography>
-            <Stack spacing={2}>
+        {/* Typography Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Typography</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Font Family
-                </Typography>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Font Family</Typography>
                 <FormControl fullWidth size="small">
                   <Select
                     value={fontFamily === 'inherit' || !fontFamily ? 'global' : (FONT_FAMILIES.includes(fontFamily) ? fontFamily : 'global')}
                     onChange={(e) => debouncedUpdate({ fontFamily: e.target.value === 'global' ? '' : e.target.value })}
+                    sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
                     MenuProps={{
-                      disablePortal: false,
-                      sx: { zIndex: 1300001 },
-                      style: { zIndex: 1300001 }
+                      disablePortal: true,
+                      sx: { zIndex: 999999 }
                     }}
                   >
                     {FONT_FAMILIES.map((font) => (
-                      <MenuItem key={font} value={font === 'Global' ? 'global' : font}>
+                      <MenuItem key={font} value={font === 'Global' ? 'global' : font} sx={{ fontSize: '11px' }}>
                         {font}
                       </MenuItem>
                     ))}
@@ -326,27 +332,25 @@ const TextWidgetEditor = () => {
               {/* Row 2: Font Size & Line Height */}
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
                 <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                    Font Size (px)
-                  </Typography>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Font Size (px)</Typography>
                   <TextField
                     type="number"
                     value={fontSize}
                     onChange={(e) => debouncedUpdate({ fontSize: Number(e.target.value) })}
                     size="small"
                     fullWidth
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
                   />
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                    Line Spacing
-                  </Typography>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Line Spacing</Typography>
                   <TextField
                     type="number"
                     value={lineHeight}
                     onChange={(e) => debouncedUpdate({ lineHeight: Number(e.target.value) })}
                     size="small"
                     fullWidth
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
                   />
                 </Box>
               </Box>
@@ -365,63 +369,47 @@ const TextWidgetEditor = () => {
                 />
               </Box>
 
-
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Alignment
-                </Typography>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Alignment</Typography>
                 <ToggleButtonGroup
                   value={textAlign}
                   exclusive
                   onChange={(e, newAlign) => newAlign && debouncedUpdate({ textAlign: newAlign })}
                   fullWidth
                   size="small"
+                  sx={{ bgcolor: '#f9f9f9' }}
                 >
-                  <ToggleButton value="left"><FormatAlignLeftIcon fontSize="small" /></ToggleButton>
-                  <ToggleButton value="center"><FormatAlignCenterIcon fontSize="small" /></ToggleButton>
-                  <ToggleButton value="right"><FormatAlignRightIcon fontSize="small" /></ToggleButton>
-                  <ToggleButton value="justify"><FormatAlignJustifyIcon fontSize="small" /></ToggleButton>
+                  <ToggleButton value="left" sx={{ p: '5px' }}><FormatAlignLeftIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="center" sx={{ p: '5px' }}><FormatAlignCenterIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="right" sx={{ p: '5px' }}><FormatAlignRightIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                  <ToggleButton value="justify" sx={{ p: '5px' }}><FormatAlignJustifyIcon sx={{ fontSize: '18px' }} /></ToggleButton>
                 </ToggleButtonGroup>
               </Box>
+
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Spacing (Padding)</Typography>
+                <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={1}>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>TOP</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>RIGHT</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>BOTTOM</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>LEFT</Typography>
+                    <TextField type="number" size="small" fullWidth value={padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }} />
+                  </Box>
+                </Box>
+              </Box>
             </Stack>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Spacing (Padding)
-            </Typography>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Top
-                </Typography>
-                <TextField type="number" size="small" fullWidth value={padding.top} onChange={(e) => handlePaddingChange("top", Number(e.target.value))} />
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Bottom
-                </Typography>
-                <TextField type="number" size="small" fullWidth value={padding.bottom} onChange={(e) => handlePaddingChange("bottom", Number(e.target.value))} />
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Left
-                </Typography>
-                <TextField type="number" size="small" fullWidth value={padding.left} onChange={(e) => handlePaddingChange("left", Number(e.target.value))} />
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                  Right
-                </Typography>
-                <TextField type="number" size="small" fullWidth value={padding.right} onChange={(e) => handlePaddingChange("right", Number(e.target.value))} />
-              </Box>
-            </Box>
-          </Box>
-
-
-        </Stack>
+          </AccordionDetails>
+        </Accordion>
       </Box>
 
       <Dialog
@@ -432,43 +420,41 @@ const TextWidgetEditor = () => {
         disablePortal={false}
         sx={{ zIndex: 1300001 }}
       >
-        <DialogTitle>Insert Link</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ p: 2, fontSize: '16px', fontWeight: 700 }}>Insert Link</DialogTitle>
+        <DialogContent sx={{ p: '2px 24px' }}>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Link URL
-              </Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Link URL</Typography>
               <TextField
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 fullWidth
                 placeholder="https://example.com"
                 size="small"
+                InputProps={{ sx: { fontSize: '11px' } }}
               />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Display Text
-              </Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Display Text</Typography>
               <TextField
                 value={linkDisplayText}
                 onChange={(e) => setLinkDisplayText(e.target.value)}
                 fullWidth
                 placeholder="Click here"
                 size="small"
+                InputProps={{ sx: { fontSize: '11px' } }}
               />
             </Box>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleLinkDialogClose}>Cancel</Button>
-          <Button onClick={handleLinkDialogSave} variant="contained" color="primary">
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleLinkDialogClose} sx={{ fontSize: '12px' }}>Cancel</Button>
+          <Button onClick={handleLinkDialogSave} variant="contained" sx={{ bgcolor: '#93003c', fontSize: '12px', '&:hover': { bgcolor: '#7a0032' } }}>
             Insert
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 };
 

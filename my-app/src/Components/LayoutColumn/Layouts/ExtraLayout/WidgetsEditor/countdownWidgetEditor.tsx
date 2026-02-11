@@ -13,8 +13,12 @@ import {
   FormControl,
   Stack,
   Divider,
-  Switch
+  Switch,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updateCountdownEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
@@ -112,259 +116,150 @@ const CountdownWidgetEditor = () => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Countdown
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Set timer settings.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Countdown</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Set timer settings for your countdown.
+        </Typography>
+      </Box>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Target Time
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Date & Time
-              </Typography>
-              <TextField
-                type="datetime-local"
-                value={dateInputValue}
-                onChange={handleDateChange}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Typography variant="caption" color="text.secondary">
-              Selected: {targetDate.toLocaleString()}
-            </Typography>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Text Settings
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Title Text
-              </Typography>
-              <TextField
-                value={countdownEditorOptions.title || ''}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ title: e.target.value }))}
-                size="small"
-                fullWidth
-                placeholder="e.g. SALES ENDS IN"
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Footer Text
-              </Typography>
-              <TextField
-                value={countdownEditorOptions.footer || ''}
-                onChange={(e) => dispatch(updateCountdownEditorOptions({ footer: e.target.value }))}
-                size="small"
-                fullWidth
-                placeholder="e.g. All courses 50% off"
-              />
-            </Box>
-            <Divider sx={{ my: 1 }} />
-            <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Unit Labels</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={3}>
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Days</Typography>
-                <TextField
-                  value={countdownEditorOptions.daysLabel || 'Days'}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ daysLabel: e.target.value }))}
-                  size="small"
-                  fullWidth
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Target Time</Typography>
+                <Box sx={{ p: 1.5, border: '1px solid #e7e9eb', borderRadius: '4px', bgcolor: '#fdfdfd' }}>
+                  <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Date & Time</Typography>
+                  <TextField
+                    type="datetime-local"
+                    value={dateInputValue}
+                    onChange={handleDateChange}
+                    size="small"
+                    fullWidth
+                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                  />
+                  <Typography sx={{ fontSize: '11px', color: '#888', mt: 1, fontStyle: 'italic' }}>
+                    Selected: {targetDate.toLocaleString()}
+                  </Typography>
+                </Box>
               </Box>
+
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Hours</Typography>
-                <TextField
-                  value={countdownEditorOptions.hoursLabel || 'Hours'}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ hoursLabel: e.target.value }))}
-                  size="small"
-                  fullWidth
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Text Settings</Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Title Text</Typography>
+                    <TextField
+                      value={countdownEditorOptions.title || ''}
+                      onChange={(e) => dispatch(updateCountdownEditorOptions({ title: e.target.value }))}
+                      size="small"
+                      fullWidth
+                      placeholder="e.g. SALES ENDS IN"
+                      InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Footer Text</Typography>
+                    <TextField
+                      value={countdownEditorOptions.footer || ''}
+                      onChange={(e) => dispatch(updateCountdownEditorOptions({ footer: e.target.value }))}
+                      size="small"
+                      fullWidth
+                      placeholder="e.g. All courses 50% off"
+                      InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                    />
+                  </Box>
+                  <Divider />
+                  <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882' }}>Unit Labels</Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Days</Typography>
+                      <TextField value={countdownEditorOptions.daysLabel || 'Days'} onChange={(e) => dispatch(updateCountdownEditorOptions({ daysLabel: e.target.value }))} size="small" fullWidth InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Hours</Typography>
+                      <TextField value={countdownEditorOptions.hoursLabel || 'Hours'} onChange={(e) => dispatch(updateCountdownEditorOptions({ hoursLabel: e.target.value }))} size="small" fullWidth InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Minutes</Typography>
+                      <TextField value={countdownEditorOptions.minutesLabel || 'Minutes'} onChange={(e) => dispatch(updateCountdownEditorOptions({ minutesLabel: e.target.value }))} size="small" fullWidth InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Seconds</Typography>
+                      <TextField value={countdownEditorOptions.secondsLabel || 'Seconds'} onChange={(e) => dispatch(updateCountdownEditorOptions({ secondsLabel: e.target.value }))} size="small" fullWidth InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }} />
+                    </Box>
+                  </Box>
+                </Stack>
               </Box>
+
               <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Minutes</Typography>
-                <TextField
-                  value={countdownEditorOptions.minutesLabel || 'Minutes'}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ minutesLabel: e.target.value }))}
-                  size="small"
-                  fullWidth
-                />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Visibility</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                  <FormControlLabel
+                    control={<Switch checked={countdownEditorOptions.showDays !== false} onChange={(e) => dispatch(updateCountdownEditorOptions({ showDays: e.target.checked }))} size="small" />}
+                    label={<Typography sx={{ fontSize: '12px', color: '#495157' }}>Days</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={countdownEditorOptions.showHours !== false} onChange={(e) => dispatch(updateCountdownEditorOptions({ showHours: e.target.checked }))} size="small" />}
+                    label={<Typography sx={{ fontSize: '12px', color: '#495157' }}>Hours</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={countdownEditorOptions.showMinutes !== false} onChange={(e) => dispatch(updateCountdownEditorOptions({ showMinutes: e.target.checked }))} size="small" />}
+                    label={<Typography sx={{ fontSize: '12px', color: '#495157' }}>Minutes</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={countdownEditorOptions.showSeconds !== false} onChange={(e) => dispatch(updateCountdownEditorOptions({ showSeconds: e.target.checked }))} size="small" />}
+                    label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Seconds</Typography>}
+                    sx={{ ml: 0 }}
+                  />
+                </Box>
               </Box>
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', display: 'block', mb: 0.5, color: '#888' }}>Seconds</Typography>
-                <TextField
-                  value={countdownEditorOptions.secondsLabel || 'Seconds'}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ secondsLabel: e.target.value }))}
-                  size="small"
-                  fullWidth
-                />
-              </Box>
-            </Box>
-          </Stack>
-        </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Visibility
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={countdownEditorOptions.showDays !== false}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showDays: e.target.checked }))}
-                  size="small"
-                />
-              }
-              label={<Typography variant="caption">Days</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={countdownEditorOptions.showHours !== false}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showHours: e.target.checked }))}
-                  size="small"
-                />
-              }
-              label={<Typography variant="caption">Hours</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={countdownEditorOptions.showMinutes !== false}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showMinutes: e.target.checked }))}
-                  size="small"
-                />
-              }
-              label={<Typography variant="caption">Minutes</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={countdownEditorOptions.showSeconds !== false}
-                  onChange={(e) => dispatch(updateCountdownEditorOptions({ showSeconds: e.target.checked }))}
-                  size="small"
-                />
-              }
-              label={<Typography variant="caption">Seconds</Typography>}
-            />
-          </Box>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Appearance
-          </Typography>
-          <Stack spacing={2}>
-            <ColorPicker
-              label="Box Background"
-              value={countdownEditorOptions.backgroundColor || '#d32f2f'}
-              onChange={(color) => handleColorChange('backgroundColor', color)}
-            />
-
-            <ColorPicker
-              label="Box Text Color"
-              value={countdownEditorOptions.textColor || '#ffffff'}
-              onChange={(color) => handleColorChange('textColor', color)}
-            />
-
-            <ColorPicker
-              label="Label Color"
-              value={countdownEditorOptions.labelColor || '#333333'}
-              onChange={(color) => handleColorChange('labelColor', color)}
-            />
-
-            <ColorPicker
-              label="Title Color"
-              value={countdownEditorOptions.titleColor || '#000000'}
-              onChange={(color) => handleColorChange('titleColor', color)}
-            />
-
-            <ColorPicker
-              label="Footer Color"
-              value={countdownEditorOptions.footerColor || '#000000'}
-              onChange={(color) => handleColorChange('footerColor', color)}
-            />
-
-            <ColorPicker
-              label="Container Background"
-              value={countdownEditorOptions.containerBgColor || 'transparent'}
-              onChange={(color) => handleColorChange('containerBgColor', color)}
-            />
-
-          </Stack>
-        </Box>
-      </Stack>
+        {/* Style Section */}
+        <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <ColorPicker label="Box Background" value={countdownEditorOptions.backgroundColor || '#d32f2f'} onChange={(color) => handleColorChange('backgroundColor', color)} />
+              <ColorPicker label="Box Text Color" value={countdownEditorOptions.textColor || '#ffffff'} onChange={(color) => handleColorChange('textColor', color)} />
+              <ColorPicker label="Label Color" value={countdownEditorOptions.labelColor || '#333333'} onChange={(color) => handleColorChange('labelColor', color)} />
+              <ColorPicker label="Title Color" value={countdownEditorOptions.titleColor || '#000000'} onChange={(color) => handleColorChange('titleColor', color)} />
+              <ColorPicker label="Footer Color" value={countdownEditorOptions.footerColor || '#000000'} onChange={(color) => handleColorChange('footerColor', color)} />
+              <ColorPicker label="Container Background" value={countdownEditorOptions.containerBgColor || 'transparent'} onChange={(color) => handleColorChange('containerBgColor', color)} />
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

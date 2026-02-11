@@ -180,7 +180,7 @@ const WorkspaceArea = ({
     const clickedInsideEditor = e.target.closest(".layout-editor-widget");
     if (!clickedInsideBlock && !clickedInsideEditor) {
       dispatch(setSelectedBlockId(null));
-      dispatch(closeEditor());
+      dispatch(openEditor({ blockId: null, columnIndex: null, widgetIndex: null, contentType: null }));
     }
   };
 
@@ -212,7 +212,7 @@ const WorkspaceArea = ({
         // Deselect if clicking on the background (Outer workspace)
         if (e.target === e.currentTarget && !previewMode) {
           dispatch(setSelectedBlockId(null));
-          dispatch(closeEditor());
+          dispatch(openEditor({ blockId: null, columnIndex: null, widgetIndex: null, contentType: null }));
         }
       }}
       onClickCapture={handleClickOutside}
@@ -303,7 +303,7 @@ const WorkspaceArea = ({
           onClick={(e) => {
             if (e.target === e.currentTarget && !previewMode) {
               dispatch(setSelectedBlockId(null));
-              dispatch(closeEditor());
+              dispatch(openEditor({ blockId: null, columnIndex: null, widgetIndex: null, contentType: null }));
             }
           }}
         >
@@ -828,6 +828,7 @@ const ColumnDropTarget = ({
         (contentType: WidgetContentType, widgetIndex: number) =>
           (e: React.MouseEvent) => {
             e.stopPropagation();
+            dispatch(setSelectedBlockId(block.id)); // Ensure block is also selected
             dispatch(
               openEditor({
                 blockId: block.id,

@@ -23,7 +23,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
 
     return (
         <Box>
-            <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 600, display: 'block', mb: 0.8, color: '#555' }}>
                 {label}
             </Typography>
             <Box position="relative">
@@ -48,7 +48,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
                             border: "1px solid #ccc"
                         }}
                     />
-                    <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>
+                    <Typography sx={{ ml: 1, color: '#666', fontSize: '11px' }}>
                         {value}
                     </Typography>
                 </Box>
@@ -65,7 +65,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ label, value, onChange }) => 
                         horizontal: 'left',
                     }}
                     disablePortal={true}
-                    sx={{ zIndex: 1300001 }}
+                    sx={{ zIndex: 9999999 }}
                 >
                     <ChromePicker
                         color={value === 'transparent' ? '#ffffff' : (value || '#ffffff')}

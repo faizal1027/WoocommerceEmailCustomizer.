@@ -1,25 +1,42 @@
-import { Box, TextField, Typography, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel, Stack, Divider, Button, InputAdornment } from '@mui/material';
+import React from 'react';
+import { Box, TextField, Typography, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel, Stack, Divider, Button, InputAdornment, Accordion, AccordionSummary, AccordionDetails, Tooltip, IconButton } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CropOriginalIcon from "@mui/icons-material/CropOriginal";
 import LinkIcon from '@mui/icons-material/Link';
 import ImageIcon from '@mui/icons-material/Image';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
-import { updateRelatedProductsEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
+import { updateRelatedProductsEditorOptions, closeEditor, deleteColumnContent } from '../../../../../Store/Slice/workspaceSlice';
 import CommonStylingControls from '../../../../utils/CommonStylingControls';
 
 const RelatedProductsWidgetEditor: React.FC = () => {
     const dispatch = useDispatch();
     const { relatedProductsEditorOptions } = useSelector((state: RootState) => state.workspace);
+    const { selectedBlockForEditor, selectedColumnIndex, selectedWidgetIndex } = useSelector(
+        (state: RootState) => state.workspace
+    );
 
     const handleChange = (field: string, value: any) => {
         dispatch(updateRelatedProductsEditorOptions({ [field]: value }));
     };
 
-    const renderLabel = (text: string) => (
-        <Typography variant="caption" sx={{ marginBottom: 1, display: 'block', fontWeight: 500, color: 'text.secondary' }}>
-            {text}
-        </Typography>
-    );
+    const handleCloseEditor = () => {
+        dispatch(closeEditor());
+    };
+
+    const handleDeleteContent = () => {
+        if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+            dispatch(
+                deleteColumnContent({
+                    blockId: selectedBlockForEditor,
+                    columnIndex: selectedColumnIndex,
+                    widgetIndex: selectedWidgetIndex,
+                })
+            );
+        }
+    };
 
     const handleBrowseImage = (field: string) => {
         const wp = (window as any).wp;
@@ -45,258 +62,284 @@ const RelatedProductsWidgetEditor: React.FC = () => {
     };
 
     return (
-        <Box sx={{ padding: '20px' }}>
-            <Stack spacing={3}>
-                <Box>
-                    <Typography variant="h6" gutterBottom>
-                        Related Products
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Customize related products recommendation section.
-                    </Typography>
+        <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+            {/* Editor Header */}
+            <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Related Products</Typography>
+                    <Box display="flex" gap={1}>
+                        <Tooltip title="Close">
+                            <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                            <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
+                <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+                    Customize related products recommendation section.
+                </Typography>
+            </Box>
 
-                <Divider />
-
-                {/* Section: General Settings */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        General Settings
-                    </Typography>
-                    <Stack spacing={2}>
-                        <Box>
-                            {renderLabel("Section Title")}
-                            <TextField
-                                fullWidth
-                                size="small"
-                                value={relatedProductsEditorOptions?.title || ''}
-                                onChange={(e) => handleChange('title', e.target.value)}
-                            />
-                        </Box>
-                        <Box>
-                            {renderLabel("Button Text")}
-                            <TextField
-                                fullWidth
-                                size="small"
-                                value={relatedProductsEditorOptions?.buttonText || 'View Product'}
-                                onChange={(e) => handleChange('buttonText', e.target.value)}
-                            />
-                        </Box>
-                        <Box>
-                            {renderLabel("Number of Products")}
-                            <Select
-                                fullWidth
-                                size="small"
-                                value={relatedProductsEditorOptions?.productsToShow || 3}
-                                onChange={(e) => handleChange('productsToShow', e.target.value)}
-                                MenuProps={{
-                                    disablePortal: false,
-                                    sx: { zIndex: 1300001 },
-                                    style: { zIndex: 1300001 }
-                                }}
-                            >
-                                <MenuItem value={2}>2 Products</MenuItem>
-                                <MenuItem value={3}>3 Products</MenuItem>
-                                <MenuItem value={4}>4 Products</MenuItem>
-                            </Select>
-                        </Box>
-                    </Stack>
-                </Box>
-
-                <Divider />
-
-                {/* Section: Appearance */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Appearance
-                    </Typography>
-                    <Stack spacing={1}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={relatedProductsEditorOptions?.showImages !== false}
-                                    onChange={(e) => handleChange('showImages', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Product Images</Typography>}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={relatedProductsEditorOptions?.showCardShadow !== false}
-                                    onChange={(e) => handleChange('showCardShadow', e.target.checked)}
-                                />
-                            }
-                            label={<Typography variant="body2">Show Card Shadow</Typography>}
-                        />
-                    </Stack>
-                </Box>
-
-                <Divider />
-
-                <CommonStylingControls
-                    options={relatedProductsEditorOptions}
-                    onUpdate={(updatedOptions) => dispatch(updateRelatedProductsEditorOptions(updatedOptions))}
-                    showTextColor={false}
-                    showTextAlign={false}
-                />
-
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Product Specific Colors
-                    </Typography>
-                    <Stack spacing={2}>
-                        <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            {/* Editor Sections */}
+            <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+                {/* Content Section */}
+                <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2.5}>
                             <Box>
-                                {renderLabel("Title Color")}
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Section Title</Typography>
                                 <TextField
                                     fullWidth
-                                    type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.titleColor === 'transparent' ? '#333333' : (relatedProductsEditorOptions?.titleColor || '#333333')}
-                                    onChange={(e) => handleChange('titleColor', e.target.value)}
-                                    sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
+                                    value={relatedProductsEditorOptions?.title || ''}
+                                    onChange={(e) => handleChange('title', e.target.value)}
+                                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
                                 />
                             </Box>
                             <Box>
-                                {renderLabel("Price Color")}
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Button Text</Typography>
                                 <TextField
                                     fullWidth
-                                    type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.priceColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.priceColor || '#4CAF50')}
-                                    onChange={(e) => handleChange('priceColor', e.target.value)}
-                                    sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
-                                />
-                            </Box>
-                        </Box>
-                        <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-                            <Box>
-                                {renderLabel("Button Color")}
-                                <TextField
-                                    fullWidth
-                                    type="color"
-                                    size="small"
-                                    value={relatedProductsEditorOptions?.buttonColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.buttonColor || '#4CAF50')}
-                                    onChange={(e) => handleChange('buttonColor', e.target.value)}
-                                    sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
+                                    value={relatedProductsEditorOptions?.buttonText || 'View Product'}
+                                    onChange={(e) => handleChange('buttonText', e.target.value)}
+                                    InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
                                 />
                             </Box>
                             <Box>
-                                {renderLabel("Button Hover")}
-                                <TextField
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Number of Products</Typography>
+                                <Select
                                     fullWidth
-                                    type="color"
                                     size="small"
-                                    value={relatedProductsEditorOptions?.buttonHoverColor === 'transparent' ? '#45a049' : (relatedProductsEditorOptions?.buttonHoverColor || '#45a049')}
-                                    onChange={(e) => handleChange('buttonHoverColor', e.target.value)}
-                                    sx={{ '& input': { height: '36px', padding: '0px 8px' } }}
+                                    value={relatedProductsEditorOptions?.productsToShow || 3}
+                                    onChange={(e) => handleChange('productsToShow', e.target.value)}
+                                    sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                                    MenuProps={{
+                                        disablePortal: true,
+                                        sx: { zIndex: 999999 }
+                                    }}
+                                >
+                                    <MenuItem value={2} sx={{ fontSize: '11px' }}>2 Products</MenuItem>
+                                    <MenuItem value={3} sx={{ fontSize: '11px' }}>3 Products</MenuItem>
+                                    <MenuItem value={4} sx={{ fontSize: '11px' }}>4 Products</MenuItem>
+                                </Select>
+                            </Box>
+                            <Divider />
+                            <Box>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            size="small"
+                                            checked={relatedProductsEditorOptions?.showImages !== false}
+                                            onChange={(e) => handleChange('showImages', e.target.checked)}
+                                        />
+                                    }
+                                    label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Product Images</Typography>}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            size="small"
+                                            checked={relatedProductsEditorOptions?.showCardShadow !== false}
+                                            onChange={(e) => handleChange('showCardShadow', e.target.checked)}
+                                        />
+                                    }
+                                    label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Show Card Shadow</Typography>}
                                 />
                             </Box>
-                        </Box>
-                    </Stack>
-                </Box>
-
-                <Divider />
-
-                {/* Section: Manual Configuration */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Manual Configuration
-                    </Typography>
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                size="small"
-                                checked={relatedProductsEditorOptions?.useManualData || false}
-                                onChange={(e) => handleChange('useManualData', e.target.checked)}
-                            />
-                        }
-                        label={<Typography variant="body2">Use Manual Data</Typography>}
-                    />
-
-                    {relatedProductsEditorOptions?.useManualData && (
-                        <Stack spacing={4} sx={{ mt: 2 }}>
-                            {[1, 2, 3, 4].slice(0, relatedProductsEditorOptions?.productsToShow || 3).map((num) => (
-                                <Box key={num} sx={{ p: 2, border: '1px solid #eee', borderRadius: 1, bgcolor: '#fcfcfc' }}>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
-                                        Product {num}
-                                    </Typography>
-                                    <Stack spacing={2}>
-                                        <Box>
-                                            {renderLabel("Product Name")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={(relatedProductsEditorOptions as any)[`p${num}_name`] || ''}
-                                                onChange={(e) => handleChange(`p${num}_name`, e.target.value)}
-                                                placeholder={`Product Name ${num}`}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            {renderLabel("Product Price")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={(relatedProductsEditorOptions as any)[`p${num}_price`] || ''}
-                                                onChange={(e) => handleChange(`p${num}_price`, e.target.value)}
-                                                placeholder={`$99.99`}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            {renderLabel("Product URL")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={(relatedProductsEditorOptions as any)[`p${num}_url`] || ''}
-                                                onChange={(e) => handleChange(`p${num}_url`, e.target.value)}
-                                                placeholder="https://example.com/product"
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <LinkIcon fontSize="small" color="action" />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        </Box>
-                                        <Box>
-                                            {renderLabel("Product Image")}
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                value={(relatedProductsEditorOptions as any)[`p${num}_image`] || ''}
-                                                onChange={(e) => handleChange(`p${num}_image`, e.target.value)}
-                                                placeholder="https://example.com/image.jpg"
-                                                sx={{ mb: 1 }}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <ImageIcon fontSize="small" color="action" />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                            <Button
-                                                variant="outlined"
-                                                fullWidth
-                                                startIcon={<CropOriginalIcon />}
-                                                size="small"
-                                                onClick={() => handleBrowseImage(`p${num}_image`)}
-                                                sx={{ border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
-                                            >
-                                                Browse Media Library
-                                            </Button>
-                                        </Box>
-                                    </Stack>
-                                </Box>
-                            ))}
                         </Stack>
-                    )}
-                </Box>
-            </Stack>
+                    </AccordionDetails>
+                </Accordion>
+
+                {/* Manual Configuration Section */}
+                <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Manual Configuration</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2.5}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        size="small"
+                                        checked={relatedProductsEditorOptions?.useManualData || false}
+                                        onChange={(e) => handleChange('useManualData', e.target.checked)}
+                                    />
+                                }
+                                label={<Typography sx={{ fontSize: '11px', color: '#495157' }}>Use Manual Data</Typography>}
+                            />
+
+                            {relatedProductsEditorOptions?.useManualData && (
+                                <Stack spacing={4}>
+                                    {[1, 2, 3, 4].slice(0, relatedProductsEditorOptions?.productsToShow || 3).map((num) => (
+                                        <Box key={num} sx={{ p: 2, border: '1px solid #eee', borderRadius: 1, bgcolor: '#fcfcfc' }}>
+                                            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#495157', textTransform: 'uppercase', mb: 2 }}>
+                                                Product {num}
+                                            </Typography>
+                                            <Stack spacing={2}>
+                                                <Box>
+                                                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Product Name</Typography>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={(relatedProductsEditorOptions as any)[`p${num}_name`] || ''}
+                                                        onChange={(e) => handleChange(`p${num}_name`, e.target.value)}
+                                                        placeholder={`Product Name ${num}`}
+                                                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#fff' } }}
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Product Price</Typography>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={(relatedProductsEditorOptions as any)[`p${num}_price`] || ''}
+                                                        onChange={(e) => handleChange(`p${num}_price`, e.target.value)}
+                                                        placeholder={`$99.99`}
+                                                        InputProps={{ sx: { fontSize: '11px', bgcolor: '#fff' } }}
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Product URL</Typography>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={(relatedProductsEditorOptions as any)[`p${num}_url`] || ''}
+                                                        onChange={(e) => handleChange(`p${num}_url`, e.target.value)}
+                                                        placeholder="https://example.com/product"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <LinkIcon fontSize="small" sx={{ color: '#a4afb7' }} />
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: { fontSize: '11px', bgcolor: '#fff' }
+                                                        }}
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Product Image</Typography>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={(relatedProductsEditorOptions as any)[`p${num}_image`] || ''}
+                                                        onChange={(e) => handleChange(`p${num}_image`, e.target.value)}
+                                                        placeholder="https://example.com/image.jpg"
+                                                        sx={{ mb: 1 }}
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <ImageIcon fontSize="small" sx={{ color: '#a4afb7' }} />
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: { fontSize: '11px', bgcolor: '#fff' }
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        startIcon={<CropOriginalIcon />}
+                                                        size="small"
+                                                        onClick={() => handleBrowseImage(`p${num}_image`)}
+                                                        sx={{ border: '1px solid #ddd', bgcolor: 'white', color: '#495157', fontSize: '13px', textTransform: 'none', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#ccc' } }}
+                                                    >
+                                                        Browse Media Library
+                                                    </Button>
+                                                </Box>
+                                            </Stack>
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            )}
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+
+                {/* Style Section */}
+                <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2.5}>
+                            <CommonStylingControls
+                                options={relatedProductsEditorOptions}
+                                onUpdate={(updatedOptions) => dispatch(updateRelatedProductsEditorOptions(updatedOptions))}
+                                showTextColor={false}
+                                showTextAlign={false}
+                                showTypography={true}
+                                showPadding={true}
+                                showFontWeight={true}
+                                showLineHeight={true}
+                            />
+
+                            <Divider />
+
+                            <Box>
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>PRODUCT COLORS</Typography>
+                                <Stack spacing={2}>
+                                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                                        <Box>
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Title Color</Typography>
+                                            <TextField
+                                                type="color"
+                                                size="small"
+                                                fullWidth
+                                                value={relatedProductsEditorOptions?.titleColor === 'transparent' ? '#333333' : (relatedProductsEditorOptions?.titleColor || '#333333')}
+                                                onChange={(e) => handleChange('titleColor', e.target.value)}
+                                                sx={{ '& .MuiInputBase-input': { padding: 0, height: '35px', cursor: 'pointer', border: 'none' }, '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #ddd' } }}
+                                            />
+                                        </Box>
+                                        <Box>
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Price Color</Typography>
+                                            <TextField
+                                                type="color"
+                                                size="small"
+                                                fullWidth
+                                                value={relatedProductsEditorOptions?.priceColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.priceColor || '#4CAF50')}
+                                                onChange={(e) => handleChange('priceColor', e.target.value)}
+                                                sx={{ '& .MuiInputBase-input': { padding: 0, height: '35px', cursor: 'pointer', border: 'none' }, '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #ddd' } }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                                        <Box>
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Button Color</Typography>
+                                            <TextField
+                                                type="color"
+                                                size="small"
+                                                fullWidth
+                                                value={relatedProductsEditorOptions?.buttonColor === 'transparent' ? '#4CAF50' : (relatedProductsEditorOptions?.buttonColor || '#4CAF50')}
+                                                onChange={(e) => handleChange('buttonColor', e.target.value)}
+                                                sx={{ '& .MuiInputBase-input': { padding: 0, height: '35px', cursor: 'pointer', border: 'none' }, '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #ddd' } }}
+                                            />
+                                        </Box>
+                                        <Box>
+                                            <Typography sx={{ fontSize: '13px', color: '#666', mb: 0.5 }}>Button Hover</Typography>
+                                            <TextField
+                                                type="color"
+                                                size="small"
+                                                fullWidth
+                                                value={relatedProductsEditorOptions?.buttonHoverColor === 'transparent' ? '#45a049' : (relatedProductsEditorOptions?.buttonHoverColor || '#45a049')}
+                                                onChange={(e) => handleChange('buttonHoverColor', e.target.value)}
+                                                sx={{ '& .MuiInputBase-input': { padding: 0, height: '35px', cursor: 'pointer', border: 'none' }, '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #ddd' } }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+            </Box>
         </Box>
     );
 };

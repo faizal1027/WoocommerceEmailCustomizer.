@@ -405,22 +405,29 @@ class WETC_Connector {
     public function submenu_add_new_page() {
         ?>
         <style>
-            /* Remove bottom space from WordPress admin wrappers */
+            /* Disable window scrolling to remove bottom space and scrollbar */
+            html, body {
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            #wpwrap {
+                height: 100vh !important;
+                overflow: hidden !important;
+            }
+            /* Pin the content area and handle background */
+            #wpcontent {
+                height: calc(100vh - 32px) !important;
+                padding-bottom: 0 !important;
+                background-color: #f5f5f5 !important;
+            }
             #wpbody-content {
                 padding-bottom: 0 !important;
-                float: none !important;
-            }
-            #wpbody {
-                padding-bottom: 0 !important;
-            }
-            #wpcontent {
-                padding-bottom: 0 !important;
-                padding-left: 0 !important;
+                margin-bottom: 0 !important;
             }
             #wpfooter {
                 display: none !important;
             }
-            /* Make root container fill available space using absolute positioning */
+            /* Ensure the app container fills the available region */
             #root {
                 position: absolute;
                 top: 0;
@@ -429,11 +436,14 @@ class WETC_Connector {
                 bottom: 0;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #fff;
+                background: #f5f5f5;
                 overflow: hidden;
             }
-            .auto-fold #wpcontent {
-                padding-left: 0 !important;
+            /* Media query for mobile admin bar height (46px) */
+            @media screen and (max-width: 782px) {
+                #wpcontent {
+                    height: calc(100vh - 46px) !important;
+                }
             }
         </style>
         <div id="root"></div>

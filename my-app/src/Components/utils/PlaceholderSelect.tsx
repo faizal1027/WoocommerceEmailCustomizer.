@@ -130,14 +130,27 @@ export const PlaceholderSelect: React.FC<PlaceholderSelectProps> = ({
             label={label}
             value=""
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+                shrink: true,
+                sx: { fontSize: '13px', fontWeight: 600, color: '#555' }
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    fontSize: '11px',
+                    bgcolor: '#f9f9f9',
+                    "& fieldset": { borderColor: "#e7e9eb" },
+                    "&:hover fieldset": { borderColor: "#d5dadf" },
+                    "&.Mui-focused fieldset": { borderColor: "#93003c" },
+                },
+                "& .MuiInputBase-input": { padding: "8px 12px" },
+            }}
             SelectProps={{
                 displayEmpty: true,
                 renderValue: (value: any) => {
                     if (value === "") {
-                        return <span style={{ color: "rgba(0, 0, 0, 0.6)" }}>{placeholder}</span>;
+                        return <span style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: '11px' }}>{placeholder}</span>;
                     }
-                    return value;
+                    return <span style={{ fontSize: '11px' }}>{value}</span>;
                 },
                 MenuProps: {
                     disablePortal: true, // Keep inside the sidebar DOM

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Tabs, Tab } from "@mui/material";
+import { Box, Tabs, Tab } from "@mui/material";
 import OverallLayout from "./Layouts";
 import EditorPanel from "./Layouts/EditorPanel";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../Constants/Theme";
-import EmailIcon from "@mui/icons-material/Email";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Store/store";
+import GridViewIcon from '@mui/icons-material/GridView';
+import TuneIcon from '@mui/icons-material/Tune';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -30,11 +31,18 @@ function CustomTabPanel(props: TabPanelProps) {
         overflowX: 'hidden',
         // Hide scrollbar for Chrome, Safari and Opera
         '&::-webkit-scrollbar': {
-          display: 'none',
+          width: '6px',
         },
-        // Hide scrollbar for IE, Edge and Firefox
-        '-ms-overflow-style': 'none',  /* IE and Edge */
-        'scrollbar-width': 'none',  /* Firefox */
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#ddd',
+          borderRadius: '3px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: '#ccc',
+        },
       }}
     >
       {value === index && (
@@ -48,14 +56,14 @@ function CustomTabPanel(props: TabPanelProps) {
 
 const LayoutColumn = () => {
   const [value, setValue] = useState(0);
-  const editorOpen = useSelector((state: RootState) => state.workspace.editorOpen);
+  const { editorOpen, selectedBlockForEditor, selectedWidgetIndex, selectedContentType, selectionCount } = useSelector((state: RootState) => state.workspace);
 
-  // Auto-switch to Editor tab when editorOpen becomes true
+  // Auto-switch to Editor tab when a selection happens or editor opens
   useEffect(() => {
-    if (editorOpen) {
+    if (editorOpen || selectedBlockForEditor !== null) {
       setValue(1);
     }
-  }, [editorOpen]);
+  }, [editorOpen, selectedBlockForEditor, selectedWidgetIndex, selectedContentType, selectionCount]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -67,50 +75,47 @@ const LayoutColumn = () => {
         sx={{
           height: "100%",
           background: "#fff",
-          width: "30%",
+          width: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "stretch",
-          boxShadow: "4px 0 8px rgba(0, 0, 0, 0.1)",
           zIndex: 1,
-          overflow: "hidden", // Changed to hidden so Tabs handle scroll
+          overflow: "hidden",
+          fontFamily: "'Roboto', sans-serif",
         }}
       >
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#f0f0f0' }}>
+        <Box sx={{
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+          zIndex: 10,
+          background: '#fff',
+        }}>
           <Tabs
             value={value}
             onChange={handleChange}
             aria-label="sidebar tabs"
             variant="fullWidth"
-            TabIndicatorProps={{ sx: { display: 'none' } }} // Hide default underline indicator
+            TabIndicatorProps={{ sx: { height: 3, bgcolor: '#93003c' } }}
             sx={{
               minHeight: '48px',
+              borderBottom: '1px solid #e7e9eb',
               '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 'normal',
-                color: '#666',
-                borderRight: '1px solid #e0e0e0',
-                borderBottom: '1px solid #e0e0e0', // Default border for inactive
-                bgcolor: '#f5f5f5', // Gray background for inactive tabs
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                color: '#6d7882',
+                minHeight: '48px',
+                padding: '12px 16px',
                 '&.Mui-selected': {
-                  color: '#000',
-                  fontWeight: 'bold',
-                  bgcolor: '#fff', // White background for active
-                  borderBottom: 'none', // Remove bottom border for active to blend with content
+                  color: '#93003c',
+                },
+                '&:hover': {
+                  color: '#58d073',
                 }
               }
             }}
           >
-            <Tab label="Components" />
-            <Tab label="Editor" />
-            <Tab
-              label={
-                <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-                  <span>Custom</span>
-                  <span>CSS</span>
-                </Box>
-              }
-            />
+            <Tab icon={<GridViewIcon fontSize="small" />} iconPosition="start" label="Elements" />
+            <Tab icon={<TuneIcon fontSize="small" />} iconPosition="start" label={selectedBlockForEditor ? "Editor" : "Global"} />
           </Tabs>
         </Box>
 
@@ -120,12 +125,6 @@ const LayoutColumn = () => {
         <CustomTabPanel value={value} index={1}>
           <EditorPanel />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
-          <Box sx={{ p: 2 }}>
-            <Typography>Custom CSS (Coming Soon)</Typography>
-          </Box>
-        </CustomTabPanel>
-
       </Box>
     </ThemeProvider>
   );

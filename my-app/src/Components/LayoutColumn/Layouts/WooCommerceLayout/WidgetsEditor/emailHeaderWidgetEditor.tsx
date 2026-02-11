@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
-    Box, Typography, Slider, Button, IconButton, Stack, Divider, Tooltip
+    Box, Typography, Slider, Button, IconButton, Stack, Divider, Tooltip, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import CloseIcon from "@mui/icons-material/Close";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { updateEmailHeaderEditorOptions, closeEditor, deleteColumnContent } from '../../../../../Store/Slice/workspaceSlice';
@@ -84,139 +85,123 @@ const EmailHeaderWidgetEditor: React.FC = () => {
 
     const currentWidth = parseInt(emailHeaderEditorOptions?.logoWidth) || 150;
 
-    const renderLabel = (text: string) => (
-        <Typography variant="caption" sx={{ marginBottom: 1, display: 'block', fontWeight: 500, color: 'text.secondary' }}>
-            {text}
-        </Typography>
-    );
-
     return (
-        <Box sx={{ padding: '20px' }}>
-            <Stack spacing={3}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 1
-                    }}
-                >
-                    <Box>
-                        <Typography variant="h6">
-                            Email Header
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                            Customize your email header logo and layout.
-                        </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+            {/* Editor Header */}
+            <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Email Header</Typography>
+                    <Box display="flex" gap={1}>
                         <Tooltip title="Close">
-                            <IconButton onClick={handleCloseEditor} size="small" sx={{ bgcolor: '#eee' }}>
-                                <CloseIcon fontSize="small" />
+                            <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
-                            <IconButton onClick={handleDeleteContent} size="small" sx={{ bgcolor: '#eee' }}>
-                                <DeleteIcon fontSize="small" />
+                            <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
                             </IconButton>
                         </Tooltip>
                     </Box>
                 </Box>
+                <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+                    Customize your email header logo and layout.
+                </Typography>
+            </Box>
 
-                <Divider />
-
-                {/* Section: Branding (Logo Only) */}
-                <Box>
-                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Branding (Logo Only)
-                    </Typography>
-                    <Stack spacing={2}>
-                        <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2, bgcolor: '#fafafa' }}>
-                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                                <Typography variant="caption" fontWeight="bold">
-                                    Logo
-                                </Typography>
-                                {(previewUrl || emailHeaderEditorOptions?.logoUrl) && (
-                                    <IconButton onClick={handleRemoveImage} size="small">
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                )}
-                            </Box>
-                            <Box sx={{ textAlign: "center", mb: 2 }}>
-                                <Box
-                                    component="img"
-                                    src={previewUrl || emailHeaderEditorOptions?.logoUrl || 'https://via.placeholder.com/150x50?text=Logo+Preview'}
-                                    alt="Logo Preview"
-                                    sx={{
-                                        maxWidth: "100%",
-                                        maxHeight: 100,
-                                        border: "1px solid #eee",
-                                        borderRadius: 1,
-                                        objectFit: "contain",
-                                        bgcolor: 'white'
-                                    }}
-                                />
-                            </Box>
-                            <Button
-                                component="label"
-                                variant="outlined"
-                                fullWidth
-                                startIcon={<CloudUploadIcon />}
-                                size="small"
-                                sx={{ mb: 1, border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
-                            >
-                                Choose Logo
-                                <input
-                                    type="file"
-                                    hidden
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                fullWidth
-                                startIcon={<CropOriginalIcon />}
-                                size="small"
-                                onClick={handleBrowseImage}
-                                sx={{ border: '1px solid #ccc', bgcolor: 'white', color: 'text.primary' }}
-                            >
-                                Browse Media Library
-                            </Button>
-
-                            <Box sx={{ mt: 2 }}>
-                                {renderLabel("Logo Width")}
-                                <Stack spacing={2} direction="row" alignItems="center">
-                                    <Slider
-                                        value={currentWidth}
-                                        onChange={handleWidthChange}
-                                        min={50}
-                                        max={400}
-                                        step={10}
-                                        sx={{ flexGrow: 1 }}
-                                        valueLabelDisplay="auto"
-                                        valueLabelFormat={(value) => `${value}px`}
-                                        size="small"
+            {/* Editor Sections */}
+            <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+                {/* Logo Section */}
+                <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Logo</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <Stack spacing={2.5}>
+                            <Box sx={{ border: "1px dashed #e0e0e0", borderRadius: '4px', p: 2, bgcolor: '#fdfdfd', textAlign: 'center' }}>
+                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: 'center' }}>
+                                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555' }}>LOGO PREVIEW</Typography>
+                                    {(previewUrl || emailHeaderEditorOptions?.logoUrl) && (
+                                        <IconButton onClick={handleRemoveImage} size="small" sx={{ p: 0.5 }}>
+                                            <DeleteIcon sx={{ fontSize: '16px', color: '#d32f2f' }} />
+                                        </IconButton>
+                                    )}
+                                </Box>
+                                <Box sx={{ bgcolor: '#fff', border: '1px solid #eee', p: 1, mb: 2, display: 'flex', justifyContent: 'center', minHeight: '80px', alignItems: 'center' }}>
+                                    <Box
+                                        component="img"
+                                        src={previewUrl || emailHeaderEditorOptions?.logoUrl || 'https://via.placeholder.com/150x50?text=Logo+Preview'}
+                                        alt="Logo Preview"
+                                        sx={{
+                                            maxWidth: "100%",
+                                            maxHeight: 100,
+                                            objectFit: "contain",
+                                        }}
                                     />
-                                    <Typography variant="body2" sx={{ minWidth: 40, textAlign: "right", fontSize: '12px' }}>
-                                        {currentWidth}px
-                                    </Typography>
+                                </Box>
+                                <Stack spacing={1}>
+                                    <Button
+                                        component="label"
+                                        variant="outlined"
+                                        startIcon={<CloudUploadIcon sx={{ fontSize: '18px' }} />}
+                                        size="small"
+                                        sx={{ textTransform: 'none', fontSize: '12px', border: '1px solid #e0e0e0', color: '#495157', bgcolor: '#fff', '&:hover': { bgcolor: '#f9f9f9' } }}
+                                    >
+                                        Upload File
+                                        <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<CropOriginalIcon sx={{ fontSize: '18px' }} />}
+                                        size="small"
+                                        onClick={handleBrowseImage}
+                                        sx={{ textTransform: 'none', fontSize: '12px', border: '1px solid #e0e0e0', color: '#495157', bgcolor: '#fff', '&:hover': { bgcolor: '#f9f9f9' } }}
+                                    >
+                                        Media Library
+                                    </Button>
                                 </Stack>
                             </Box>
-                        </Box>
-                    </Stack>
-                </Box>
 
-                <CommonStylingControls
-                    options={emailHeaderEditorOptions}
-                    onUpdate={(updatedOptions) => dispatch(updateEmailHeaderEditorOptions(updatedOptions))}
-                    title="Appearance & Styling"
-                    showTypography={false}
-                    showTextColor={false}
-                    textAlignLabel="Alignment"
-                    showPadding={true}
-                />
-            </Stack>
+                            <Box>
+                                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>LOGO WIDTH</Typography>
+                                <Box sx={{ px: 1 }}>
+                                    <Stack spacing={2} direction="row" alignItems="center">
+                                        <Slider
+                                            value={currentWidth}
+                                            onChange={handleWidthChange}
+                                            min={50}
+                                            max={400}
+                                            step={1}
+                                            sx={{ flexGrow: 1, color: '#333' }}
+                                            size="small"
+                                        />
+                                        <Typography sx={{ fontSize: '12px', minWidth: '40px', fontWeight: 600, color: '#666' }}>
+                                            {currentWidth}px
+                                        </Typography>
+                                    </Stack>
+                                </Box>
+                            </Box>
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+
+                {/* Styling Section */}
+                <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+                        <CommonStylingControls
+                            options={emailHeaderEditorOptions}
+                            onUpdate={(updatedOptions) => dispatch(updateEmailHeaderEditorOptions(updatedOptions))}
+                            showTypography={false}
+                            showTextColor={false}
+                            textAlignLabel="Alignment"
+                            showPadding={true}
+                        />
+                    </AccordionDetails>
+                </Accordion>
+            </Box>
         </Box>
     );
 };

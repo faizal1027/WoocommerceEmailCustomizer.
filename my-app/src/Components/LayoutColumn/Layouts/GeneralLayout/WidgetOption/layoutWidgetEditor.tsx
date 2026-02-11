@@ -1,15 +1,17 @@
-import { useState } from "react";
-import ColorPicker from "../../../../utils/ColorPicker";
+import React from 'react';
 import {
   Box, Typography, TextField,
   Select, MenuItem, FormControl,
   ToggleButton, ToggleButtonGroup,
+  Tooltip, IconButton, Stack, Divider, Accordion, AccordionSummary, AccordionDetails
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import {
   closeEditor, setSelectedBlockId, updateSelectedColumnIndex,
@@ -19,8 +21,10 @@ import {
   updateColumnBorderRightSize, updateColumnBorderTopColor,
   updateColumnBorderBottomColor, updateColumnBorderLeftColor,
   updateColumnBorderRightColor, updateColumnTextAlign,
+  deleteColumnContent
 } from "../../../../../Store/Slice/workspaceSlice";
 import { RootState } from "../../../../../Store/store";
+import ColorPicker from "../../../../utils/ColorPicker";
 
 const LayoutEditorWidget = () => {
   const dispatch = useDispatch();
@@ -30,6 +34,9 @@ const LayoutEditorWidget = () => {
   );
   const selectedColumnIndex = useSelector(
     (state: RootState) => state.workspace.selectedColumnIndex
+  );
+  const selectedWidgetIndex = useSelector(
+    (state: RootState) => state.workspace.selectedWidgetIndex
   );
   const selectedBlock = useSelector(
     (state: RootState) =>
@@ -53,6 +60,7 @@ const LayoutEditorWidget = () => {
   const currentBorderBottomColor = isColumnSelected ? selectedStyle?.borderBottomColor || "#000000" : undefined;
   const currentBorderLeftColor = isColumnSelected ? selectedStyle?.borderLeftColor || "#000000" : undefined;
   const currentBorderRightColor = isColumnSelected ? selectedStyle?.borderRightColor || "#000000" : undefined;
+
   const getPaddingObject = (padding: any) => {
     if (!padding) return { top: 0, right: 0, bottom: 0, left: 0 };
     if (typeof padding === 'object') return {
@@ -61,11 +69,10 @@ const LayoutEditorWidget = () => {
       bottom: Number(padding.bottom) || 0,
       left: Number(padding.left) || 0
     };
-    // Handle string "20px" or "10px 20px..."
     const parts = String(padding).replace(/px/g, '').split(' ').map(Number);
     if (parts.length === 1) return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };
     if (parts.length >= 4) return { top: parts[0], right: parts[1], bottom: parts[2], left: parts[3] };
-    return { top: 0, right: 0, bottom: 0, left: 0 }; // Fallback
+    return { top: 0, right: 0, bottom: 0, left: 0 };
   };
 
   const currentPadding = isColumnSelected ? getPaddingObject(selectedStyle?.padding) : undefined;
@@ -73,26 +80,13 @@ const LayoutEditorWidget = () => {
 
   const textFieldStyle = {
     "& .MuiOutlinedInput-root": {
-      "& fieldset": { borderColor: "#e0e0e0" },
-      "&:hover fieldset": { borderColor: "#e0e0e0" },
-      "&.Mui-focused fieldset": { borderColor: "#e0e0e0" },
+      fontSize: '11px',
+      bgcolor: '#f9f9f9',
+      "& fieldset": { borderColor: "#e7e9eb" },
+      "&:hover fieldset": { borderColor: "#d5dadf" },
+      "&.Mui-focused fieldset": { borderColor: "#3498db" },
     },
     "& .MuiInputBase-input": { padding: "8px 12px" },
-    bgcolor: "#f5f5f5",
-    borderRadius: "4px",
-  };
-
-  const inputGroupContainerStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "16px",
-    mt: 1,
-  };
-
-  const inputGroupItemStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
   };
 
   const isEditorEnabled = !!selectedBlockForEditor;
@@ -106,8 +100,6 @@ const LayoutEditorWidget = () => {
     const finalColumnPayload = { ...payload, columnIndex: selectedColumnIndex, blockId: selectedBlockForEditor };
     const finalBlockPayload = { ...payload, blockId: selectedBlockForEditor };
 
-
-
     if (isColumnSelected && selectedColumnIndex !== null) {
       dispatch(columnAction(finalColumnPayload));
     } else {
@@ -115,407 +107,202 @@ const LayoutEditorWidget = () => {
     }
   };
 
+  const handleCloseEditor = () => {
+    dispatch(closeEditor());
+    dispatch(setSelectedBlockId(null));
+  };
+
+  const handleDeleteContent = () => {
+    if (selectedBlockForEditor && selectedColumnIndex !== null && selectedWidgetIndex !== null) {
+      dispatch(
+        deleteColumnContent({
+          blockId: selectedBlockForEditor,
+          columnIndex: selectedColumnIndex,
+          widgetIndex: selectedWidgetIndex,
+        })
+      );
+    }
+  };
+
   return (
-    <Box
-      sx={{
-        boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        p: 2,
-        bgcolor: "background.paper",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <Box
-        sx={{ width: "100%", display: "flex", justifyContent: "space-between" }}
-      >
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-          {isColumnSelected ? `Column ${selectedColumnIndex + 1}` : "Block"}
-        </Typography>
-        <Typography
-          variant="h6"
-          onClick={() => {
-            dispatch(closeEditor());
-            dispatch(setSelectedBlockId(null));
-          }}
-          sx={{ color: "#000", fontSize: "20px", cursor: "pointer" }}
-        >
-          X
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>
+            {isColumnSelected ? `Column ${selectedColumnIndex + 1}` : "Block Layout"}
+          </Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+              </IconButton>
+            </Tooltip>
+            {isEditorEnabled && (
+              <Tooltip title="Delete">
+                <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                  <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
+        </Box>
+        <Typography sx={{ fontSize: '13px', color: '#6d7882', fontStyle: 'italic' }}>
+          {isColumnSelected ? "Customize column style." : "Customize block layout and style."}
         </Typography>
       </Box>
 
-      {!isEditorEnabled && (
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-          Select a block to edit its properties.
-        </Typography>
-      )}
-
-      {isEditorEnabled && (
-        <>
-          {numberOfColumns > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Select Column
-              </Typography>
-              <FormControl
-                variant="outlined"
-                size="small"
-                fullWidth
-                sx={textFieldStyle}
-              >
-                <Select
-                  value={selectedColumnIndex !== null ? selectedColumnIndex : ""}
-                  onChange={handleColumnSelectChange}
-                  MenuProps={{ disablePortal: true }}
-                >
-                  {Array.from({ length: numberOfColumns }, (_, i) => (
-                    <MenuItem key={i} value={i}>
-                      Column {i + 1}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-
-          {isColumnSelected && currentBgColor && (
-            <Box sx={{ mb: 2 }}>
-              <ColorPicker
-                label="Background Color"
-                value={currentBgColor}
-                onChange={(color) =>
-                  dispatchStyleUpdate(
-                    () => { },
-                    updateColumnBgColor,
-                    { blockId: selectedBlockForEditor!, color: color }
-                  )
-                }
-              />
-            </Box>
-          )}
-
-          {isColumnSelected && currentBorderStyle !== undefined && (
-            <>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
-                  Border
-                </Typography>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                  <Box sx={{ display: "flex", flexDirection: "column", width: "45%" }}>
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>
-                      Style
-                    </Typography>
-                    <FormControl variant="outlined" size="small" sx={textFieldStyle}>
+      {!isEditorEnabled ? (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Select a block to edit its properties.
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+          {/* Layout Section */}
+          <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Layout</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+              <Stack spacing={2.5}>
+                {numberOfColumns > 0 && (
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.8 }}>Choose Column</Typography>
+                    <FormControl variant="outlined" size="small" fullWidth>
                       <Select
-                        value={currentBorderStyle}
-                        onChange={(e) =>
-                          dispatchStyleUpdate(
-                            () => { },
-                            updateColumnBorderStyle,
-                            {
-                              blockId: selectedBlockForEditor!,
-                              columnIndex: selectedColumnIndex!,
-                              style: e.target.value as 'solid' | 'dashed' | 'dotted',
-                            }
-                          )
-                        }
-                        displayEmpty
-                        inputProps={{ "aria-label": "Select border style" }}
-                        MenuProps={{ disablePortal: true }}
+                        value={selectedColumnIndex !== null ? selectedColumnIndex : ""}
+                        onChange={handleColumnSelectChange}
+                        sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                        MenuProps={{ disablePortal: true, sx: { zIndex: 999999 } }}
                       >
-                        <MenuItem value="solid">Solid</MenuItem>
-                        <MenuItem value="dashed">Dashed</MenuItem>
-                        <MenuItem value="dotted">Dotted</MenuItem>
+                        {Array.from({ length: numberOfColumns }, (_, i) => (
+                          <MenuItem key={i} value={i} sx={{ fontSize: '11px' }}>
+                            Column {i + 1}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </Box>
-                </Box>
+                )}
 
-
-
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px", mt: 1 }}>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Top</Typography>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      value={currentBorderTopSize || 0}
-                      InputProps={{ inputProps: { min: 0, max: 40 } }}
-                      onChange={(e) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderTopSize,
-                          {
-                            blockId: selectedBlockForEditor!,
-                            columnIndex: selectedColumnIndex!,
-                            size: Math.min(Number(e.target.value), 40),
-                          }
-                        )
-                      }
-                      type="number"
-                      sx={textFieldStyle}
-                    />
-                    <ColorPicker
-                      label="Top Color"
-                      value={currentBorderTopColor || "#000000"}
-                      onChange={(color) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderTopColor,
-                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
-                        )
-                      }
-                    />
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Bottom</Typography>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-
-                      value={currentBorderBottomSize || 0}
-                      InputProps={{ inputProps: { min: 0, max: 40 } }}
-                      onChange={(e) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderBottomSize,
-                          {
-                            blockId: selectedBlockForEditor!,
-                            columnIndex: selectedColumnIndex!,
-                            size: Math.min(Number(e.target.value), 40),
-                          }
-                        )
-                      }
-                      type="number"
-                      sx={textFieldStyle}
-                    />
-                    <ColorPicker
-                      label="Bottom Color"
-                      value={currentBorderBottomColor || "#000000"}
-                      onChange={(color) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderBottomColor,
-                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
-                        )
-                      }
-                    />
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Left</Typography>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      value={currentBorderLeftSize || 0}
-                      InputProps={{ inputProps: { min: 0, max: 40 } }}
-                      onChange={(e) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderLeftSize,
-                          {
-                            blockId: selectedBlockForEditor!,
-                            columnIndex: selectedColumnIndex!,
-                            size: Math.min(Number(e.target.value), 40),
-                          }
-                        )
-                      }
-                      type="number"
-                      sx={textFieldStyle}
-                    />
-                    <ColorPicker
-                      label="Left Color"
-                      value={currentBorderLeftColor || "#000000"}
-                      onChange={(color) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderLeftColor,
-                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
-                        )
-                      }
-                    />
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <Typography variant="body2" sx={{ mb: 1, fontWeight: "light" }}>Right</Typography>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      value={currentBorderRightSize || 0}
-                      InputProps={{ inputProps: { min: 0, max: 40 } }}
-                      onChange={(e) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderRightSize,
-                          {
-                            blockId: selectedBlockForEditor!,
-                            columnIndex: selectedColumnIndex!,
-                            size: Math.min(Number(e.target.value), 40),
-                          }
-                        )
-                      }
-                      type="number"
-                      sx={textFieldStyle}
-                    />
-                    <ColorPicker
-                      label="Right Color"
-                      value={currentBorderRightColor || "#000000"}
-                      onChange={(color) =>
-                        dispatchStyleUpdate(
-                          () => { },
-                          updateColumnBorderRightColor,
-                          { blockId: selectedBlockForEditor!, columnIndex: selectedColumnIndex!, color: color }
-                        )
-                      }
-                    />
-                  </Box>
-                </Box>
-              </Box>
-            </>
-          )}
-
-          {isColumnSelected && currentPadding && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Padding
-              </Typography>
-              <Box sx={inputGroupContainerStyle}>
-                <Box sx={inputGroupItemStyle}>
-                  <Typography variant="caption">Top</Typography>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    value={currentPadding.top}
-                    InputProps={{ inputProps: { min: 0, max: 50 } }}
-                    onChange={(e) =>
-                      dispatchStyleUpdate(
-                        () => { },
-                        updateColumnPadding,
-                        {
-                          blockId: selectedBlockForEditor!,
-                          columnIndex: selectedColumnIndex!,
-                          side: "top",
-                          value: Math.min(Number(e.target.value), 50),
+                {isColumnSelected && (
+                  <Box>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1 }}>Content Alignment</Typography>
+                    <ToggleButtonGroup
+                      value={currentTextAlign}
+                      exclusive
+                      onChange={(_, newAlignment) => {
+                        if (newAlignment) {
+                          dispatchStyleUpdate(() => { }, updateColumnTextAlign, { textAlign: newAlignment });
                         }
-                      )
-                    }
-                    type="number"
-                    sx={textFieldStyle}
-                  />
-                </Box>
-                <Box sx={inputGroupItemStyle}>
-                  <Typography variant="caption">Left</Typography>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    value={currentPadding.left}
-                    InputProps={{ inputProps: { min: 0, max: 50 } }}
-                    onChange={(e) =>
-                      dispatchStyleUpdate(
-                        () => { },
-                        updateColumnPadding,
-                        {
-                          blockId: selectedBlockForEditor!,
-                          columnIndex: selectedColumnIndex!,
-                          side: "left",
-                          value: Math.min(Number(e.target.value), 50),
-                        }
-                      )
-                    }
-                    type="number"
-                    sx={textFieldStyle}
-                  />
-                </Box>
-                <Box sx={inputGroupItemStyle}>
-                  <Typography variant="caption">Right</Typography>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    value={currentPadding.right}
-                    InputProps={{ inputProps: { min: 0, max: 50 } }}
-                    onChange={(e) =>
-                      dispatchStyleUpdate(
-                        () => { },
-                        updateColumnPadding,
-                        {
-                          blockId: selectedBlockForEditor!,
-                          columnIndex: selectedColumnIndex!,
-                          side: "right",
-                          value: Math.min(Number(e.target.value), 50),
-                        }
-                      )
-                    }
-                    type="number"
-                    sx={textFieldStyle}
-                  />
-                </Box>
-                <Box sx={inputGroupItemStyle}>
-                  <Typography variant="caption">Bottom</Typography>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    value={currentPadding.bottom}
-                    InputProps={{ inputProps: { min: 0, max: 50 } }}
-                    onChange={(e) =>
-                      dispatchStyleUpdate(
-                        () => { },
-                        updateColumnPadding,
-                        {
-                          blockId: selectedBlockForEditor!,
-                          columnIndex: selectedColumnIndex!,
-                          side: "bottom",
-                          value: Math.min(Number(e.target.value), 50),
-                        }
-                      )
-                    }
-                    type="number"
-                    sx={textFieldStyle}
-                  />
-                </Box>
-              </Box>
-            </Box>
+                      }}
+                      size="small"
+                      fullWidth
+                      sx={{ bgcolor: '#f9f9f9' }}
+                    >
+                      <ToggleButton value="left"><FormatAlignLeftIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                      <ToggleButton value="center"><FormatAlignCenterIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                      <ToggleButton value="right"><FormatAlignRightIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                      <ToggleButton value="justify"><FormatAlignJustifyIcon sx={{ fontSize: '18px' }} /></ToggleButton>
+                    </ToggleButtonGroup>
+                  </Box>
+                )}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
 
-          )}
+          {/* Style Section */}
+          <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+              <Stack spacing={3}>
+                {isColumnSelected && currentBgColor && (
+                  <ColorPicker
+                    label="Background Color"
+                    value={currentBgColor}
+                    onChange={(color) => dispatchStyleUpdate(() => { }, updateColumnBgColor, { color: color })}
+                  />
+                )}
 
-          {isColumnSelected && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Alignment
-              </Typography>
-              <ToggleButtonGroup
-                value={currentTextAlign}
-                exclusive
-                onChange={(_, newAlignment) => {
-                  if (newAlignment) {
-                    dispatchStyleUpdate(
-                      () => { },
-                      updateColumnTextAlign,
-                      {
-                        blockId: selectedBlockForEditor!,
-                        columnIndex: selectedColumnIndex!,
-                        textAlign: newAlignment,
-                      }
-                    );
-                  }
-                }}
-                aria-label="text alignment"
-                size="small"
-                fullWidth
-              >
-                <ToggleButton value="left" aria-label="left aligned">
-                  <FormatAlignLeftIcon />
-                </ToggleButton>
-                <ToggleButton value="center" aria-label="centered">
-                  <FormatAlignCenterIcon />
-                </ToggleButton>
-                <ToggleButton value="right" aria-label="right aligned">
-                  <FormatAlignRightIcon />
-                </ToggleButton>
-                <ToggleButton value="justify" aria-label="justified">
-                  <FormatAlignJustifyIcon />
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-          )}
-        </>
+                {isColumnSelected && currentBorderStyle !== undefined && (
+                  <>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Border Settings</Typography>
+                      <FormControl variant="outlined" size="small" fullWidth sx={{ mb: 2 }}>
+                        <Typography sx={{ fontSize: '12px', color: '#6d7882', mb: 0.5 }}>Border Style</Typography>
+                        <Select
+                          value={currentBorderStyle}
+                          onChange={(e) => dispatchStyleUpdate(() => { }, updateColumnBorderStyle, { style: e.target.value })}
+                          sx={{ fontSize: '11px', bgcolor: '#f9f9f9' }}
+                          MenuProps={{ disablePortal: true, sx: { zIndex: 999999 } }}
+                        >
+                          <MenuItem value="solid" sx={{ fontSize: '11px' }}>Solid</MenuItem>
+                          <MenuItem value="dashed" sx={{ fontSize: '11px' }}>Dashed</MenuItem>
+                          <MenuItem value="dotted" sx={{ fontSize: '11px' }}>Dotted</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                        {[
+                          { label: 'Top', size: currentBorderTopSize, color: currentBorderTopColor, sizeAction: updateColumnBorderTopSize, colorAction: updateColumnBorderTopColor },
+                          { label: 'Bottom', size: currentBorderBottomSize, color: currentBorderBottomColor, sizeAction: updateColumnBorderBottomSize, colorAction: updateColumnBorderBottomColor },
+                          { label: 'Left', size: currentBorderLeftSize, color: currentBorderLeftColor, sizeAction: updateColumnBorderLeftSize, colorAction: updateColumnBorderLeftColor },
+                          { label: 'Right', size: currentBorderRightSize, color: currentBorderRightColor, sizeAction: updateColumnBorderRightSize, colorAction: updateColumnBorderRightColor },
+                        ].map((b) => (
+                          <Stack key={b.label} spacing={1} sx={{ p: 1.5, border: '1px solid #f0f0f0', borderRadius: '4px', bgcolor: '#fdfdfd' }}>
+                            <Typography sx={{ fontSize: '10px', fontWeight: 700, color: '#a4afb7', textTransform: 'uppercase' }}>{b.label}</Typography>
+                            <TextField
+                              type="number"
+                              size="small"
+                              value={b.size || 0}
+                              onChange={(e) => dispatchStyleUpdate(() => { }, b.sizeAction, { size: Math.min(Number(e.target.value), 40) })}
+                              sx={textFieldStyle}
+                            />
+                            <ColorPicker
+                              label=""
+                              value={b.color || "#000000"}
+                              onChange={(color) => dispatchStyleUpdate(() => { }, b.colorAction, { color: color })}
+                            />
+                          </Stack>
+                        ))}
+                      </Box>
+                    </Box>
+
+                    {currentPadding && (
+                      <Box>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Padding</Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1 }}>
+                          {[
+                            { label: 'TOP', side: 'top' },
+                            { label: 'RIGHT', side: 'right' },
+                            { label: 'BOTTOM', side: 'bottom' },
+                            { label: 'LEFT', side: 'left' },
+                          ].map((p) => (
+                            <Box key={p.side}>
+                              <Typography sx={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', mb: 0.5, color: '#6d7882' }}>{p.label}</Typography>
+                              <TextField
+                                type="number"
+                                size="small"
+                                fullWidth
+                                value={currentPadding[p.side as keyof typeof currentPadding]}
+                                onChange={(e) => dispatchStyleUpdate(() => { }, updateColumnPadding, { side: p.side, value: Math.min(Number(e.target.value), 50) })}
+                                InputProps={{ sx: { fontSize: '11px', textAlign: 'center', p: 0, bgcolor: '#f9f9f9' } }}
+                              />
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+                  </>
+                )}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+        </Box>
       )}
     </Box>
   );

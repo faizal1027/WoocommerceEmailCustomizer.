@@ -16,7 +16,12 @@ export const FONT_FAMILIES = [
     'Trebuchet MS',
     'Verdana',
     'Webdings',
-    'Wingdings'
+    'Wingdings',
+    'Inter, sans-serif',
+    'Roboto, sans-serif',
+    'Open Sans, sans-serif',
+    'Lato, sans-serif',
+    'Montserrat, sans-serif'
 ];
 
 export const DEFAULT_FONT_SIZE = '14px';

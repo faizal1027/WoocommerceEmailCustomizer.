@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import {
   Accordion, AccordionSummary,
   AccordionDetails, Typography,
-  Box, Slide, Paper, InputBase, IconButton,
+  Box, Paper, InputBase, IconButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../Store/store';
 
-// Import Layouts
 // Import Layouts
 import GeneralLayout, { layoutOptions } from './GeneralLayout';
 import MainLayout, { basicsWidgets } from './basicsLayout';
@@ -17,70 +14,6 @@ import WooCommerceLayout, { wooCommerceWidgets } from './WooCommerceLayout';
 // import FormsLayout, { formsWidgets } from './FormsLayout';
 import LayoutBlockLayout, { blockLayoutWidgets } from './BlockLayout';
 import ExtraLayout, { extraWidgets } from './ExtraLayout';
-
-// Import Editor Widgets
-import LayoutEditorWidget from './GeneralLayout/WidgetOption/layoutWidgetEditor';
-
-// Basics Layout Editors
-import TextWidgetEditor from './basicsLayout/WidgetsEditor/textWidgetEditor';
-import ButtonWidgetEditor from './basicsLayout/WidgetsEditor/buttonWidgetEditor';
-import HeadingWidgetEditor from './basicsLayout/WidgetsEditor/headingWidgetEditor';
-import SocialIconsWidgetEditor from './basicsLayout/WidgetsEditor/socialIconsWidgetEditor';
-import DividerWidgetEditor from './basicsLayout/WidgetsEditor/dividerWidgetEditor';
-import ImageWidgetEditor from './basicsLayout/WidgetsEditor/imageWidgetEditor';
-import SectionWidgetEditor from './basicsLayout/WidgetsEditor/sectionWidgetEditor';
-import SpacerWidgetEditor from './basicsLayout/WidgetsEditor/spacerWidgetEditor';
-import LinkWidgetEditor from './basicsLayout/WidgetsEditor/linkWidgetEditor';
-// import LinkBoxWidgetEditor from './basicsLayout/WidgetsEditor/linkBoxWidgetEditor';
-// import ImageBoxWidgetEditor from './basicsLayout/WidgetsEditor/imageBoxWidgetEditor';
-// import MapWidgetEditor from './basicsLayout/WidgetsEditor/mapWidgetEditor';
-import IconWidgetEditor from './basicsLayout/WidgetsEditor/iconWidgetEditor';
-
-// Layout Block Editors 
-import RowWidgetEditor from './BlockLayout/WidgetsEditor/rowWidgetEditor';
-import ContainerWidgetEditor from './BlockLayout/WidgetsEditor/containerWidgetEditor';
-import GroupWidgetEditor from './BlockLayout/WidgetsEditor/groupWidgetEditor';
-
-// Forms Editors
-// import FormWidgetEditor from './FormsLayout/WidgetsEditor/formWidgetEditor';
-// import SurveyWidgetEditor from './FormsLayout/WidgetsEditor/surveyWidgetEditor';
-// import InputWidgetEditor from './FormsLayout/WidgetsEditor/inputWidgetEditor';
-// import TextareaWidgetEditor from './FormsLayout/WidgetsEditor/textareaWidgetEditor';
-// import SelectWidgetEditor from './FormsLayout/WidgetsEditor/selectWidgetEditor';
-// import CheckboxWidgetEditor from './FormsLayout/WidgetsEditor/checkboxWidgetEditor';
-// import RadioWidgetEditor from './FormsLayout/WidgetsEditor/radioWidgetEditor';
-// import LabelWidgetEditor from './FormsLayout/WidgetsEditor/labelWidgetEditor';
-
-// Extra Block Editors 
-import SocialFollowWidgetEditor from './ExtraLayout/WidgetsEditor/socialFollowWidgetEditor';
-import VideoWidgetEditor from './ExtraLayout/WidgetsEditor/videoWidgetEditor';
-
-import CountdownWidgetEditor from './ExtraLayout/WidgetsEditor/countdownWidgetEditor';
-// import ProgressBarWidgetEditor from './ExtraLayout/WidgetsEditor/progressBarWidgetEditor';
-import PromoCodeWidgetEditor from './ExtraLayout/WidgetsEditor/promoCodeWidgetEditor';
-import PriceWidgetEditor from './ExtraLayout/WidgetsEditor/priceWidgetEditor';
-// import TestimonialWidgetEditor from './ExtraLayout/WidgetsEditor/testimonialWidgetEditor';
-// import NavbarWidgetEditor from './ExtraLayout/WidgetsEditor/navbarWidgetEditor';
-// import CardWidgetEditor from './ExtraLayout/WidgetsEditor/cardWidgetEditor';
-// import AlertWidgetEditor from './ExtraLayout/WidgetsEditor/alertWidgetEditor';
-// import ProgressWidgetEditor from './ExtraLayout/WidgetsEditor/progressWidgetEditor';
-
-// Woocommerce Editors
-import ShippingAddressWidgetEditor from './WooCommerceLayout/WidgetsEditor/shippingAddressWidgetEditor';
-import BillingAddressWidgetEditor from './WooCommerceLayout/WidgetsEditor/billingAddressWidgetEditor';
-import OrderItemsWidgetEditor from './WooCommerceLayout/WidgetsEditor/orderItemWidgetEditor';
-import TaxBillingWidgetEditor from './WooCommerceLayout/WidgetsEditor/taxBillingWidgetEditor';
-import EmailHeaderWidgetEditor from './WooCommerceLayout/WidgetsEditor/emailHeaderWidgetEditor';
-import EmailFooterWidgetEditor from './WooCommerceLayout/WidgetsEditor/emailFooterWidgetEditor';
-import CtaButtonWidgetEditor from './WooCommerceLayout/WidgetsEditor/ctaButtonWidgetEditor';
-import RelatedProductsWidgetEditor from './WooCommerceLayout/WidgetsEditor/relatedProductsWidgetEditor';
-import OrderSubtotalWidgetEditor from './WooCommerceLayout/WidgetsEditor/orderSubtotalWidgetEditor';
-import OrderTotalWidgetEditor from './WooCommerceLayout/WidgetsEditor/orderTotalWidgetEditor';
-import ShippingMethodWidgetEditor from './WooCommerceLayout/WidgetsEditor/shippingMethodWidgetEditor';
-import PaymentMethodWidgetEditor from './WooCommerceLayout/WidgetsEditor/paymentMethodWidgetEditor';
-import CustomerNoteWidgetEditor from './WooCommerceLayout/WidgetsEditor/customerNoteWidgetEditor';
-import ContactWidgetEditor from './WooCommerceLayout/WidgetsEditor/contactWidgetEditor';
-import ProductDetailsWidgetEditor from './WooCommerceLayout/WidgetsEditor/productDetailsWidgetEditor';
 
 const OverallLayout = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,66 +32,141 @@ const OverallLayout = () => {
 
   const hasGeneralMatches = !searchTerm || layoutOptions.some(col =>
     `${col} Column`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    'layout'.includes(searchTerm.toLowerCase())
+    'layout'.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const showGeneral = hasGeneralMatches;
   const showBasics = hasMatches(basicsWidgets, searchTerm);
   const showLayoutBlocks = hasMatches(blockLayoutWidgets, searchTerm);
-  // const showForms = hasMatches(formsWidgets, searchTerm);
   const showExtra = hasMatches(extraWidgets, searchTerm);
   const showWooCommerce = hasMatches(wooCommerceWidgets, searchTerm);
+
+  // Common Accordion Styles for Elementor Look
+  const accordionStyles = {
+    boxShadow: 'none',
+    border: 'none',
+    '&:before': { display: 'none' }, // Remove default top border
+    '&.Mui-expanded': { margin: 0 },
+    backgroundColor: 'transparent',
+  };
+
+  const summaryStyles = {
+    minHeight: '40px',
+    borderBottom: '1px solid #e7e9eb',
+    '&.Mui-expanded': { minHeight: '40px', borderBottom: '1px solid #e7e9eb' },
+    '& .MuiAccordionSummary-content': { margin: '12px 0' },
+  };
+
+  const headerTypographyStyles = {
+    fontSize: '11px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    color: '#6d7882',
+  };
+
+  const detailsStyles = {
+    padding: '0px',
+  };
 
   return (
     <Box
       sx={{
-        width: '100%', height: '100vh',
+        width: '100%', height: '100%',
         position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column'
+        display: 'flex', flexDirection: 'column',
+        bgcolor: '#f9f9f9' // Light gray background for panel content
       }}
     >
-
-
       <Box
         sx={{
           flex: 1,
-          overflow: 'auto',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          // Custom Scrollbar
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#ddd',
+            borderRadius: '3px',
+          },
         }}
       >
-        <Box sx={{ p: 2, position: 'sticky', top: 0, bgcolor: 'background.paper', zIndex: 1, borderBottom: '1px solid #eee' }}>
-          <Paper
-            component="div"
+        <Box sx={{ p: '15px 20px', position: 'sticky', top: 0, bgcolor: '#fff', borderBottom: '1px solid #e7e9eb', zIndex: 10 }}>
+          <Box
             sx={{
-              p: '2px 4px',
+              p: '4px 12px',
               display: 'flex',
               alignItems: 'center',
               width: '100%',
-              border: '1px solid #ccc',
-              boxShadow: 'none',
-              borderRadius: '4px'
+              bgcolor: '#f1f3f5',
+              borderRadius: '6px',
+              height: '35px',
+              transition: 'all 0.2s',
+              border: '1px solid transparent',
+              '&:focus-within': {
+                bgcolor: '#fff',
+                borderColor: '#93003c',
+                boxShadow: '0 0 0 2px rgba(147, 0, 60, 0.1)'
+              }
             }}
           >
+            <SearchIcon sx={{ color: '#888', mr: 1, fontSize: '18px' }} />
             <InputBase
-              sx={{ ml: 1, flex: 1 }}
-              placeholder="Search element"
+              sx={{
+                ml: 0,
+                flex: 1,
+                fontSize: '13px',
+                color: '#495157',
+                border: 'none !important',
+                outline: 'none !important',
+                boxShadow: 'none !important',
+                '&::before': {
+                  display: 'none',
+                },
+                '&::after': {
+                  display: 'none',
+                },
+                '& input': {
+                  outline: 'none !important',
+                  border: 'none !important',
+                  padding: '0 !important',
+                  boxShadow: 'none !important',
+                  '&:focus': {
+                    outline: 'none !important',
+                    border: 'none !important',
+                    boxShadow: 'none !important',
+                  }
+                },
+                '& .MuiInputBase-input': {
+                  padding: '0 !important',
+                  border: 'none !important',
+                  outline: 'none !important',
+                  boxShadow: 'none !important',
+                },
+                '&.Mui-focused': {
+                  border: 'none !important',
+                  outline: 'none !important',
+                  boxShadow: 'none !important',
+                }
+              }}
+              placeholder="Search Widget..."
               value={searchTerm}
               onChange={handleSearchChange}
             />
-            <IconButton type="button" sx={{ p: '10px' }} aria-label="search" disabled>
-              <SearchIcon color="action" />
-            </IconButton>
-          </Paper>
+          </Box>
         </Box>
 
         {/* General Layout */}
         {showGeneral && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>GeneralLayout</Typography>
+          <Accordion defaultExpanded disableGutters sx={accordionStyles}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px', color: '#888' }} />} sx={summaryStyles}>
+              <Typography sx={headerTypographyStyles}>Layout</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={detailsStyles}>
               <GeneralLayout searchTerm={searchTerm} />
             </AccordionDetails>
           </Accordion>
@@ -166,11 +174,11 @@ const OverallLayout = () => {
 
         {/* Basics Layout */}
         {showBasics && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Basics</Typography>
+          <Accordion defaultExpanded disableGutters sx={accordionStyles}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px', color: '#888' }} />} sx={summaryStyles}>
+              <Typography sx={headerTypographyStyles}>Basic</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={detailsStyles}>
               <MainLayout searchTerm={searchTerm} />
             </AccordionDetails>
           </Accordion>
@@ -178,25 +186,23 @@ const OverallLayout = () => {
 
         {/* Layout Block */}
         {showLayoutBlocks && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Layout Block</Typography>
+          <Accordion defaultExpanded disableGutters sx={accordionStyles}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px', color: '#888' }} />} sx={summaryStyles}>
+              <Typography sx={headerTypographyStyles}>Structure</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={detailsStyles}>
               <LayoutBlockLayout searchTerm={searchTerm} />
             </AccordionDetails>
           </Accordion>
         )}
 
-
-
         {/* Extra Block  */}
         {showExtra && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Extra Block</Typography>
+          <Accordion defaultExpanded disableGutters sx={accordionStyles}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px', color: '#888' }} />} sx={summaryStyles}>
+              <Typography sx={headerTypographyStyles}>General</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={detailsStyles}>
               <ExtraLayout searchTerm={searchTerm} />
             </AccordionDetails>
           </Accordion>
@@ -204,11 +210,11 @@ const OverallLayout = () => {
 
         {/* WooCommerce */}
         {showWooCommerce && (
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>WooCommerce</Typography>
+          <Accordion defaultExpanded disableGutters sx={accordionStyles}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px', color: '#888' }} />} sx={summaryStyles}>
+              <Typography sx={headerTypographyStyles}>WooCommerce</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={detailsStyles}>
               <WooCommerceLayout searchTerm={searchTerm} />
             </AccordionDetails>
           </Accordion>
@@ -216,7 +222,7 @@ const OverallLayout = () => {
 
         {!showGeneral && !showBasics && !showLayoutBlocks && !showExtra && !showWooCommerce && (
           <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
-            <Typography>No matching blocks found</Typography>
+            <Typography sx={{ fontSize: '13px' }}>No matching widgets found.</Typography>
           </Box>
         )}
       </Box>

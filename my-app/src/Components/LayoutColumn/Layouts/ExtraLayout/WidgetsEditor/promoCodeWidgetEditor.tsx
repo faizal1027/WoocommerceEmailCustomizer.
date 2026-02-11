@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Box, Typography, TextField, Tooltip, IconButton, Stack, Divider } from '@mui/material';
+import React from 'react';
+import { Box, Typography, TextField, Tooltip, IconButton, Stack, Divider, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../../Store/store';
 import { closeEditor, deleteColumnContent, updatePromoCodeEditorOptions } from '../../../../../Store/Slice/workspaceSlice';
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import ColorPicker from "../../../../utils/ColorPicker";
+import CommonStylingControls from '../../../../utils/CommonStylingControls';
 
 const PromoCodeWidgetEditor = () => {
   const dispatch = useDispatch();
@@ -42,148 +44,121 @@ const PromoCodeWidgetEditor = () => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Stack spacing={3}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box>
-            <Typography variant="h6">
-              Promo Code
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Edit promo code details.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" gap={1}>
-            <Tooltip title="close" placement="bottom">
-              <IconButton
-                onClick={handleCloseEditor}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <CloseIcon fontSize="small" />
+    <Box sx={{ bgcolor: '#f9f9f9', height: '100%' }}>
+      {/* Editor Header */}
+      <Box sx={{ p: '15px 20px', bgcolor: '#fff', borderBottom: '1px solid #e7e9eb' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 700, color: '#495157' }}>Promo Code</Typography>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Close">
+              <IconButton onClick={handleCloseEditor} size="small" sx={{ p: 0.5 }}>
+                <CloseIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
-
-            <Tooltip title="Delete" placement="bottom">
-              <IconButton
-                onClick={handleDeleteContent}
-                sx={{
-                  backgroundColor: "#9e9e9e",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#757575",
-                  },
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  padding: 0,
-                  minWidth: "unset",
-                }}
-              >
-                <DeleteIcon fontSize="small" />
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDeleteContent} size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" sx={{ color: '#a4afb7', fontSize: '18px' }} />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
+        <Typography sx={{ fontSize: '11px', color: '#6d7882', fontStyle: 'italic' }}>
+          Edit promo code details and styling.
+        </Typography>
+      </Box>
 
-        <Divider />
+      {/* Editor Sections */}
+      <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        {/* Content Section */}
+        <Accordion defaultExpanded disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Content</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Title</Typography>
+                <TextField
+                  value={promoCodeEditorOptions.title ?? ''}
+                  onChange={handleChange('title')}
+                  size="small"
+                  fullWidth
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Promo Code</Typography>
+                <TextField
+                  value={promoCodeEditorOptions.code ?? ''}
+                  onChange={handleChange('code')}
+                  size="small"
+                  fullWidth
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Description</Typography>
+                <TextField
+                  multiline
+                  rows={2}
+                  value={promoCodeEditorOptions.description ?? ''}
+                  onChange={handleChange('description')}
+                  size="small"
+                  fullWidth
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 0.5 }}>Valid Until</Typography>
+                <TextField
+                  value={promoCodeEditorOptions.validUntil ?? ''}
+                  onChange={handleChange('validUntil')}
+                  size="small"
+                  fullWidth
+                  placeholder="e.g. Dec 31, 2024"
+                  InputProps={{ sx: { fontSize: '11px', bgcolor: '#f9f9f9' } }}
+                />
+              </Box>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Details
-          </Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Title
-              </Typography>
-              <TextField
-                value={promoCodeEditorOptions.title ?? ''}
-                onChange={handleChange('title')}
-                size="small"
-                fullWidth
+        {/* Style Section */}
+        <Accordion disableGutters sx={{ boxShadow: 'none', borderBottom: '1px solid #e7e9eb', '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '18px' }} />} sx={{ minHeight: '40px', '&.Mui-expanded': { minHeight: '40px' }, '& .MuiAccordionSummary-content': { margin: '12px 0' } }}>
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#6d7882', textTransform: 'uppercase' }}>Style</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 2, bgcolor: '#fff' }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#555', mb: 1.5 }}>Appearance</Typography>
+                <Stack spacing={2}>
+                  <ColorPicker
+                    label="Background Color"
+                    value={promoCodeEditorOptions.backgroundColor || '#fff3cd'}
+                    onChange={(color) => handleColorChange('backgroundColor', color)}
+                  />
+                  <ColorPicker
+                    label="Text Color"
+                    value={promoCodeEditorOptions.textColor || '#856404'}
+                    onChange={(color) => handleColorChange('textColor', color)}
+                  />
+                  <ColorPicker
+                    label="Border Color"
+                    value={promoCodeEditorOptions.borderColor || '#ffeaa7'}
+                    onChange={(color) => handleColorChange('borderColor', color)}
+                  />
+                </Stack>
+              </Box>
+              <Divider />
+              <CommonStylingControls
+                options={promoCodeEditorOptions}
+                onUpdate={(updatedOptions) => dispatch(updatePromoCodeEditorOptions(updatedOptions))}
               />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Promo Code
-              </Typography>
-              <TextField
-                value={promoCodeEditorOptions.code ?? ''}
-                onChange={handleChange('code')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Description
-              </Typography>
-              <TextField
-                multiline
-                rows={2}
-                value={promoCodeEditorOptions.description ?? ''}
-                onChange={handleChange('description')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5, color: '#666' }}>
-                Valid Until
-              </Typography>
-              <TextField
-                value={promoCodeEditorOptions.validUntil ?? ''}
-                onChange={handleChange('validUntil')}
-                size="small"
-                fullWidth
-              />
-            </Box>
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-            Appearance
-          </Typography>
-          <Stack spacing={2}>
-            <ColorPicker
-              label="Background Color"
-              value={promoCodeEditorOptions.backgroundColor || '#fff3cd'}
-              onChange={(color) => handleColorChange('backgroundColor', color)}
-            />
-
-            <ColorPicker
-              label="Text Color"
-              value={promoCodeEditorOptions.textColor || '#856404'}
-              onChange={(color) => handleColorChange('textColor', color)}
-            />
-
-            <ColorPicker
-              label="Border Color"
-              value={promoCodeEditorOptions.borderColor || '#ffeaa7'}
-              onChange={(color) => handleColorChange('borderColor', color)}
-            />
-
-          </Stack>
-        </Box>
-      </Stack>
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Box>
   );
 };

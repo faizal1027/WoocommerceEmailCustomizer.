@@ -65,7 +65,7 @@ const ExportDialogModal: React.FC<ExportDialogModalProps> = ({
   };
 
   return (
-    <Modal open={open} onClose={onClose} sx={{ zIndex: 1300001 }}>
+    <Modal open={open} onClose={onClose} sx={{ zIndex: 9999999 }}>
       <Box
         sx={{
           position: 'absolute',
